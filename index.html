@@ -447,7 +447,14 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 :root[data-theme=paper] .locbtns button{font-family:var(--hand);font-weight:400;font-size:20px}
 .locbtns button[disabled]{opacity:.55}
 .duo .pairhint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font-size:14px;color:var(--sub)}
-.backbtn{color:var(--accent);font-weight:700;font-size:16px;padding:6px 0 0}
+.backbtn{color:var(--accent);font-weight:700;font-size:16px;padding:8px 14px 8px 0;min-height:44px}
+.subbar{position:sticky;top:-8px;z-index:30;margin:-8px -16px 0;padding:8px 16px 0;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.apps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 4px;margin:16px 0 4px}
+.app{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--text)}
+.app .ic{position:relative;width:56px;height:56px;border-radius:18px;display:grid;place-items:center;box-shadow:0 2px 0 rgba(125,35,65,.08)}
+.app .an{font-size:12px;font-weight:600;line-height:1.1;text-align:center}
+:root[data-theme=paper] .app .an{font-family:var(--hand);font-weight:400;font-size:16px}
+.app .bdg{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:99px;background:var(--accent);color:#fff;font-style:normal;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--bg)}
 :root[data-theme=paper] .backbtn{font-family:var(--hand);font-weight:400;font-size:21px}
 .tile.live{cursor:pointer}
 .nextdate{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--card);border:2px dashed #d9819f;border-radius:18px;padding:14px;margin:0 0 4px}
@@ -1081,6 +1088,7 @@ async function syncRoom(){
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const merged = await r.json();
     afterAnnounce(body.announce, merged);
+    sync.sv = +merged.sv || 0;
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
     if (applyRoom(merged)) softRender();
     else if (state.tab === 'more' && !sheetOpen()) render();
@@ -1503,7 +1511,7 @@ const meKey = () => sync.me || 'Mình';
 const photoUrl = id => `${syncBase()}/photo/${sync.room}/${id}`;
 const wdUp = k => WD_LONG[parseKey(k).getDay()].toUpperCase();
 function relDay(ms){ const k = keyOf(new Date(ms)), d = diffDays(k, todayKey()); return d === 0 ? 'hôm nay' : d === 1 ? 'hôm qua' : fmtDM(k); }
-const subBack = () => `<button class="backbtn" data-act="usp" data-s="">‹ Hai đứa</button>`;
+const subBack = () => `<div class="subbar"><button class="backbtn" data-act="usp" data-s="">‹ Hai đứa</button></div>`;
 
 /* --- hẹn hò --- */
 const IDEAS = ['Đi ăn lẩu rồi xem phim', 'Picnic công viên, mang đồ ăn tự làm', 'Nấu một bữa tối cùng nhau', 'Đi cà phê sách, mỗi đứa chọn cuốn cho đứa kia',
@@ -2148,6 +2156,7 @@ function viewUs(){
     h += `<button class="uscount taped" data-act="usEditStart"><div class="pair">${pair}<div style="min-width:0"><div class="num">${n} ngày</div><div class="s">${ymdSpan(db.us.start, tk)} · từ ${fmtShort(db.us.start)}</div></div></div>
       ${next ? `<div class="prog"><i style="width:${pct}%"></i></div><div class="s" style="margin-top:6px">còn ${next - n} ngày tới mốc ${next} ngày</div>` : ''}</button>`;
   }
+  h += '<!--APPS-->';
   const ly = lastYearToday();
   if (ly) h += `<button class="ago-card" data-act="memo" data-id="${ly.id}"><span class="th2">${ly.photo && sync.room ? `<img src="${photoUrl(ly.photo)}" alt="">` : '📷'}</span><span style="min-width:0"><div class="lab">${parseKey(todayKey()).getFullYear() - parseKey(ly.date).getFullYear()} NĂM TRƯỚC HÔM NAY</div><div class="tt">${esc(ly.title)}</div></span></button>`;
   const list = specialList();
@@ -2164,8 +2173,12 @@ function viewUs(){
   const nd = upcomingDates()[0], wk = Date.now() - 7 * 864e5, newJ = db.jar.filter(x => (x.at || 0) > wk).length;
   const dateSub = nd ? `${WD_SHORT[parseKey(nd.date).getDay()]} ${fmtDM(nd.date)} · ${esc(nd.title)} · ${diffDays(tk, nd.date) ? 'còn ' + diffDays(tk, nd.date) + ' ngày' : 'hôm nay'}` : pastDates().length ? `${pastDates().length} kỷ niệm · lên kèo hẹn mới` : 'lên kế hoạch, lưu kỷ niệm';
   const jarSub = db.jar.length ? `${db.jar.length} mảnh${newJ ? ' · ' + newJ + ' mới tuần này' : ''}` : 'thích gì bỏ vào hũ';
-  const T = (s2, ic, bg, fg, t, sub) => `<button class="tile live ${s2 === 'mood' ? 'wide' : ''}" data-act="usp" data-s="${s2 === 'mood' ? 'moods' : s2}"><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${sub}</div></button>`;
-  h += `<div class="tiles">
+  const SHORT = { moods: 'Chat', mood: 'Chat', dates: 'Hẹn hò', foods: 'Món ngon', jar: 'Hũ', letters: 'Thư', coupons: 'Phiếu', loc: 'Ở đâu', memmap: 'Bản đồ', recap: 'Tổng kết' };
+  const rdy = unopenedInbox().filter(l => Date.now() >= letterOpenAt(l)).length, wait = unopenedInbox().length;
+  const BADGE = { mood: un || '', letters: rdy || (wait ? '🔒' : ''), coupons: db.coupons.filter(c => !couponMine(c) && !c.used).length || '', jar: newJ || '', dates: nd && diffDays(tk, nd.date) <= 7 ? '•' : '' };
+  const T = (s2, ic, bg, fg, t) => `<button class="app" data-act="usp" data-s="${s2 === 'mood' ? 'moods' : s2}" aria-label="${t}"><span class="ic" style="background:${bg}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${BADGE[s2] ? `<i class="bdg">${BADGE[s2]}</i>` : ''}</span><span class="an">${SHORT[s2]}</span></button>`;
+  const appsH = `<div class="apps">
+    ${T('mood', '<path d="M4 5h16v11H9l-5 4z"/>', '#efe7fb', '#6b4fb3', 'Chat &amp; tâm trạng', moodSub)}
     ${T('dates', '<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', dateSub)}
     ${T('jar', '<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', jarSub)}
     ${T('foods', '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/>', '#ffe6dc', '#b0461f', 'Món ngon', db.foods.length ? `${db.foods.length} món · ${esc(db.foods.slice().sort((a, b) => b.at - a.at)[0].name)}` : 'chụp món ăn cùng nhau')}
@@ -2174,9 +2187,8 @@ function viewUs(){
     ${T('memmap', '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>', '#e3f4e8', '#2f7a4a', 'Bản đồ kỷ niệm', `${memPoints().length} chỗ đã đi`)}
     ${T('recap', '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', '#efe7fb', '#6b4fb3', 'Tổng kết tháng', `tháng ${new Date().getMonth() + 1} · ${streakInfo().cur ? '🔥 ' + streakInfo().cur + ' ngày' : 'xem lại tháng này'}`)}
     ${T('loc', '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/>', '#e4effa', '#2f5f8f', 'Đang ở đâu', locSub)}
-    ${T('mood', '<circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01M9 15c1.6 1.4 4.4 1.4 6 0"/>', '#efe7fb', '#6b4fb3', 'Chat &amp; tâm trạng', moodSub)}
   </div>`;
-  return h;
+  return h.replace('<!--APPS-->', appsH);
 }
 function openSpecial(id){
   const ex = (db.us.specials || []).find(s => s.id === id);
@@ -2348,12 +2360,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain())) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 6))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 6 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2394,7 +2407,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.2</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.4</p>`;
 }
 
 function viewCycle(){
