@@ -8,5 +8,12 @@
   "triggers": { "crons": ["* * * * *"] },
   "kv_namespaces": [
     { "binding": "SOTAY", "id": "361ce3bcfe69461188660bdcf9ed5d26" }
+  ],
+  // Phòng chung của hai máy: mỗi cặp một Durable Object (miễn phí), ghi tuần tự để không mất dữ liệu
+  "durable_objects": {
+    "bindings": [{ "name": "ROOM", "class_name": "Room" }]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["Room"] }
   ]
 }

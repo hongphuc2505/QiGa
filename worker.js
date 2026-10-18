@@ -4,6 +4,9 @@
 // ============================================================
 
 // File lời chúc trên GitHub (mỗi dòng một câu). Sửa file này là lời chúc đổi theo.
+import { DurableObject } from 'cloudflare:workers';
+const SERVER_V = 6; // phiên bản máy chủ, app hiện ở tab Khác
+
 const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
 const CORS = {
@@ -128,7 +131,7 @@ function mergeRoom(cur, inc) {
   const cutoff = Date.now() - 60 * 864e5; // dọn các mục đã xóa quá 60 ngày
   for (const c of COLLS) {
     const m = lww(cur[c], inc[c]);
-    if (c === 'letters') for (const [id, e] of Object.entries(m)) { const o = (cur.letters || {})[id]; if (e && !e.deleted && o) { if (!e.body && o.body) m[id] = e = Object.assign({}, e, { body: o.body }); if (!e.title && o.title) m[id] = Object.assign({}, e, { title: o.title }); } }
+    if (c === 'letters') for (let [id, e] of Object.entries(m)) { const o = (cur.letters || {})[id]; if (e && !e.deleted && o) { if (!e.body && o.body) m[id] = e = Object.assign({}, e, { body: o.body }); if (!e.title && o.title) m[id] = Object.assign({}, e, { title: o.title }); } }
     for (const [id, e] of Object.entries(m)) if (e.deleted && (+e.updated || 0) < cutoff) delete m[id];
     out[c] = m;
   }
@@ -158,8 +161,8 @@ async function buildCalendar(data, env) {
 
   for (const e of data.events || []) out.push(...vevent(e, stamp));
   if (data.room && /^[A-Za-z0-9_-]{8,64}$/.test(data.room)) {
-    const raw = await env.SOTAY.get('room:' + data.room);
-    if (raw) for (const e of roomEvents(JSON.parse(raw), data)) out.push(...vevent(e, stamp));
+    const room = await readRoom(env, data.room);
+    if (room) for (const e of roomEvents(room, data)) out.push(...vevent(e, stamp));
   }
 
   const lv = data.love;
@@ -405,12 +408,73 @@ async function runMedReminders(env, when) {
         await own({ title: '⏰ Đã quá giờ uống thuốc 1 tiếng', body: `${d.meds} · ${d.time} · uống xong nhớ tick nha` });
         await sendToRoom(env, data.room, data.device, { title: `⚠️ ${who} chưa uống thuốc`, body: `${d.meds} · ${d.time} · đã quá 1 tiếng chưa tick`, tab: 'us', usp: 'moods' });
         if (data.room && /^[A-Za-z0-9_-]{8,64}$/.test(data.room)) { // ghi vào chat chung
-          const rk = 'room:' + data.room, room = JSON.parse((await env.SOTAY.get(rk)) || '{"events":{}}'), id = 'late-' + key.slice(0, 8) + d.at.replace(/[^0-9]/g, '');
-          room.moods = room.moods || {};
-          if (!room.moods[id]) { room.moods[id] = { id, kind: 'act', icon: '⚠️', text: `chưa tick thuốc ${d.meds} (${d.time}) sau 1 tiếng`, dev: data.device || '', name: who, at: when, updated: when }; await env.SOTAY.put(rk, JSON.stringify(room)); }
+          const id = 'late-' + key.slice(0, 8) + d.at.replace(/[^0-9]/g, '');
+          await appendRoom(env, data.room, { id, kind: 'act', icon: '⚠️', text: `chưa tick thuốc ${d.meds} (${d.time}) sau 1 tiếng`, dev: data.device || '', name: who, at: when, updated: when });
         }
       }
     }
+  }
+}
+
+// ---- phòng chung của hai máy: đọc/ghi qua một "store" (Durable Object, hoặc KV nếu chưa có) ----
+async function roomRequest(env, code, req, store) {
+  const cur = (await store.get()) || { events: {} };
+    if (req.method === 'PUT') {
+    const body = await req.text();
+    if (body.length > 600000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
+    let inc; try { inc = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+    const dev = String(inc.device || ''), who = String(inc.name || '').slice(0, 40);
+    const ann = Array.isArray(inc.announce) ? new Set(inc.announce.slice(0, 200).map(String)) : null;
+    const incA = ann ? onlyAnnounced(inc, ann) : inc, curA = ann ? withoutAnnounced(cur, ann) : cur;
+    const changes = describeChanges(curA, incA), usLines = describeUs(curA, incA), collLines = describeColls(curA, incA);
+    const merged = mergeRoom(cur, inc);
+    const pplMsgs = describePeople(cur, merged, dev, who, inc, ann);
+    if (JSON.stringify(merged) !== JSON.stringify(cur)) await store.put(merged);
+    const jobs = [];
+    if (changes.length) jobs.push(notifyRoom(env, code, dev, who, changes));
+    if (usLines.length) jobs.push(sendToRoom(env, code, dev, { title: `💞 ${who || 'Người ấy'} ${usLines[0]}`, body: usLines.length > 1 ? usLines.slice(1, 4).join('\n') : 'Mở tab Hai đứa xem nha' }));
+    if (collLines.length && collLines.length <= 3) for (const l of collLines) jobs.push(sendToRoom(env, code, dev, { title: `${l.icon} ${who || 'Người ấy'} ${l.text}`, body: 'Bấm để xem trong Chat' }));
+    else if (collLines.length) jobs.push(sendToRoom(env, code, dev, collLines.length === 1
+      ? { title: `${collLines[0].icon} ${who || 'Người ấy'} ${collLines[0].text}`, body: 'Mở tab Hai đứa xem nha' }
+      : { title: `${collLines[0].icon} ${who || 'Người ấy'} vừa cập nhật ${collLines.length} mục`, body: collLines.slice(0, 4).map(l => l.icon + ' ' + l.text).join('\n') }));
+    for (const m of pplMsgs) jobs.push(sendToRoom(env, code, dev, m));
+    const recentT = Date.now() - 10 * 60000;
+    const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
+    for (const x of chats) jobs.push(sendToRoom(env, code, dev, x.kind === 'touch'
+      ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
+          hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
+      : { title: `💬 ${who || 'Người ấy'}`, body: clip(x.note, 160), tab: 'us', usp: 'moods',
+          hist: [{ id: cleanStr(x.id, 40), kind: 'msg', dev, name: who, note: cleanStr(x.note, 300), at: +x.at, updated: +x.updated || +x.at }] }));
+    if (jobs.length) await Promise.all(jobs.map(j => j.catch(() => {})));
+    { // thêm thư mới vào lịch mở
+      const fresh = Object.values(inc.letters || {}).filter(l => l && !l.deleted && l.dev === dev && +l.openAt > Date.now() && !(cur.letters || {})[l.id]);
+      if (fresh.length) { const li = JSON.parse((await env.SOTAY.get('letter-index')) || '[]'); for (const l of fresh) li.push({ room: code, id: l.id, at: +l.openAt, dev, from: who, title: l.hideTitle ? '' : clip(l.title || '', 40) }); await env.SOTAY.put('letter-index', JSON.stringify(li)); }
+    }
+    return new Response(JSON.stringify(Object.assign(lockLetters(merged, dev), { sv: SERVER_V })), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+  }
+  return new Response(JSON.stringify(Object.assign(lockLetters(cur, ''), { sv: SERVER_V })), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+}
+const kvStore = (env, code) => ({ get: async () => JSON.parse((await env.SOTAY.get('room:' + code)) || 'null'), put: v => env.SOTAY.put('room:' + code, JSON.stringify(v)) });
+const roomStub = (env, code) => env.ROOM.get(env.ROOM.idFromName(code));
+async function readRoom(env, code) { // dùng cho lịch iPhone
+  if (env.ROOM) { const r = await roomStub(env, code).fetch(`https://room/get/${code}`); return r.ok ? r.json() : null; }
+  return kvStore(env, code).get();
+}
+async function appendRoom(env, code, item) { // ghi thêm 1 dòng vào chat chung (từ lịch nhắc thuốc)
+  if (env.ROOM) return roomStub(env, code).fetch(`https://room/append/${code}`, { method: 'POST', body: JSON.stringify(item) });
+  const st = kvStore(env, code), room = (await st.get()) || { events: {} }; room.moods = room.moods || {};
+  if (!room.moods[item.id]) { room.moods[item.id] = item; await st.put(room); }
+}
+
+// Mỗi cặp một Durable Object: ghi tuần tự, không bao giờ đọc phải bản cũ → không mất dữ liệu
+export class Room extends DurableObject {
+  async fetch(req) {
+    const url = new URL(req.url), [, op, code] = url.pathname.split('/');
+    const storage = this.ctx.storage, env = this.env;
+    const store = { get: async () => { let v = await storage.get('room'); if (!v && env.SOTAY) { const raw = await env.SOTAY.get('room:' + code); v = raw ? JSON.parse(raw) : null; if (v) await storage.put('room', v); } return v; }, put: v => storage.put('room', v) };
+    if (op === 'get') return new Response(JSON.stringify((await store.get()) || { events: {} }), { headers: { 'Content-Type': 'application/json' } });
+    if (op === 'append') { const item = await req.json(), room = (await store.get()) || { events: {} }; room.moods = room.moods || {}; if (!room.moods[item.id]) { room.moods[item.id] = item; await store.put(room); } return new Response('ok'); }
+    return roomRequest(env, code, req, store);
   }
 }
 
@@ -477,42 +541,8 @@ export default {
     const r = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})$/);
     if (r) {
       if (!env.SOTAY) return new Response('Thiếu KV binding tên SOTAY', { status: 500, headers: CORS });
-      const rkey = 'room:' + r[1];
-      const cur = JSON.parse((await env.SOTAY.get(rkey)) || '{"events":{}}');
-      if (req.method === 'PUT') {
-        const body = await req.text();
-        if (body.length > 600000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
-        let inc; try { inc = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
-        const dev = String(inc.device || ''), who = String(inc.name || '').slice(0, 40);
-        const ann = Array.isArray(inc.announce) ? new Set(inc.announce.slice(0, 200).map(String)) : null;
-        const incA = ann ? onlyAnnounced(inc, ann) : inc, curA = ann ? withoutAnnounced(cur, ann) : cur;
-        const changes = describeChanges(curA, incA), usLines = describeUs(curA, incA), collLines = describeColls(curA, incA);
-        const merged = mergeRoom(cur, inc);
-        const pplMsgs = describePeople(cur, merged, dev, who, inc, ann);
-        if (JSON.stringify(merged) !== JSON.stringify(cur)) await env.SOTAY.put(rkey, JSON.stringify(merged));
-        const jobs = [];
-        if (changes.length) jobs.push(notifyRoom(env, r[1], dev, who, changes));
-        if (usLines.length) jobs.push(sendToRoom(env, r[1], dev, { title: `💞 ${who || 'Người ấy'} ${usLines[0]}`, body: usLines.length > 1 ? usLines.slice(1, 4).join('\n') : 'Mở tab Hai đứa xem nha' }));
-        if (collLines.length && collLines.length <= 3) for (const l of collLines) jobs.push(sendToRoom(env, r[1], dev, { title: `${l.icon} ${who || 'Người ấy'} ${l.text}`, body: 'Bấm để xem trong Chat' }));
-        else if (collLines.length) jobs.push(sendToRoom(env, r[1], dev, collLines.length === 1
-          ? { title: `${collLines[0].icon} ${who || 'Người ấy'} ${collLines[0].text}`, body: 'Mở tab Hai đứa xem nha' }
-          : { title: `${collLines[0].icon} ${who || 'Người ấy'} vừa cập nhật ${collLines.length} mục`, body: collLines.slice(0, 4).map(l => l.icon + ' ' + l.text).join('\n') }));
-        for (const m of pplMsgs) jobs.push(sendToRoom(env, r[1], dev, m));
-        const recentT = Date.now() - 10 * 60000;
-        const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
-        for (const x of chats) jobs.push(sendToRoom(env, r[1], dev, x.kind === 'touch'
-          ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
-              hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
-          : { title: `💬 ${who || 'Người ấy'}`, body: clip(x.note, 160), tab: 'us', usp: 'moods',
-              hist: [{ id: cleanStr(x.id, 40), kind: 'msg', dev, name: who, note: cleanStr(x.note, 300), at: +x.at, updated: +x.updated || +x.at }] }));
-        if (jobs.length) { const p = Promise.all(jobs); if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p; }
-        { // thêm thư mới vào lịch mở
-          const fresh = Object.values(inc.letters || {}).filter(l => l && !l.deleted && l.dev === dev && +l.openAt > Date.now() && !(cur.letters || {})[l.id]);
-          if (fresh.length) { const li = JSON.parse((await env.SOTAY.get('letter-index')) || '[]'); for (const l of fresh) li.push({ room: r[1], id: l.id, at: +l.openAt, dev, from: who, title: l.hideTitle ? '' : clip(l.title || '', 40) }); await env.SOTAY.put('letter-index', JSON.stringify(li)); }
-        }
-        return new Response(JSON.stringify(lockLetters(merged, dev)), { headers: { ...CORS, 'Content-Type': 'application/json' } });
-      }
-      return new Response(JSON.stringify(lockLetters(cur, '')), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+      if (env.ROOM) { const body = req.method === 'PUT' ? await req.text() : undefined; return roomStub(env, r[1]).fetch(`https://room/room/${r[1]}`, { method: req.method, body }); }
+      return roomRequest(env, r[1], req, kvStore(env, r[1]));
     }
     const m = url.pathname.match(/^\/cal\/([A-Za-z0-9_-]{20,64})(?:\.ics)?$/);
     if (!m) return new Response('Sổ Tay sync đang chạy ✅', { headers: { ...CORS, 'Content-Type': 'text/plain; charset=utf-8' } });
