@@ -170,9 +170,10 @@ let db = load() || { meds: [], logs: {}, events: {} };
 const defCycle = () => ({ periods: [], cycleLen: 28, periodLen: 5, auto: true });
 db.meds = db.meds || []; db.logs = db.logs || {}; db.events = db.events || {};
 db.cycle = Object.assign(defCycle(), db.cycle || {});
+db.deletedEvents = db.deletedEvents || {};
 const defLove = () => ({ nameFrom: 'HoPu', nameTo: 'QiGa', from: 'anh', to: 'em', time: '08:00', custom: [] });
 db.love = Object.assign(defLove(), db.love || {});
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } if (typeof scheduleSync === 'function') scheduleSync(); }
 
 /* ---------- tiện ích ngày ---------- */
 const pad = n => String(n).padStart(2, '0');
@@ -318,7 +319,17 @@ function fillLove(t){
   let out = t.replace(/\{a\}/g, L.from).replace(/\{A\}/g, cap(L.from)).replace(/\{e\}/g, L.to).replace(/\{E\}/g, cap(L.to));
   return cap(out);
 }
-function lovePool(){ return (db.love.custom || []).concat(LOVE); }
+function remoteLove(){ try { const a = JSON.parse(localStorage.getItem('sotay-love-lines') || 'null'); return Array.isArray(a) && a.length ? a : null; } catch(e){ return null; } }
+function lovePool(){ return remoteLove() || (db.love.custom || []).concat(LOVE); }
+function fetchLoveLines(){
+  fetch('loichuc.txt', { cache: 'no-cache' }).then(r => r.ok ? r.text() : null).then(t => {
+    if (!t) return;
+    const lines = t.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+    if (!lines.length) return;
+    const js = JSON.stringify(lines);
+    if (js !== localStorage.getItem('sotay-love-lines')) { try { localStorage.setItem('sotay-love-lines', js); } catch(e){} if (state.tab === 'today' && !sheetOpen()) render(); }
+  }).catch(() => {});
+}
 function loveFor(k){
   const pool = lovePool();
   // xáo theo số ngày để không lặp theo thứ tự cố định
@@ -349,6 +360,121 @@ function buildLoveICS(days){
   return L.map(fold).join('\r\n') + '\r\n';
 }
 
+/* ---------- đồng bộ lịch ---------- */
+const SYNC_KEY = 'sotay-sync';
+let sync = (() => { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch(e){ return null; } })() || { url: '', key: '', last: 0, sent: '', err: '' };
+function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify(sync)); } catch(e){} }
+function genKey(){ const a = new Uint8Array(18); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+const syncBase = () => (sync.url || '').trim().replace(/\/+$/, '');
+const calHttps = () => `${syncBase()}/cal/${sync.key}.ics`;
+const calWebcal = () => calHttps().replace(/^https?:\/\//, 'webcal://');
+const ymd = k => k.replace(/-/g, '');
+
+function syncEvents(){
+  const ev = [], tk = todayKey();
+  // thuốc
+  for (const m of db.meds) {
+    const first = firstMatchingDay(m);
+    if (m.end && keyOf(first) > m.end) continue;
+    for (const t of m.times) {
+      let rr = 'FREQ=' + (m.days && m.days.length ? 'WEEKLY;BYDAY=' + m.days.map(d => ICS_DAYS[d]).join(',') : 'DAILY');
+      if (m.end) rr += ';UNTIL=' + ymd(m.end) + 'T235959';
+      ev.push({ uid: `med-${m.id}-${t.replace(':', '')}@sotay`, date: ymd(keyOf(first)), time: t.replace(':', ''), dur: 10, rrule: rr,
+        title: '💊 ' + m.name + (m.dose ? ' – ' + m.dose : ''), desc: m.note || '', alarms: ['PT0M'] });
+    }
+  }
+  // chu kỳ
+  const S = cycleStarts(), cl = avgCycle();
+  if (S.length) {
+    S.filter(x => x.pred && addDays(x.start, x.len) > tk).slice(0, 6).forEach(x => {
+      ev.push({ uid: `period-${ymd(x.start)}@sotay`, date: ymd(x.start), end: ymd(addDays(x.start, x.len)),
+        title: '🩸 Dự kiến tới tháng', alarms: ['-PT15H', 'PT8H'] });
+    });
+    let n = 0;
+    for (let i = 0; i < S.length && n < 6; i++) {
+      if (!S[i].pred && S[i + 1] && !S[i + 1].pred) continue;
+      let next = S[i + 1] ? S[i + 1].start : addDays(S[i].start, cl);
+      if (diffDays(S[i].start, next) > 45) next = addDays(S[i].start, cl);
+      const ov = addDays(next, -14);
+      if (addDays(ov, 1) < tk) continue;
+      ev.push({ uid: `fertile-${ymd(ov)}@sotay`, date: ymd(addDays(ov, -5)), end: ymd(addDays(ov, 2)), title: '⚠️ Ngày nguy hiểm' });
+      n++;
+    }
+  }
+  // sự kiện (khi đã ghép đôi thì máy chủ tự thêm sự kiện chung)
+  if (!sync.room) for (const [k, list] of Object.entries(db.events)) {
+    if (k < addDays(tk, -1)) continue;
+    for (const e of list) {
+      if (e.time) ev.push({ uid: `ev-${e.id}@sotay`, date: ymd(k), time: e.time.replace(':', ''), dur: 30, title: '📌 ' + e.title, desc: e.note || '', alarms: ['-PT30M'] });
+      else ev.push({ uid: `ev-${e.id}@sotay`, date: ymd(k), end: ymd(addDays(k, 1)), title: '📌 ' + e.title, desc: e.note || '', alarms: ['PT8H'] });
+    }
+  }
+  return ev;
+}
+function syncPayload(){
+  return {
+    name: 'Sổ Tay', tzOffset: new Date().getTimezoneOffset(), events: syncEvents(), room: sync.room || undefined,
+    love: { enabled: db.love.enabled !== false, title: `${db.love.nameFrom} chúc ${db.love.nameTo}`, time: db.love.time || '08:00',
+      from: db.love.from, to: db.love.to, fallback: (db.love.custom || []).concat(LOVE).map(fillLove) }
+  };
+}
+let syncTimer = null, syncing = false;
+function scheduleSync(delay = 1500){ clearTimeout(syncTimer); syncTimer = setTimeout(() => { syncRoom(); syncNow(false); }, delay); }
+async function syncNow(force){
+  if (!syncBase() || syncing) return;
+  if (!sync.key) { sync.key = genKey(); saveSync(); }
+  const body = JSON.stringify(syncPayload());
+  if (!force && body === sync.sent) return;
+  syncing = true;
+  try {
+    const r = await fetch(`${syncBase()}/cal/${sync.key}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body });
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + (await r.text()).slice(0, 80));
+    sync.sent = body; sync.last = Date.now(); sync.err = '';
+    if (force) toast('Đã đồng bộ');
+  } catch (e) {
+    sync.err = String(e.message || e);
+    if (force) toast('Đồng bộ lỗi, xem ở tab Khác');
+  } finally {
+    syncing = false; saveSync();
+    if (state.tab === 'more' && !sheetOpen()) render();
+  }
+}
+function roomMap(){
+  const map = {};
+  for (const [k, list] of Object.entries(db.events)) for (const e of list) map[e.id] = { id: e.id, date: k, title: e.title, time: e.time || '', note: e.note || '', by: e.by || '', updated: e.updated || 1 };
+  for (const [id, ts] of Object.entries(db.deletedEvents)) if (!map[id]) map[id] = { id, deleted: true, updated: ts };
+  return map;
+}
+function applyRoom(map){
+  const events = {}, deleted = {};
+  for (const e of Object.values(map || {})) {
+    if (e.deleted) { deleted[e.id] = e.updated; continue; }
+    (events[e.date] = events[e.date] || []).push({ id: e.id, title: e.title, time: e.time || '', note: e.note || '', by: e.by || '', updated: e.updated });
+  }
+  const before = JSON.stringify([db.events, db.deletedEvents]);
+  db.events = events; db.deletedEvents = deleted;
+  if (JSON.stringify([db.events, db.deletedEvents]) !== before) {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){}
+    return true;
+  }
+  return false;
+}
+let roomBusy = false;
+async function syncRoom(){
+  if (!syncBase() || !sync.room || roomBusy) return;
+  roomBusy = true;
+  try {
+    const r = await fetch(`${syncBase()}/room/${sync.room}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ events: roomMap() }) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const merged = await r.json();
+    sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
+    if (applyRoom(merged.events) && !sheetOpen()) render();
+    else if (state.tab === 'more' && !sheetOpen()) render();
+  } catch (e) { sync.roomErr = String(e.message || e); saveSync(); }
+  finally { roomBusy = false; }
+}
+function fmtTime(ms){ const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getDate()}/${d.getMonth() + 1}`; }
+
 /* ---------- state ---------- */
 const state = { tab: 'today', month: null, cmonth: null, sel: todayKey() };
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
@@ -376,7 +502,7 @@ function eventsBlock(k){
   return `<div class="section-title"><span>Ghi chú & sự kiện</span><button class="linkbtn" data-act="addEvent" data-k="${k}">+ Thêm</button></div>
   <div class="card">${ev.length ? ev.map(e => `<button class="row" data-act="editEvent" data-k="${k}" data-id="${e.id}">
       <span class="time">${e.time || '—'}</span>
-      <span class="main"><div class="t">${esc(e.title)}</div>${e.note ? `<div class="s">${esc(e.note)}</div>` : ''}</span>
+      <span class="main"><div class="t">${esc(e.title)}</div>${e.note || e.by ? `<div class="s">${esc(e.note || '')}${e.note && e.by ? ' · ' : ''}${e.by ? 'by ' + esc(e.by) : ''}</div>` : ''}</span>
     </button>`).join('') : '<div class="empty" style="padding:16px">Chưa có gì</div>'}</div>`;
 }
 
@@ -466,22 +592,17 @@ function viewMeds(){
   h += `<button class="btn" data-act="addMed">+ Thêm thuốc</button>
   <div class="section-title"><span>Báo nhắc trên iPhone</span></div>
   <div class="card">
-    <div class="note">Đưa lịch uống thuốc vào app <b>Lịch</b> của iPhone để được báo đúng giờ, kể cả khi không mở app và không có mạng.
-      <ol>
-        <li>Trong app Lịch, tạo một lịch mới tên <b>"Uống thuốc"</b>.</li>
-        <li>Bấm nút bên dưới, mở file vừa tải → <b>Thêm tất cả</b> → chọn lịch "Uống thuốc".</li>
-        <li>Mỗi lần sửa thuốc: xóa lịch "Uống thuốc" cũ, tạo lại rồi xuất lần nữa để không bị trùng.</li>
-      </ol>
-      Nếu bấm mà không thấy gì xảy ra khi đang mở từ màn hình chính, hãy mở trang này bằng Safari rồi bấm lại.
-    </div>
-    <div class="pad"><button class="btn ghost" data-act="ics">Xuất sang Lịch iPhone</button></div>
+    ${syncBase() && sync.last
+      ? `<div class="note">✅ Lịch uống thuốc đang <b>tự đồng bộ</b> sang app Lịch của iPhone. Thêm, sửa hay xóa thuốc ở đây là Lịch tự cập nhật.</div>`
+      : `<div class="note">Để iPhone tự báo giờ uống thuốc, vào tab <b>Khác → Thông báo tự động</b> và bật đồng bộ (chỉ làm một lần).</div>
+         <div class="pad"><button class="btn ghost" data-act="ics">Hoặc xuất thủ công sang Lịch (.ics)</button></div>`}
   </div>`;
   return h;
 }
 
 function viewMore(){
   const days = Object.keys(db.logs).length;
-  return `<h1>Khác</h1><p class="subtitle">Dữ liệu chỉ lưu trên máy này</p>
+  return `<h1>Khác</h1><p class="subtitle">${syncBase() ? 'Đang đồng bộ qua máy chủ của bạn' : 'Dữ liệu chỉ lưu trên máy này'}</p>
   ${state.loveAdmin ? `<div class="section-title"><span>Lời chúc mỗi sáng 🤫</span><button class="linkbtn" data-act="loveHide">Ẩn</button></div>
   <div class="card">
     <label class="f inline"><span>Tên người gửi</span><input id="lvNameFrom" value="${esc(db.love.nameFrom)}" autocomplete="off"></label>
@@ -489,18 +610,35 @@ function viewMore(){
     <label class="f inline"><span>Người gửi xưng là</span><input id="lvFrom" value="${esc(db.love.from)}" placeholder="anh" autocomplete="off"></label>
     <label class="f inline"><span>Gọi người nhận là</span><input id="lvTo" value="${esc(db.love.to)}" placeholder="em" autocomplete="off"></label>
     <label class="f inline"><span>Giờ chúc</span><input type="time" id="lvTime" value="${db.love.time}"></label>
-    <label class="f"><span>Lời chúc riêng (mỗi dòng một câu, dùng chung với ${LOVE.length} câu có sẵn)</span><textarea id="lvCustom" rows="4" placeholder="VD: Chúc mừng 1 năm yêu nhau nha {e} 💕">${esc((db.love.custom || []).join('\n'))}</textarea></label>
+    <label class="frow"><span class="lbl">Gửi lời chúc mỗi sáng</span><input type="checkbox" class="switch" id="lvOn" ${db.love.enabled !== false ? 'checked' : ''}></label>
   </div>
+  <div class="card"><div class="note">Lời chúc lấy từ file <b>loichuc.txt</b> trên GitHub (mỗi dòng một câu, có thể dùng <b>{a}</b> cho người gửi, <b>{e}</b> cho người nhận). Sửa file đó là cả thẻ trong app lẫn thông báo 8h đều tự đổi, không cần đụng vào máy này.<br>Thông báo đi qua phần <b>Thông báo tự động</b> bên dưới.</div></div>` : ''}
+  <div class="section-title"><span>Thông báo tự động</span></div>
   <div class="card">
-    <div class="note">Để iPhone báo lời chúc đúng giờ mỗi sáng (không cần mạng):
-      <ol>
-        <li>Trong app Lịch, tạo một lịch mới tên <b>"Lời chúc"</b>.</li>
-        <li>Bấm nút bên dưới, mở file → <b>Thêm tất cả</b> → chọn lịch "Lời chúc".</li>
-        <li>Mỗi lần xuất có lời chúc cho 90 ngày. Hết thì xóa lịch "Lời chúc", tạo lại và xuất tiếp.</li>
-      </ol>
-      Trong câu chúc, <b>{a}</b> là người gửi, <b>{e}</b> là người nhận.
-    </div>
-    <div class="pad"><button class="btn pink" data-act="loveIcs">Thêm lời chúc vào Lịch iPhone</button></div>
+    ${!syncBase() ? `
+      <div class="note">Đồng bộ thuốc, kỳ kinh dự kiến và sự kiện sang app <b>Lịch</b> của iPhone. Lịch sẽ báo đúng giờ, kể cả khi không có mạng; mọi thay đổi trong app tự cập nhật sang.</div>
+      <label class="f"><span>Địa chỉ máy chủ đồng bộ</span><input id="syUrl" type="url" inputmode="url" autocapitalize="off" autocorrect="off" placeholder="https://sotay.ten-ban.workers.dev"></label>
+      <div class="pad" style="padding-top:12px"><button class="btn" data-act="syncSave">Lưu & đồng bộ</button></div>`
+    : `
+      <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.err ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.err) + '</span>' : sync.last ? 'Đã đồng bộ lúc ' + fmtTime(sync.last) : 'Đang chờ đồng bộ…'}</span></div>
+      <div class="note">Bước cuối, <b>chỉ làm một lần</b>: bấm nút dưới → iPhone hỏi đăng ký lịch → <b>Đăng ký</b>. Nếu thấy mục kiểu "Xóa cảnh báo / Remove Alerts" thì <b>tắt</b> nó đi, rồi bấm <b>Thêm</b>.</div>
+      <div class="pad"><button class="btn" data-act="syncSub">Đăng ký lịch trên iPhone</button><button class="btn ghost" data-act="syncNow">Đồng bộ ngay</button><button class="btn ghost" data-act="syncCopy">Sao chép link lịch</button></div>
+      <div class="pad" style="text-align:center"><button class="linkbtn" data-act="syncReset" style="color:var(--sub);font-weight:500">Đổi máy chủ</button></div>`}
+  </div>
+  ${syncBase() ? `<div class="section-title"><span>Chia sẻ sự kiện với người ấy</span></div>
+  <div class="card">
+    ${sync.room ? `
+      <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
+      <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
+      <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
+      <div class="note">Sự kiện thêm trên máy nào cũng hiện ở cả hai máy và vào Lịch iPhone (nếu đã đăng ký lịch ở trên).</div>
+      <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
+      <div class="pad" style="text-align:center"><button class="linkbtn" data-act="roomLeave" style="color:var(--sub);font-weight:500">Hủy ghép đôi</button></div>`
+    : `
+      <div class="note">Ghép đôi hai máy để sự kiện thêm ở máy này tự hiện ở máy kia. Một máy bấm <b>Tạo mã</b>, máy còn lại nhập mã đó.</div>
+      <div class="pad" style="padding-top:2px"><button class="btn" data-act="roomNew">Tạo mã ghép đôi</button></div>
+      <label class="f"><span>Hoặc nhập mã từ máy kia</span><input id="roomIn" autocapitalize="off" autocorrect="off" placeholder="Dán mã vào đây"></label>
+      <div class="pad" style="padding-top:12px"><button class="btn ghost" data-act="roomJoin">Ghép đôi</button></div>`}
   </div>` : ''}
   <div class="section-title"><span>Sao lưu</span></div>
   <div class="card">
@@ -509,7 +647,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 1.3</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 2.0</p>`;
 }
 
 function viewCycle(){
@@ -680,7 +818,7 @@ function openEvent(k, id){
     $('#saveEv').onclick = () => {
       const title = $('#eTitle').value.trim();
       if (!title) return toast('Nhập tiêu đề');
-      const rec = { id: e.id, title, time: $('#eTime').value || '', note: $('#eNote').value.trim() };
+      const rec = { id: e.id, title, time: $('#eTime').value || '', note: $('#eNote').value.trim(), by: e.by || sync.me || '', updated: Date.now() };
       const arr = (db.events[k] || []).filter(x => x.id !== e.id);
       arr.push(rec); db.events[k] = arr;
       save(); closeSheet(); render(); toast('Đã lưu');
@@ -688,6 +826,7 @@ function openEvent(k, id){
     if (ex) $('#delEv').onclick = () => {
       const arr = (db.events[k] || []).filter(x => x.id !== e.id);
       if (arr.length) db.events[k] = arr; else delete db.events[k];
+      db.deletedEvents[e.id] = Date.now();
       save(); closeSheet(); render();
     };
   });
@@ -871,6 +1010,35 @@ $('#main').addEventListener('click', async e => {
       break;
     }
     case 'loveHide': state.loveAdmin = false; render(); break;
+    case 'syncSave': {
+      let u = ($('#syUrl').value || '').trim();
+      if (!u) return toast('Dán địa chỉ máy chủ vào');
+      if (!/^https?:\/\//.test(u)) u = 'https://' + u;
+      sync.url = u; sync.err = ''; sync.sent = ''; saveSync(); render(); syncNow(true); break;
+    }
+    case 'syncNow': syncNow(true); break;
+    case 'roomNew': sync.room = genKey().slice(0, 12); sync.roomErr = ''; saveSync(); render(); await syncRoom(); syncNow(false); toast('Đã tạo mã, gửi mã này cho máy kia'); break;
+    case 'roomJoin': {
+      const c = ($('#roomIn').value || '').trim();
+      if (!/^[A-Za-z0-9_-]{8,64}$/.test(c)) return toast('Mã không hợp lệ');
+      sync.room = c; sync.roomErr = ''; saveSync(); render(); await syncRoom(); syncNow(false); toast('Đã ghép đôi 💞'); break;
+    }
+    case 'roomNow': await syncRoom(); toast('Đã cập nhật'); break;
+    case 'roomCopy':
+      try { await navigator.clipboard.writeText(sync.room); toast('Đã sao chép mã'); } catch (e) { prompt('Mã ghép đôi:', sync.room); }
+      break;
+    case 'roomLeave':
+      if (!confirm('Hủy ghép đôi? Sự kiện đã có vẫn giữ trên máy này.')) return;
+      sync.room = ''; sync.roomLast = 0; saveSync(); render(); syncNow(false); break;
+    case 'syncSub':
+      if (!sync.last) return toast('Chưa đồng bộ được, bấm "Đồng bộ ngay" trước');
+      location.href = calWebcal(); break;
+    case 'syncCopy':
+      try { await navigator.clipboard.writeText(calWebcal()); toast('Đã sao chép link'); } catch (e) { prompt('Link lịch:', calWebcal()); }
+      break;
+    case 'syncReset':
+      if (!confirm('Đổi địa chỉ máy chủ? Lịch đã đăng ký trên iPhone sẽ không cập nhật nữa.')) return;
+      sync.url = ''; sync.sent = ''; sync.err = ''; saveSync(); render(); break;
     case 'loveIcs':
       downloadFile('loi-chuc.ics', buildLoveICS(90), 'text/calendar');
       break;
@@ -887,7 +1055,7 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {} }; save(); render(); toast('Đã xóa');
       break;
   }
 });
@@ -897,7 +1065,8 @@ $('#main').addEventListener('change', e => {
   if (t.id === 'lvNameFrom' || t.id === 'lvNameTo') { const f = t.id === 'lvNameFrom' ? 'nameFrom' : 'nameTo'; db.love[f] = t.value.trim() || defLove()[f]; save(); toast('Đã lưu'); return; }
   if (t.id === 'lvFrom' || t.id === 'lvTo') { db.love[t.id === 'lvFrom' ? 'from' : 'to'] = t.value.trim() || (t.id === 'lvFrom' ? 'anh' : 'em'); save(); toast('Đã lưu'); return; }
   if (t.id === 'lvTime') { if (t.value) { db.love.time = t.value; save(); toast('Đã lưu'); } return; }
-  if (t.id === 'lvCustom') { db.love.custom = t.value.split('\n').map(x => x.trim()).filter(Boolean); save(); toast('Đã lưu'); return; }
+  if (t.id === 'syMe') { sync.me = t.value.trim(); saveSync(); toast('Đã lưu'); return; }
+  if (t.id === 'lvOn') { db.love.enabled = t.checked; save(); toast(t.checked ? 'Đã bật' : 'Đã tắt'); return; }
   if (t.id === 'cyAuto') { c.auto = t.checked; save(); render(); }
   else if (t.id === 'cyLen') { const v = Math.round(+t.value); if (v >= 20 && v <= 45) { c.cycleLen = v; save(); render(); } else { toast('Chu kỳ từ 20 đến 45 ngày'); t.value = c.cycleLen; } }
   else if (t.id === 'cyPLen') { const v = Math.round(+t.value); if (v >= 1 && v <= 15) { c.periodLen = v; save(); render(); } else { toast('Từ 1 đến 15 ngày'); t.value = c.periodLen; } }
@@ -910,17 +1079,20 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}) };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {} };
     save(); render(); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
 };
 
 /* cập nhật trạng thái "quá giờ" và đổi ngày */
 setInterval(() => { if (!sheetOpen() && state.tab !== 'more' && state.tab !== 'meds') render(); }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheetOpen()) render(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); } });
 
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+fetchLoveLines();
+scheduleSync(800);
+setInterval(() => { if (!document.hidden) syncRoom(); }, 120000);
 </script>
 </body>
 </html>
