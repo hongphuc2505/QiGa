@@ -2507,7 +2507,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.8</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.9</p>`;
 }
 
 function viewCycle(){
@@ -3134,9 +3134,13 @@ function openCouponView(id){
       <div class="tq">${left ? `Còn <b>${left}</b>/${q} lần` : `<b>Đã dùng hết</b> ${q > 1 ? q + ' lần' : ''}`}</div></div>
     <div class="section-title"><span>Lịch sử dùng</span></div>
     <div class="card">${u.length ? u.slice().reverse().map((t, i) => `<div class="frow"><span class="lbl">Lần ${u.length - i}</span><span class="s">${fmtWhen(t)}</span></div>`).join('') : '<div class="empty" style="padding:14px">Chưa dùng lần nào</div>'}</div>
-    ${!mine && left ? `<button class="btn" id="cvUse">Dùng 1 lần${q > 1 ? ` (còn ${left})` : ''}</button>` : ''}${mine && !u.length ? '<button class="btn danger" id="cvDel">Thu hồi phiếu</button>' : ''}`, () => {
+    ${!mine && left ? `<button class="btn" id="cvUse">Dùng 1 lần${q > 1 ? ` (còn ${left})` : ''}</button>` : ''}${mine ? `<div class="card"><div class="frow"><span class="lbl">${left ? 'Tặng thêm lần dùng' : 'Phiếu hết rồi, tặng thêm lần?'}</span><span class="stepper"><button type="button" id="cvMinus" aria-label="Bớt">−</button><b id="cvN">1</b><button type="button" id="cvPlus" aria-label="Thêm">+</button></span></div></div><button class="btn" id="cvMore">＋ Tặng thêm lần dùng</button>` : ''}`, () => {
     if ($('#cvUse')) $('#cvUse').onclick = () => { closeSheet(); useCoupon(c.id); };
-    if ($('#cvDel')) $('#cvDel').onclick = () => { if (!confirm('Thu hồi phiếu này?')) return; removeItem('coupons', c.id); closeSheet(); render(); };
+    if ($('#cvMore')) { let n = 1; const setN = v => { n = Math.max(1, Math.min(20, v)); $('#cvN').textContent = n; };
+      $('#cvMinus').onclick = () => setN(n - 1); $('#cvPlus').onclick = () => setN(n + 1);
+      $('#cvMore').onclick = () => { const cur = db.coupons.find(x => x.id === c.id) || c, q2 = cpQty(cur) + n, uses = cpUses(cur);
+        logAct('🎟️', `tặng thêm ${n} lần phiếu: ${cur.icon || ''} ${cur.title} (còn ${q2 - uses.length} lần)`, '', 'coupons:' + cur.id);
+        upsert('coupons', Object.assign({}, cur, { qty: q2, uses, used: uses.length >= q2 })); closeSheet(); render(); bigHearts(cur.icon || '🎟️', `Đã tặng thêm ${n} lần`); }; }
   });
 }
 function viewCoupons(){
