@@ -450,6 +450,59 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .av.mini,:root[data-theme=paper] .av.mini{width:18px;height:18px;font-size:10px;line-height:1;border-width:1px;display:inline-grid;vertical-align:-4px;margin-right:4px}
 .av.big{width:56px;height:56px;font-size:24px}
 .avrow{gap:12px}
+.chatbar .cam{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.replybar{display:flex;align-items:center;gap:8px;background:var(--card);border-left:4px solid var(--accent);border-radius:10px;padding:6px 8px 6px 10px;margin-bottom:8px}
+.replybar .rb{flex:1;min-width:0;display:flex;flex-direction:column;font-size:12px;color:var(--sub)}
+.replybar .rb b{color:var(--accent)}
+.replybar .rb span{font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.replybar button{width:30px;height:30px;border-radius:50%;background:var(--bg);color:var(--sub);font-size:18px;flex:none}
+.quote{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;background:rgba(0,0,0,.06);border-left:3px solid currentColor;border-radius:8px;padding:4px 8px;margin:0 0 6px;font-size:12px;color:inherit;opacity:.85;max-width:240px}
+.hb.me .quote{background:rgba(255,255,255,.18)}
+.quote b{font-weight:700}
+.quote span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bub.msg{flex-direction:column;align-items:stretch;gap:0}
+.bub.msg.onlyph,.hb.me .bub.msg.onlyph{padding:0;background:transparent;box-shadow:none}
+.cph{display:grid;gap:3px;border-radius:14px;overflow:hidden;width:220px;max-width:62vw}
+.cph.n1{grid-template-columns:1fr}
+.cph.n2,.cph.n4{grid-template-columns:1fr 1fr}
+.cph.n3{grid-template-columns:1fr 1fr}
+.cph.n3 .cpi:first-child{grid-column:span 2}
+.cpi{position:relative;display:block}
+.cph img{width:100%;height:100%;aspect-ratio:1;object-fit:cover;display:block}
+.cph.n1 img{aspect-ratio:auto;max-height:300px}
+.cph.n3 .cpi:first-child img{aspect-ratio:2/1}
+.cpi i{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);color:#fff;font-style:normal;font-size:22px;font-weight:800}
+.bub.msg .cph+.bn{margin-top:6px}
+.rx{display:inline-flex;align-items:center;gap:1px;margin:-8px 6px 0;padding:1px 6px;background:var(--card);border-radius:99px;box-shadow:0 1px 3px rgba(0,0,0,.18);font-size:14px;position:relative;z-index:1}
+.rx i{font-style:normal;font-size:11px;color:var(--sub);margin-left:2px}
+.ht .seen{font-weight:700;color:var(--accent)}
+.hb{transition:background .3s}
+.hb.flash .bub{animation:flash 1.3s}
+@keyframes flash{0%,60%{box-shadow:0 0 0 4px var(--accent-soft),0 0 0 8px rgba(181,56,95,.25)}100%{box-shadow:none}}
+.hb.swr::before{content:'↩';position:absolute;margin-left:-26px;margin-top:10px;color:var(--accent);font-weight:800}
+.hb{position:relative}
+.mmprev{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:10px;max-height:120px;overflow:hidden}
+.emorow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.emorow button{font-size:28px;padding:8px 0;border-radius:14px;background:var(--card);border:2px solid transparent}
+.emorow button.on{border-color:var(--accent);background:var(--accent-soft)}
+.pinbar{display:flex;align-items:center;gap:8px;width:calc(100% + 32px);margin:2px -16px 0;padding:6px 16px;text-align:left;background:var(--card);border-top:1px solid var(--line);color:var(--text)}
+.pinbar .pi{font-size:16px}
+.pinbar .pt{flex:1;min-width:0;display:flex;flex-direction:column;font-size:12px}
+.pinbar .pt b{color:var(--accent)}
+.pinbar .pt span{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pinbar .chev{color:var(--sub);font-size:18px}
+.pinrow{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.pinrow:last-child{border-bottom:0}
+.pinrow .pmain{flex:1;min-width:0;display:flex;flex-direction:column;text-align:left;color:var(--text)}
+.pinrow .pmain b{font-size:12px;color:var(--accent)}
+.pinrow .pmain span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pinrow .pmain small{font-size:11px;color:var(--sub)}
+.pinrow .pun{width:30px;height:30px;border-radius:50%;background:var(--bg);color:var(--sub);font-size:18px}
+.hb.typing .bub{padding:12px 14px}
+.dots{display:inline-flex;gap:4px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--sub);animation:dot 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--accent);color:#fff}
@@ -515,7 +568,8 @@ main.chatmode .week{margin-top:10px}
 .locbtns button[disabled]{opacity:.55}
 .duo .pairhint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font-size:14px;color:var(--sub)}
 .backbtn{color:var(--accent);font-weight:700;font-size:16px;padding:8px 14px 8px 0;min-height:44px}
-.subbar .sbt{position:absolute;left:50%;top:50%;transform:translate(-50%,-30%);font-weight:700;font-size:16px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.sbrow{position:relative}
+.subbar .sbt{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:700;font-size:16px;display:flex;align-items:center;gap:4px;white-space:nowrap}
 :root[data-theme=paper] .subbar .sbt{font-family:var(--hand);font-weight:400;font-size:22px}
 .subbar{position:sticky;top:-8px;z-index:30;margin:-8px -16px 0;padding:8px 16px 0;background:var(--bg);box-shadow:0 6px 8px -6px rgba(125,35,65,.18)}
 .apps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 4px;margin:16px 0 4px}
@@ -1128,6 +1182,8 @@ function applyRoom(merged){
       if (id === me) continue;
       const o = db.peers[id] || {}, n = Object.assign({}, x);
       for (const f of ['mood', 'loc', 'home', 'place']) if (o[f] && (!x[f] || (o[f].at || 0) > (x[f].at || 0))) n[f] = o[f];
+      if ((o.seenAt || 0) > (x.seenAt || 0)) n.seenAt = o.seenAt;
+      if ((o.typingAt || 0) > (x.typingAt || 0)) n.typingAt = o.typingAt;
       pp[id] = n;
     }
     db.peers = pp;
@@ -1452,6 +1508,7 @@ function peerMain(){
     for (const f of ['mood', 'loc', 'home', 'place']) for (const x of list) if (x[f] && (!c[f] || (x[f].at || 0) > (c[f].at || 0))) c[f] = x[f];
     for (const x of list) if ((x.at || 0) >= c.at) { c.at = x.at || 0; c.name = x.name || c.name; }
     let aAt = -1; for (const x of list) if (x.avatar && (x.avatarAt || 0) > aAt) { c.avatar = x.avatar; aAt = x.avatarAt || 0; }
+    c.seenAt = Math.max(0, ...list.map(x => x.seenAt || 0)); c.typingAt = Math.max(0, ...list.map(x => x.typingAt || 0));
     const t = act(c); if (t > bestAct) { best = c; bestAct = t; }
   }
   return best;
@@ -1607,7 +1664,7 @@ const photoUrl = id => `${syncBase()}/photo/${sync.room}/${id}`;
 const wdUp = k => WD_LONG[parseKey(k).getDay()].toUpperCase();
 function relDay(ms){ const k = keyOf(new Date(ms)), d = diffDays(k, todayKey()); return d === 0 ? 'hôm nay' : d === 1 ? 'hôm qua' : fmtDM(k); }
 const TABNAME = { today: 'Hôm nay', health: 'Sức khỏe', us: 'Hai đứa', more: 'Khác' };
-const subBack = title => `<div class="subbar"><button class="backbtn" data-act="goBack">‹ ${TABNAME[state.back] || 'Hai đứa'}</button>${title ? `<span class="sbt">${title}</span>` : ''}</div>`;
+const subBack = (title, extra) => `<div class="subbar"><div class="sbrow"><button class="backbtn" data-act="goBack">‹ ${TABNAME[state.back] || 'Hai đứa'}</button>${title ? `<span class="sbt">${title}</span>` : ''}</div>${extra || ''}</div>`;
 function goBack(){ if (state.back && state.back !== 'us') state.tab = state.back; state.back = null; state.usp = ''; state.chatPanel = false; $('#main').scrollTop = 0; render(); }
 
 /* --- hẹn hò --- */
@@ -1985,8 +2042,14 @@ function histItem(x, mine, tail = true, head = true){
   const gc = `${tail ? '' : ' cont'}${head ? '' : ' mid'}`;
   const m = x.kind === 'mood' && moodOf(x.v);
   const who = mine ? '' : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
-  if (x.kind === 'msg') return `<div class="hb ${mine ? 'me' : ''}${gc}"><div class="bub msg"><div class="bn">${esc(x.note)}</div></div>${tail ? `<div class="ht">${who}${hm(x.at)}</div>` : ''}</div>`;
-  if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}${gc}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div>${tail ? `<div class="ht">${who}${hm(x.at)}</div>` : ''}</div>`;
+  const rx = Object.values(x.react || {}).filter(Boolean), rxH = rx.length ? `<span class="rx">${rx.join('')}${rx.length > 1 ? `<i>${rx.length}</i>` : ''}</span>` : '';
+  const meta = tail || x.pinned ? `<div class="ht">${x.pinned ? '📌 ' : ''}${who}${hm(x.at)}${x._seen ? ` · <b class="seen">${x._seen}</b>` : ''}</div>` : '';
+  if (x.kind === 'msg') {
+    const quote = x.reply ? `<button class="quote" data-act="jumpTo" data-id="${esc(x.reply.id)}"><b>↩ ${esc(x.reply.name || '')}</b><span>${esc(x.reply.text || '')}</span></button>` : '';
+    const ps = Array.isArray(x.photos) ? x.photos : [], ph = ps.length && sync.room ? `<span class="cph n${Math.min(ps.length, 4)}">${ps.slice(0, 4).map((pid, i) => `<span class="cpi"><img src="${photoUrl(pid)}" alt="" loading="lazy" data-view="c${x.id}">${i === 3 && ps.length > 4 ? `<i>+${ps.length - 4}</i>` : ''}</span>`).join('')}</span>` : '';
+    return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub msg ${ph && !x.note ? 'onlyph' : ''}">${quote}${ph}${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div>${rxH}${meta}</div>`;
+  }
+  if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div>${rxH}${meta}</div>`;
   if (x.kind === 'act' || x.kind === 'home' || x.kind === 'loc') {
     const t = x.kind === 'home' ? '🏠 về tới nhà rồi' : x.kind === 'loc' ? '📍 đã gửi vị trí' : `${x.icon || '•'} ${esc(x.text)}`;
     const ref = x.ref || (x.photo ? ((db.foods.find(f => f.photo === x.photo) && 'foods:' + db.foods.find(f => f.photo === x.photo).id) || (db.dates.find(d => d.photo === x.photo) && 'dates:' + db.dates.find(d => d.photo === x.photo).id)) : '');
@@ -1994,7 +2057,7 @@ function histItem(x, mine, tail = true, head = true){
     return `<div class="hact ${mine ? 'me' : ''}">${x.photo && sync.room ? `<img class="hph" src="${photoUrl(x.photo)}" alt="" loading="lazy">` : ''}<span>${esc(mine ? (sync.me || 'Mình') : (x.name || 'Người ấy'))} ${t}</span><small>${hm(x.at)}</small></div>`;
   }
   if (!m) return '';
-  return `<div class="hb ${mine ? 'me' : ''}${gc}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div>${tail ? `<div class="ht">${who}${hm(x.at)}</div>` : ''}</div>`;
+  return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div>${rxH}${meta}</div>`;
 }
 function openChat(){ if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
 function chatToEnd(){ const m = $('#main'); if (m) m.scrollTop = m.scrollHeight; }
@@ -2006,7 +2069,7 @@ function quickPhrases(){
   return [`Nhớ ${p} quá 🥺`, 'Ăn cơm chưa?', 'Đang làm gì đó?', 'Về tới nơi nhắn nha', 'Đi đường cẩn thận nha', `Yêu ${p} 💕`, 'Ngủ ngon nha 🌙', 'Gọi xíu được không?'];
 }
 async function sendQuick(t){
-  logHistory('msg', { note: t }); db.chatSeen = Date.now(); state.histAtEnd = true; state.chatPanel = false; save(); render();
+  logHistory('msg', Object.assign({ note: t }, state.tab === 'us' && state.usp === 'moods' ? takeReply() : {})); db.chatSeen = Date.now(); state.histAtEnd = true; state.chatPanel = false; save(); render();
   if (!sync.room) return toast('Đã lưu · ghép đôi để gửi cho người ấy');
   const ok = await syncRoom(); toast(ok ? sentTo() + ' 💌' : 'Chưa gửi được, sẽ tự thử lại');
 }
@@ -2024,10 +2087,58 @@ function openJarQuick(){
     setTimeout(() => $('#jqIn').focus(), 300);
   });
 }
+function msgShort(x){ if (!x) return ''; if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
+function takeReply(){ const r = state.replyTo && db.moods.find(x => x.id === state.replyTo); state.replyTo = null; return r ? { reply: { id: r.id, name: isMineH(r) ? (sync.me || 'Mình') : (r.name || 'Người ấy'), text: msgShort(r).slice(0, 80) } } : {}; }
+function setReply(id){ if (!db.moods.some(x => x.id === id)) return; state.replyTo = id; state.histAtEnd = true; render(); const i = $('#chatIn'); if (i) i.focus(); }
+function updateMsg(id, patch){ const x = db.moods.find(m => m.id === id); if (!x) return null; const n = Object.assign({}, x, patch, { updated: Date.now() }); db.moods = db.moods.map(m => m.id === id ? n : m); return n; }
+function reactMsg(id, emo){
+  const x = db.moods.find(m => m.id === id); if (!x) return;
+  const me = sync.me || 'Mình', react = Object.assign({}, x.react || {});
+  if (react[me] === emo) delete react[me]; else react[me] = emo;
+  updateMsg(id, { react, reactBy: me, reactEmo: react[me] || '' }); save(); render(); if (react[me]) { const el = document.querySelector(`[data-mid="${id}"] .bub`); if (el) { const r = el.getBoundingClientRect(); heartsAt(r.left + r.width / 2, r.top); } }
+  if (sync.room) syncRoom();
+}
+function pinMsg(id){
+  const x = db.moods.find(m => m.id === id); if (!x) return;
+  updateMsg(id, { pinned: !x.pinned, pinnedBy: sync.me || 'Mình', pinnedAt: Date.now() }); save(); if (!patchChat()) render();
+  toast(x.pinned ? 'Đã bỏ ghim' : 'Đã ghim 📌'); if (sync.room) syncRoom();
+}
+function openPinList(){
+  const pins = db.moods.filter(x => x.pinned).sort((a, b) => (b.pinnedAt || 0) - (a.pinnedAt || 0));
+  if (pins.length === 1) { const el = document.querySelector(`[data-mid="${pins[0].id}"]`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); return; } }
+  openSheet('Tin đã ghim 📌', `<div class="card">${pins.map(x => `<div class="pinrow"><button class="pmain" data-pj="${x.id}"><b>${esc(isMineH(x) ? (sync.me || 'Mình') : (x.name || 'Người ấy'))}</b><span>${esc(msgShort(x))}</span><small>${relDay(x.at)} ${hm(x.at)} · ghim bởi ${esc(x.pinnedBy || '')}</small></button><button class="pun" data-pu="${x.id}" aria-label="Bỏ ghim">×</button></div>`).join('')}</div>`, () => {
+    $('#sheetBody').onclick = e => { const j = e.target.closest('[data-pj]'), u = e.target.closest('[data-pu]');
+      if (u) { closeSheet(); pinMsg(u.dataset.pu); return; }
+      if (j) { closeSheet(); state.histAll = true; render(); setTimeout(() => { const el = document.querySelector(`[data-mid="${j.dataset.pj}"]`); if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); } }, 80); } };
+  });
+}
+function openMsgMenu(id){
+  const x = db.moods.find(m => m.id === id); if (!x) return;
+  const me = sync.me || 'Mình', cur = (x.react || {})[me];
+  openSheet('Tin nhắn', `<div class="mmprev">${esc(msgShort(x)) || '…'}</div>
+    <div class="emorow" id="mmEmo">${['❤️', '😂', '🥰', '😢', '😮', '👍'].map(e => `<button type="button" data-e="${e}" class="${cur === e ? 'on' : ''}">${e}</button>`).join('')}</div>
+    <button class="btn" id="mmReply">↩️ Trả lời tin này</button><button class="btn ghost" id="mmPin">${x.pinned ? '📌 Bỏ ghim' : '📌 Ghim tin này'}</button>${x.note ? '<button class="btn ghost" id="mmCopy">📋 Sao chép</button>' : ''}`, () => {
+    $('#mmEmo').onclick = e => { const b = e.target.closest('[data-e]'); if (!b) return; closeSheet(); reactMsg(id, b.dataset.e); };
+    $('#mmReply').onclick = () => { closeSheet(); setTimeout(() => setReply(id), 200); };
+    $('#mmPin').onclick = () => { closeSheet(); pinMsg(id); };
+    if ($('#mmCopy')) $('#mmCopy').onclick = async () => { try { await navigator.clipboard.writeText(x.note); toast('Đã sao chép'); } catch (e) {} closeSheet(); };
+  });
+}
+async function sendChatPhotos(){
+  pickPhoto(async fs => {
+    const rp = takeReply(); toast(`Đang gửi ${fs.length > 1 ? fs.length + ' ảnh' : 'ảnh'}…`); render();
+    try {
+      const ids = []; for (const f of fs) ids.push(await uploadPhoto(f));
+      logHistory('msg', Object.assign({ note: '', photos: ids }, rp)); db.chatSeen = Date.now(); state.histAtEnd = true; state.chatPanel = false; save(); render();
+      const ok = await syncRoom(); toast(ok ? sentTo() + ' 📷' : 'Chưa gửi được, sẽ tự thử lại'); syncPhotos();
+    } catch (e) { toast('Gửi ảnh lỗi, thử lại nha'); }
+  });
+}
 async function sendChat(){
   const inp = $('#chatIn'), t = (inp && inp.value || '').trim(); if (!t) return;
-  inp.value = ''; logHistory('msg', { note: t.slice(0, 300) }); db.chatSeen = Date.now(); state.histAtEnd = true; save(); render();
-  const i2 = $('#chatIn'); if (i2) i2.focus();
+  inp.value = ''; logHistory('msg', Object.assign({ note: t.slice(0, 300) }, takeReply())); db.chatSeen = Date.now(); state.histAtEnd = true; save();
+  if (!patchChat()) render(); chatToEnd();
+  const i2 = $('#chatIn'); if (i2 && document.activeElement !== i2) i2.focus();
   if (!sync.room) return toast('Đã lưu · ghép đôi để gửi cho người ấy');
   const ok = await syncRoom(); if (!ok) toast('Chưa gửi được, sẽ tự thử lại');
 }
@@ -2036,31 +2147,42 @@ function viewHistory(){
   const isMine = isMineH;
   const list = db.moods.slice().sort((a, b) => a.at - b.at);
   db.chatSeen = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
-  let h = subBack(`${avSpan(norm(peerName(peerMain())) === norm(db.love.nameFrom) ? 'h' : 'q', peerName(peerMain()), 'mini')}${esc(peerName(peerMain()))}`);
+  const lastPeerAt = Math.max(0, ...list.filter(x => !isMine(x)).map(x => x.at));
+  if (lastPeerAt > (db.mine.seenAt || 0)) { db.mine.seenAt = lastPeerAt; setTimeout(() => syncRoom(), 300); } // báo "đã xem" cho người kia
+  const pins = list.filter(x => x.pinned).sort((a, b) => (b.pinnedAt || 0) - (a.pinnedAt || 0));
+  const pinBar = pins.length ? `<button class="pinbar" data-act="pinList"><span class="pi">📌</span><span class="pt"><b>${pins.length > 1 ? pins.length + ' tin đã ghim' : 'Tin đã ghim'}</b><span>${esc(msgShort(pins[0]))}</span></span><span class="chev">›</span></button>` : '';
+  let h = subBack(`${avSpan(norm(peerName(peerMain())) === norm(db.love.nameFrom) ? 'h' : 'q', peerName(peerMain()), 'mini')}${esc(peerName(peerMain()))}`, pinBar);
   // 7 ngày qua: mặt cuối cùng mỗi ngày của từng người
   const tk = todayKey(), days = Array.from({ length: 7 }, (_, i) => addDays(tk, i - 6));
   const lastOn = (k, mine) => { const xs = list.filter(x => x.kind === 'mood' && keyOf(new Date(x.at)) === k && isMine(x) === mine); return xs.length ? moodOf(xs[xs.length - 1].v) : null; };
   const pn = peerName(peerMain());
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const pr = partnerPron(), QA = [['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
+  const pr = partnerPron(), QA = [['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
     <div class="qlab">Nhắn nhanh <button class="linkbtn" data-act="quickEdit" style="font-size:12px;float:right">✏️ Sửa</button></div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
-  const composer = `<div class="chatdock">${panel}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
+  const rpx = state.replyTo && db.moods.find(x => x.id === state.replyTo);
+  const replyBar = rpx ? `<div class="replybar"><span class="rb">↩ Trả lời <b>${esc(isMineH(rpx) ? 'chính mình' : (rpx.name || 'Người ấy'))}</b><span>${esc(msgShort(rpx))}</span></span><button data-act="replyCancel" aria-label="Bỏ trả lời">×</button></div>` : '';
+  const composer = `<div class="chatdock">${panel}${replyBar}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><button class="cam" data-act="chatPhoto" aria-label="Gửi ảnh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
   if (!list.length) return h + `<div class="hist"><div class="chatempty">💌<br>Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
-  const shown = state.histAll ? list : list.slice(-60);
+  let shown = state.histAll ? list : list.slice(-60);
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
   let lastDay = '';
   h += `<div class="hist">`;
   const BK = new Set(['msg', 'mood', 'touch']);
+  const lastMine = [...shown].reverse().find(x => BK.has(x.kind)), pSeen = (peerMain() || {}).seenAt || 0;
+  if (lastMine && isMine(lastMine)) shown = shown.map(x => x === lastMine ? Object.assign({}, x, { _seen: pSeen >= x.at ? 'Đã xem' : 'Đã gửi' }) : x);
   shown.forEach((x, i) => {
     const k = keyOf(new Date(x.at)), nx = shown[i + 1], pv = shown[i - 1];
     if (k !== lastDay) { lastDay = k; const dd = diffDays(k, tk); h += `<div class="hday">${dd === 0 ? 'Hôm nay' : dd === 1 ? 'Hôm qua' : fmtLong(k)}</div>`; }
     const same = (a, b) => a && b && BK.has(a.kind) && BK.has(b.kind) && isMine(a) === isMine(b) && keyOf(new Date(a.at)) === keyOf(new Date(b.at)) && Math.abs(b.at - a.at) < 5 * 60e3;
     h += histItem(x, isMine(x), !same(x, nx), !same(pv, x));
   });
+  const pm = peerMain(), lastPeer = Math.max(0, ...list.filter(x => !isMine(x)).map(x => x.at));
+  state.typingShown = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > lastPeer);
+  if (state.typingShown) h += `<div class="hb typing"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht">${esc(peerName(pm))} đang nhập…</div></div>`;
   h += `</div><div id="histEnd"></div>` + composer;
   return h;
 }
@@ -2507,7 +2629,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.9</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.1</p>`;
 }
 
 function viewCycle(){
@@ -2612,8 +2734,20 @@ const typing = () => { const a = document.activeElement; return !!(a && (a.tagNa
 let softPending = false;
 function softRender(){ // làm mới nền: không phá chữ đang gõ
   if (sheetOpen()) { pendingRender = true; return; }
-  if (typing()) { softPending = true; return; }
+  if (typing()) { if (document.activeElement && document.activeElement.id === 'chatIn' && patchChat()) return; softPending = true; return; }
   render();
+}
+function patchChat(){ // Chat: chỉ vẽ lại phần tin nhắn, giữ nguyên ô nhập (bàn phím không bị đóng)
+  if (!(state.tab === 'us' && state.usp === 'moods')) return false;
+  const m = $('#main'), dock = m.querySelector('.chatdock'); if (!dock) return false;
+  const atEnd = m.scrollTop + m.clientHeight >= m.scrollHeight - 80;
+  const tpl = document.createElement('div'); tpl.innerHTML = viewUs();
+  const nd = tpl.querySelector('.chatdock'), rb = nd && nd.querySelector('.replybar'), orb = dock.querySelector('.replybar');
+  if (orb) orb.remove(); if (rb) dock.insertBefore(rb, dock.querySelector('.chatbar'));
+  [...m.children].forEach(c => { if (c !== dock) c.remove(); });
+  [...tpl.children].forEach(n => { if (!n.classList.contains('chatdock')) m.insertBefore(n, dock); });
+  if (atEnd) chatToEnd();
+  return true;
 }
 function render(){
   const keepVals = {}, ae = document.activeElement, focusId = ae && $('#main').contains(ae) && ae.id;
@@ -3286,6 +3420,7 @@ function allPhotos(){
   const out = [];
   for (const d of db.dates) for (const id of photoIds(d)) out.push({ id, name: d.title, at: parseKey(d.date).getTime() });
   for (const f of db.foods) for (const id of photoIds(f)) out.push({ id, name: f.name, at: f.at || 0 });
+  for (const x of db.moods) for (const id of (Array.isArray(x.photos) ? x.photos : [])) out.push({ id, name: 'chat', at: x.at || 0 });
   const seen = new Set(); return out.filter(x => !seen.has(x.id) && seen.add(x.id)).sort((a, b) => b.at - a.at);
 }
 let photoSyncing = false;
@@ -3365,7 +3500,33 @@ $('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-to
     else { m.style.transform = ''; m.style.opacity = ''; } };
   m.addEventListener('touchend', end); m.addEventListener('touchcancel', end);
 })();
+(() => { // giữ tin → menu, vuốt tin sang phải → trả lời, chạm 2 lần → ❤️
+  const m = $('#main'); let lp = null, sx = 0, sy = 0, el = null, sw = false, lastTap = { id: '', t: 0 };
+  const inChat = () => state.tab === 'us' && state.usp === 'moods';
+  m.addEventListener('touchstart', e => { const hb = e.target.closest('[data-mid]'); if (!hb || !inChat() || e.target.closest('img,.quote')) return; const t = e.touches[0]; if (t.clientX < 34) return;
+    sx = t.clientX; sy = t.clientY; el = hb; sw = false; const id = hb.dataset.mid;
+    lp = setTimeout(() => { lp = null; const cur = el; el = null; if (cur) { cur.style.transform = ''; try { navigator.vibrate && navigator.vibrate(10); } catch (_) {} openMsgMenu(id); } }, 480); }, { passive: true });
+  m.addEventListener('touchmove', e => { if (!el) return; const t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) { clearTimeout(lp); lp = null; }
+    if (Math.abs(dy) > 30 && !sw) { el.style.transform = ''; el = null; return; }
+    if (dx > 0) { el.style.transform = `translateX(${Math.min(dx, 72)}px)`; sw = dx > 56; el.classList.toggle('swr', sw); } }, { passive: true });
+  const end = () => { clearTimeout(lp); lp = null; const cur = el; el = null; if (!cur) return; cur.style.transition = 'transform .15s'; cur.style.transform = ''; cur.classList.remove('swr'); setTimeout(() => { cur.style.transition = ''; }, 160); if (sw) setReply(cur.dataset.mid); sw = false; };
+  m.addEventListener('touchend', end); m.addEventListener('touchcancel', end);
+  m.addEventListener('contextmenu', e => { const hb = e.target.closest('[data-mid]'); if (hb && inChat()) { e.preventDefault(); openMsgMenu(hb.dataset.mid); } });
+  m.addEventListener('click', e => { const hb = e.target.closest('[data-mid]'); if (!hb || !inChat() || e.target.closest('img,.quote,button')) return;
+    const now = Date.now(); if (lastTap.id === hb.dataset.mid && now - lastTap.t < 320) { lastTap = { id: '', t: 0 }; reactMsg(hb.dataset.mid, '❤️'); } else lastTap = { id: hb.dataset.mid, t: now }; });
+})();
 $('#main').addEventListener('toggle', e => { const g = e.target.dataset && e.target.dataset.g; if (g) state.grp[g] = e.target.open; }, true);
+let typingSent = 0;
+$('#main').addEventListener('input', e => { // báo "đang nhập…" (tối đa mỗi 3 giây 1 lần)
+  if (e.target.id !== 'chatIn' || !sync.room || !e.target.value) return;
+  if (Date.now() - typingSent < 3000) return; typingSent = Date.now(); db.mine.typingAt = typingSent; syncRoom();
+});
+setInterval(() => { // trong Chat: hỏi máy chủ mỗi 3 giây, ẩn "đang nhập…" khi hết hạn
+  if (document.hidden || !(state.tab === 'us' && state.usp === 'moods')) return;
+  syncRoom().then(() => { const pm = peerMain(); const show = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > Math.max(0, ...db.moods.filter(x => !isMineH(x)).map(x => x.at)));
+    if (show !== !!state.typingShown) { if (!patchChat()) softRender(); } });
+}, 3000);
 $('#main').addEventListener('keydown', e => { if (e.key !== 'Enter' || e.isComposing) return; if (e.target.id === 'chatIn') { e.preventDefault(); sendChat(); } else if (e.target.id === 'qmIn') { e.preventDefault(); const b = document.querySelector('[data-act=qmSend]'); if (b) b.click(); } else if (e.target.id === 'jarIn') { e.preventDefault(); const b = document.querySelector('[data-act=jarAdd]'); if (b) b.click(); } });
 $('#main').addEventListener('click', async e => {
   const th = e.target.closest('[data-th]');
@@ -3449,6 +3610,10 @@ $('#main').addEventListener('click', async e => {
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
+    case 'chatPhoto': state.chatPanel = false; sendChatPhotos(); break;
+    case 'replyCancel': state.replyTo = null; render(); break;
+    case 'pinList': openPinList(); break;
+    case 'jumpTo': { const el = document.querySelector(`[data-mid="${id}"]`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); } else toast('Tin này cũ quá, bấm "Xem cũ hơn" ở đầu Chat'); break; }
     case 'qmSend': { const qi = $('#qmIn'), t = (qi && qi.value || '').trim(); if (!t) { if (qi) qi.focus(); return; } qi.value = ''; await sendQuick(t.slice(0, 300)); break; }
     case 'moodPick': openMoodPick(); break;
     case 'quickEdit': state.chatPanel = false; openQuickEdit(); break;
@@ -3613,6 +3778,7 @@ function applyLive(m){ // dữ liệu đi kèm thông báo: hiện ngay
   if (m.peer && m.peer.dev && m.peer.dev !== ensureDevice()) {
     const o = db.peers[m.peer.dev] || {}, n = Object.assign({}, o, { name: m.peer.name || o.name, at: Math.max(o.at || 0, m.peer.at || 0) });
     for (const f of ['mood', 'loc', 'home']) if (m.peer[f] && (!o[f] || (m.peer[f].at || 0) > (o[f].at || 0))) { n[f] = m.peer[f]; changed = true; }
+    if ((m.peer.seenAt || 0) > (o.seenAt || 0)) { n.seenAt = m.peer.seenAt; changed = true; }
     db.peers[m.peer.dev] = n;
   }
   for (const x of m.hist || []) if (x && x.id && !db.moods.some(y => y.id === x.id)) { db.moods = db.moods.concat([x]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); changed = true; }

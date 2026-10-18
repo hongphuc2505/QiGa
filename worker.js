@@ -96,6 +96,8 @@ function cleanPerson(p) {
   if (p.loc && p.loc.hidden) o.loc = { hidden: true, until: +p.loc.until || 0, at: +p.loc.at || 0 };
   else if (p.loc && isFinite(p.loc.lat) && isFinite(p.loc.lng)) o.loc = { lat: +(+p.loc.lat).toFixed(5), lng: +(+p.loc.lng).toFixed(5), acc: Math.round(+p.loc.acc || 0), at: +p.loc.at || 0, auto: !!p.loc.auto };
   if (p.home && p.home.at) o.home = { at: +p.home.at };
+  if (+p.seenAt) o.seenAt = +p.seenAt;
+  if (+p.typingAt) o.typingAt = +p.typingAt;
   if (typeof p.avatar === 'string') { o.avatar = cleanStr(p.avatar, 40); o.avatarAt = +p.avatarAt || 0; }
   if (p.place && p.place.at) o.place = isFinite(p.place.lat) && isFinite(p.place.lng) ? { lat: +(+p.place.lat).toFixed(5), lng: +(+p.place.lng).toFixed(5), at: +p.place.at } : { at: +p.place.at };
   return o;
@@ -141,6 +143,8 @@ function mergeRoom(cur, inc) {
     const c = cleanPerson(p), o = people[dev] || {};
     const m = { name: c.name || o.name || '', at: c.at - (o.at || 0) > 15 * 60000 ? c.at : (o.at || c.at) }; // chỉ ghi lại giờ mở app mỗi 15 phút cho đỡ tốn lượt ghi
     for (const f of ['mood', 'loc', 'home', 'place']) { const v = newer(o[f], c[f]); if (v) m[f] = v; }
+    if (c.seenAt || o.seenAt) m.seenAt = Math.max(c.seenAt || 0, o.seenAt || 0);
+    if (c.typingAt || o.typingAt) m.typingAt = Math.max(c.typingAt || 0, o.typingAt || 0);
     if (c.avatar !== undefined && (c.avatarAt || 0) >= (o.avatarAt || 0)) { m.avatar = c.avatar; m.avatarAt = c.avatarAt; } else if (o.avatar !== undefined) { m.avatar = o.avatar; m.avatarAt = o.avatarAt; }
     people[dev] = m;
   }
@@ -304,6 +308,14 @@ function describeColls(cur, inc) {
     const d = new Date(+e.openAt + 7 * 3600e3);
     return { icon: '💌', text: `gửi một lá thư hẹn giờ 🔒 · mở được lúc ${d.getUTCHours()}:${pad(d.getUTCMinutes())} ${d.getUTCDate()}/${d.getUTCMonth() + 1}` };
   });
+  walk('moods', (e, o) => {
+    if (!o || e.deleted) return null;
+    if (e.pinned && !o.pinned) return { icon: '📌', text: `ghim tin: "${clip(e.note || (Array.isArray(e.photos) && e.photos.length ? 'ảnh' : e.text || e.label || ''), 50)}"` };
+    if (!e.reactBy || !e.reactEmo) return null;
+    if ((e.react || {})[e.reactBy] !== e.reactEmo || (o.react || {})[e.reactBy] === e.reactEmo) return null;
+    const what = e.note ? `"${clip(e.note, 40)}"` : Array.isArray(e.photos) && e.photos.length ? 'ảnh' : e.kind === 'mood' ? 'cảm xúc' : 'tin nhắn';
+    return { icon: e.reactEmo, text: `thả ${e.reactEmo} vào ${what}` };
+  });
   walk('coupons', (e, o) => {
     if (e.deleted) return null;
     const q = Math.max(1, +e.qty || 1), nu = Array.isArray(e.uses) ? e.uses.length : (e.used ? 1 : 0), ou = o ? (Array.isArray(o.uses) ? o.uses.length : (o.used ? 1 : 0)) : 0;
@@ -341,7 +353,7 @@ function describePeople(cur, merged, dev, name, inc, ann) {
   if (now.home && now.home.at >= recent && ok('home', now.home) && (ann || !before.home || now.home.at > before.home.at))
     out.push({ title: `🏠 ${who} về tới nhà rồi`, body: 'Yên tâm nha 💕', tab: 'today' });
   if (out.length) { // gửi kèm dữ liệu mới để app đang mở hiện ngay, không phải chờ máy chủ
-    const peer = { dev, name: now.name, at: now.at };
+    const peer = { dev, name: now.name, at: now.at, seenAt: now.seenAt || 0 };
     for (const f of ['mood', 'loc', 'home']) if (now[f]) peer[f] = now[f];
     const hist = Object.values((inc && inc.moods) || {}).filter(x => x && !x.deleted && x.dev === dev && (+x.at || 0) >= recent)
       .sort((a, b) => b.at - a.at).slice(0, 3).map(x => ({ id: cleanStr(x.id, 40), kind: cleanStr(x.kind, 8), dev, name: cleanStr(x.name, 40), v: cleanStr(x.v, 12), note: cleanStr(x.note, 120), at: +x.at, updated: +x.updated || +x.at }));
@@ -446,8 +458,10 @@ async function roomRequest(env, code, req, store) {
     for (const x of chats) jobs.push(sendToRoom(env, code, dev, x.kind === 'touch'
       ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
           hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
-      : { title: `💬 ${who || 'Người ấy'}`, body: clip(x.note, 160), tab: 'us', usp: 'moods',
-          hist: [{ id: cleanStr(x.id, 40), kind: 'msg', dev, name: who, note: cleanStr(x.note, 300), at: +x.at, updated: +x.updated || +x.at }] }));
+          : { title: `💬 ${who || 'Người ấy'}`, body: x.note ? clip(x.note, 160) : (Array.isArray(x.photos) && x.photos.length ? `📷 Đã gửi ${x.photos.length > 1 ? x.photos.length + ' ảnh' : 'ảnh'}` : '…'), tab: 'us', usp: 'moods',
+              hist: [Object.assign({ id: cleanStr(x.id, 40), kind: 'msg', dev, name: who, note: cleanStr(x.note, 300), at: +x.at, updated: +x.updated || +x.at },
+                Array.isArray(x.photos) ? { photos: x.photos.slice(0, 12).map(v => cleanStr(v, 40)) } : {},
+                x.reply && typeof x.reply === 'object' ? { reply: { id: cleanStr(x.reply.id, 40), name: cleanStr(x.reply.name, 40), text: cleanStr(x.reply.text, 80) } } : {})] }));
     if (jobs.length) await Promise.all(jobs.map(j => j.catch(() => {})));
     { // thêm thư mới vào lịch mở
       const fresh = Object.values(inc.letters || {}).filter(l => l && !l.deleted && l.dev === dev && +l.openAt > Date.now() && !(cur.letters || {})[l.id]);
