@@ -93,13 +93,25 @@ function cleanPerson(p) {
   if (p.loc && p.loc.hidden) o.loc = { hidden: true, until: +p.loc.until || 0, at: +p.loc.at || 0 };
   else if (p.loc && isFinite(p.loc.lat) && isFinite(p.loc.lng)) o.loc = { lat: +(+p.loc.lat).toFixed(5), lng: +(+p.loc.lng).toFixed(5), acc: Math.round(+p.loc.acc || 0), at: +p.loc.at || 0, auto: !!p.loc.auto };
   if (p.home && p.home.at) o.home = { at: +p.home.at };
+  if (typeof p.avatar === 'string') { o.avatar = cleanStr(p.avatar, 40); o.avatarAt = +p.avatarAt || 0; }
   if (p.place && p.place.at) o.place = isFinite(p.place.lat) && isFinite(p.place.lng) ? { lat: +(+p.place.lat).toFixed(5), lng: +(+p.place.lng).toFixed(5), at: +p.place.at } : { at: +p.place.at };
   return o;
+}
+function onlyAnnounced(inc, ann) {
+  const out = { meta: {} };
+  for (const c of COLLS) { out[c] = {}; for (const [id, e] of Object.entries(inc[c] || {})) if (e && ann.has(`${c}:${id}:${e.updated}`)) out[c][id] = e; }
+  const st = inc.meta && inc.meta.start; if (st && ann.has(`meta:start:${st.updated}`)) out.meta.start = st;
+  return out;
+}
+function withoutAnnounced(cur, ann) { // bản cũ của máy chủ có thể đã có mục này (lần báo trước bị lỗi) → vẫn coi là mới so với bản trước đó
+  const out = Object.assign({}, cur);
+  for (const c of COLLS) { if (!cur[c]) continue; const m = {}; for (const [id, e] of Object.entries(cur[c])) if (!(e && ann.has(`${c}:${id}:${e.updated}`))) m[id] = e; out[c] = m; }
+  return out;
 }
 function lockLetters(room, dev) { // trước giờ mở, máy nhận chỉ thấy phong thư khóa
   if (!room.letters) return room;
   const out = Object.assign({}, room, { letters: {} }), now = Date.now();
-  for (const [id, l] of Object.entries(room.letters)) out.letters[id] = l && !l.deleted && l.dev !== dev && +l.openAt > now ? Object.assign({}, l, { body: '', locked: true }) : l;
+  for (const [id, l] of Object.entries(room.letters)) out.letters[id] = l && !l.deleted && l.dev !== dev && +l.openAt > now ? Object.assign({}, l, { body: '', locked: true }, l.hideTitle ? { title: '' } : {}) : l;
   return out;
 }
 async function runLetters(env, when) {
@@ -109,14 +121,14 @@ async function runLetters(env, when) {
   for (const x of due) await sendToRoom(env, x.room, x.dev, { title: `💌 Thư của ${x.from || 'người ấy'} mở được rồi!`, body: x.title ? `"${x.title}" · bấm để đọc` : 'Bấm để đọc nha', tab: 'us', usp: 'letters' });
   await env.SOTAY.put('letter-index', JSON.stringify(rest));
 }
-const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar', 'moods', 'foods', 'letters'];
+const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar', 'moods', 'foods', 'letters', 'coupons', 'days'];
 function mergeRoom(cur, inc) {
   inc = inc || {};
   const out = { meta: lww(cur.meta, inc.meta) };
   const cutoff = Date.now() - 60 * 864e5; // dọn các mục đã xóa quá 60 ngày
   for (const c of COLLS) {
     const m = lww(cur[c], inc[c]);
-    if (c === 'letters') for (const [id, e] of Object.entries(m)) { const o = (cur.letters || {})[id]; if (e && !e.deleted && !e.body && o && o.body) m[id] = Object.assign({}, e, { body: o.body }); }
+    if (c === 'letters') for (const [id, e] of Object.entries(m)) { const o = (cur.letters || {})[id]; if (e && !e.deleted && o) { if (!e.body && o.body) m[id] = e = Object.assign({}, e, { body: o.body }); if (!e.title && o.title) m[id] = Object.assign({}, e, { title: o.title }); } }
     for (const [id, e] of Object.entries(m)) if (e.deleted && (+e.updated || 0) < cutoff) delete m[id];
     out[c] = m;
   }
@@ -126,12 +138,15 @@ function mergeRoom(cur, inc) {
     const c = cleanPerson(p), o = people[dev] || {};
     const m = { name: c.name || o.name || '', at: c.at - (o.at || 0) > 15 * 60000 ? c.at : (o.at || c.at) }; // chỉ ghi lại giờ mở app mỗi 15 phút cho đỡ tốn lượt ghi
     for (const f of ['mood', 'loc', 'home', 'place']) { const v = newer(o[f], c[f]); if (v) m[f] = v; }
+    if (c.avatar !== undefined && (c.avatarAt || 0) >= (o.avatarAt || 0)) { m.avatar = c.avatar; m.avatarAt = c.avatarAt; } else if (o.avatar !== undefined) { m.avatar = o.avatar; m.avatarAt = o.avatarAt; }
     people[dev] = m;
   }
   const ids = Object.keys(people).sort((a, b) => (people[b].at || 0) - (people[a].at || 0));
   for (const id of ids.slice(6)) delete people[id]; // giữ tối đa 6 máy
   const mk = Object.keys(out.moods || {});
-  if (mk.length > 300) { mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0)); for (const id of mk.slice(300)) delete out.moods[id]; } // chat giữ 300 mục mới nhất
+  if (mk.length > 600) { mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0)); for (const id of mk.slice(600)) delete out.moods[id]; } // chat giữ 600 mục mới nhất
+  const dk = Object.keys(out.days || {});
+  if (dk.length > 500) { dk.sort().reverse(); for (const id of dk.slice(500)) delete out.days[id]; }
   out.people = people;
   return out;
 }
@@ -278,12 +293,19 @@ function describeColls(cur, inc) {
     if (e.deleted) return null;
     if (!o) return { icon: '🫙', text: `vừa bỏ vào hũ: ${clip(e.text)}` };
     if (e.done && !o.done) return { icon: '🎁', text: `đã thực hiện điều trong hũ: ${clip(e.text)}` };
+    if ((+e.count || 0) > (+o.count || 0)) return { icon: '🎁', text: `đã thực hiện điều trong hũ (lần ${+e.count}): ${clip(e.text)} · vẫn để trong hũ` };
     return null;
   });
   walk('letters', (e, o) => {
     if (e.deleted || o) return null;
     const d = new Date(+e.openAt + 7 * 3600e3);
     return { icon: '💌', text: `gửi một lá thư hẹn giờ 🔒 · mở được lúc ${d.getUTCHours()}:${pad(d.getUTCMinutes())} ${d.getUTCDate()}/${d.getUTCMonth() + 1}` };
+  });
+  walk('coupons', (e, o) => {
+    if (e.deleted) return null;
+    if (!o) return { icon: '🎟️', text: `tặng một phiếu: ${e.icon || ''} ${clip(e.title, 50)}` };
+    if (e.used && !o.used) return { icon: '🎟️', text: `vừa dùng phiếu: ${e.icon || ''} ${clip(e.title, 50)}` };
+    return null;
   });
   walk('foods', (e, o) => {
     if (e.deleted || o) return null;
@@ -298,18 +320,19 @@ function distKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 const fmtKm = d => d < 1 ? `${Math.round(d * 1000 / 10) * 10} m` : `${d < 10 ? d.toFixed(1).replace('.', ',') : Math.round(d)} km`;
-function describePeople(cur, merged, dev, name, inc) {
+function describePeople(cur, merged, dev, name, inc, ann) {
   const recent = Date.now() - 10 * 60000, out = [];
+  const ok = (f, x) => ann ? ann.has(`p:${f}:${x.at}`) : true; // máy gửi báo mục nào thì mới thông báo mục đó
   const before = (cur.people || {})[dev] || {}, now = (merged.people || {})[dev] || {};
   const who = name || now.name || 'Người ấy';
-  if (now.mood && now.mood.at >= recent && (!before.mood || now.mood.at > before.mood.at))
+  if (now.mood && now.mood.at >= recent && ok('mood', now.mood) && (ann || !before.mood || now.mood.at > before.mood.at))
     out.push({ title: `${now.mood.emo || '💗'} ${who} ${now.mood.label || 'vừa gửi tâm trạng'}`, body: now.mood.note ? `“${now.mood.note}”` : (now.mood.tip || 'Mở Sổ Tay xem nha'), tab: 'today' });
-  if (now.loc && !now.loc.hidden && !now.loc.auto && now.loc.at >= recent && (!before.loc || now.loc.at > before.loc.at)) {
+  if (now.loc && !now.loc.hidden && !now.loc.auto && now.loc.at >= recent && ok('loc', now.loc) && (ann || !before.loc || now.loc.at > before.loc.at)) {
     const others = Object.entries(merged.people || {}).filter(([id, p]) => id !== dev && p.loc && !p.loc.hidden).map(([, p]) => p.loc);
     const d = others.length ? distKm(now.loc, others.sort((a, b) => b.at - a.at)[0]) : null;
     out.push({ title: `📍 ${who} vừa gửi vị trí`, body: d != null ? `Đang cách nhau khoảng ${fmtKm(d)} · bấm để xem` : 'Bấm để xem trên bản đồ', tab: 'us', usp: 'loc' });
   }
-  if (now.home && now.home.at >= recent && (!before.home || now.home.at > before.home.at))
+  if (now.home && now.home.at >= recent && ok('home', now.home) && (ann || !before.home || now.home.at > before.home.at))
     out.push({ title: `🏠 ${who} về tới nhà rồi`, body: 'Yên tâm nha 💕', tab: 'today' });
   if (out.length) { // gửi kèm dữ liệu mới để app đang mở hiện ngay, không phải chờ máy chủ
     const peer = { dev, name: now.name, at: now.at };
@@ -461,19 +484,22 @@ export default {
         if (body.length > 600000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
         let inc; try { inc = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
         const dev = String(inc.device || ''), who = String(inc.name || '').slice(0, 40);
-        const changes = describeChanges(cur, inc), usLines = describeUs(cur, inc), collLines = describeColls(cur, inc);
+        const ann = Array.isArray(inc.announce) ? new Set(inc.announce.slice(0, 200).map(String)) : null;
+        const incA = ann ? onlyAnnounced(inc, ann) : inc, curA = ann ? withoutAnnounced(cur, ann) : cur;
+        const changes = describeChanges(curA, incA), usLines = describeUs(curA, incA), collLines = describeColls(curA, incA);
         const merged = mergeRoom(cur, inc);
-        const pplMsgs = describePeople(cur, merged, dev, who, inc);
+        const pplMsgs = describePeople(cur, merged, dev, who, inc, ann);
         if (JSON.stringify(merged) !== JSON.stringify(cur)) await env.SOTAY.put(rkey, JSON.stringify(merged));
         const jobs = [];
         if (changes.length) jobs.push(notifyRoom(env, r[1], dev, who, changes));
         if (usLines.length) jobs.push(sendToRoom(env, r[1], dev, { title: `💞 ${who || 'Người ấy'} ${usLines[0]}`, body: usLines.length > 1 ? usLines.slice(1, 4).join('\n') : 'Mở tab Hai đứa xem nha' }));
-        if (collLines.length) jobs.push(sendToRoom(env, r[1], dev, collLines.length === 1
+        if (collLines.length && collLines.length <= 3) for (const l of collLines) jobs.push(sendToRoom(env, r[1], dev, { title: `${l.icon} ${who || 'Người ấy'} ${l.text}`, body: 'Bấm để xem trong Chat' }));
+        else if (collLines.length) jobs.push(sendToRoom(env, r[1], dev, collLines.length === 1
           ? { title: `${collLines[0].icon} ${who || 'Người ấy'} ${collLines[0].text}`, body: 'Mở tab Hai đứa xem nha' }
           : { title: `${collLines[0].icon} ${who || 'Người ấy'} vừa cập nhật ${collLines.length} mục`, body: collLines.slice(0, 4).map(l => l.icon + ' ' + l.text).join('\n') }));
         for (const m of pplMsgs) jobs.push(sendToRoom(env, r[1], dev, m));
         const recentT = Date.now() - 10 * 60000;
-        const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && !(cur.moods || {})[x.id]).sort((a, b) => a.at - b.at).slice(-3);
+        const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
         for (const x of chats) jobs.push(sendToRoom(env, r[1], dev, x.kind === 'touch'
           ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
               hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
@@ -482,7 +508,7 @@ export default {
         if (jobs.length) { const p = Promise.all(jobs); if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p; }
         { // thêm thư mới vào lịch mở
           const fresh = Object.values(inc.letters || {}).filter(l => l && !l.deleted && l.dev === dev && +l.openAt > Date.now() && !(cur.letters || {})[l.id]);
-          if (fresh.length) { const li = JSON.parse((await env.SOTAY.get('letter-index')) || '[]'); for (const l of fresh) li.push({ room: r[1], id: l.id, at: +l.openAt, dev, from: who, title: clip(l.title || '', 40) }); await env.SOTAY.put('letter-index', JSON.stringify(li)); }
+          if (fresh.length) { const li = JSON.parse((await env.SOTAY.get('letter-index')) || '[]'); for (const l of fresh) li.push({ room: r[1], id: l.id, at: +l.openAt, dev, from: who, title: l.hideTitle ? '' : clip(l.title || '', 40) }); await env.SOTAY.put('letter-index', JSON.stringify(li)); }
         }
         return new Response(JSON.stringify(lockLetters(merged, dev)), { headers: { ...CORS, 'Content-Type': 'application/json' } });
       }
