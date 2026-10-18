@@ -213,6 +213,11 @@ textarea{resize:none;min-height:64px}
 .duo .peer .t{font-weight:700;font-size:16px;line-height:1.2}
 :root[data-theme=paper] .duo .peer .t{font-family:var(--hand);font-weight:400;font-size:22px}
 .duo .s{font-size:13px;color:var(--sub)}
+.duo .mnote{font-size:15px;margin:2px 0 1px;color:var(--text)}
+:root[data-theme=paper] .duo .mnote{font-family:var(--hand);font-size:20px}
+.moodpick{display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:20px;padding:16px;margin:4px 0 12px;color:#3b2530;font-size:18px}
+.moodpick svg{width:64px;height:64px}
+:root[data-theme=paper] .moodpick b{font-family:var(--hand);font-weight:400;font-size:26px}
 .duo .pl{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;margin-top:8px;flex-wrap:wrap}
 .duo .pl a{color:var(--accent);font-weight:700;text-decoration:none;margin-left:auto}
 .duo .mlab{font-size:13px;font-weight:700;color:var(--sub);margin:14px 0 8px;padding-top:12px;border-top:2px dashed var(--line)}
@@ -227,6 +232,83 @@ textarea{resize:none;min-height:64px}
 :root[data-theme=paper] .locbtns button{font-family:var(--hand);font-weight:400;font-size:20px}
 .locbtns button[disabled]{opacity:.55}
 .duo .pairhint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font-size:14px;color:var(--sub)}
+.backbtn{color:var(--accent);font-weight:700;font-size:16px;padding:6px 0 0}
+:root[data-theme=paper] .backbtn{font-family:var(--hand);font-weight:400;font-size:21px}
+.tile.live{cursor:pointer}
+.nextdate{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--card);border:2px dashed #d9819f;border-radius:18px;padding:14px;margin:0 0 4px}
+.nextdate .bigd{width:74px;flex:none;text-align:center;background:var(--accent-soft);border-radius:14px;padding:8px 0;line-height:1.05;color:var(--accent)}
+.nextdate .bigd b{display:block;font-size:34px;font-weight:800}
+:root[data-theme=paper] .nextdate .bigd b{font-family:var(--hand);font-weight:400;font-size:42px}
+.nextdate .bigd small{font-size:10px;font-weight:700;letter-spacing:.3px}
+.nextdate .main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nextdate .lab{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.3px}
+.nextdate .tt{font-size:19px;font-weight:700;line-height:1.15}
+:root[data-theme=paper] .nextdate .tt{font-family:var(--hand);font-weight:400;font-size:26px}
+.nextdate .s,.jarhd .s,.prow .s{font-size:13px;color:var(--sub)}
+.polas{display:flex;flex-direction:column;gap:6px}
+.pola{display:flex;flex-direction:column;text-align:left;background:#fff;color:#3b2530;padding:10px 10px 14px;border-radius:4px;box-shadow:0 6px 16px rgba(125,35,65,.14);transform:rotate(-1.1deg);margin:8px 6px;width:calc(100% - 12px)}
+.pola.r{transform:rotate(1deg)}
+.pola.big{transform:none;margin:4px 0 10px;width:100%}
+.pola .ph{aspect-ratio:4/3;background:#f6e3ea;border-radius:2px;overflow:hidden;display:grid;place-items:center;color:#9a7a86;font-weight:600;font-size:14px}
+.pola .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.pola .addph{border:2px dashed #e7a9bd;border-radius:10px;padding:10px 14px}
+.pola .cap{font-size:17px;font-weight:700;margin:10px 2px 4px}
+:root[data-theme=paper] .pola .cap{font-family:var(--hand);font-weight:400;font-size:23px}
+.pola .who{font-size:10px;font-weight:800;color:#b5385f;letter-spacing:.4px;margin:4px 2px 0}
+.pola .ln{font-size:15px;margin:0 2px;line-height:1.25}
+:root[data-theme=paper] .pola .ln{font-family:var(--hand);font-size:20px}
+.pola .ln.muted{color:#9a7a86}
+.bucket{padding:4px 0}
+.bk{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.bk .chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--accent);color:#fff;font-weight:800;flex:none;display:grid;place-items:center;font-size:15px}
+.bk.done .chk{background:var(--accent)}
+.bk .bt{flex:1;text-align:left;font-size:16px;color:var(--text)}
+:root[data-theme=paper] .bk .bt{font-family:var(--hand);font-size:21px}
+.bk.done .bt{text-decoration:line-through;color:var(--sub)}
+.bkadd{display:flex;gap:8px;align-items:center;padding:8px 14px}
+.bkadd input,.jaradd input{flex:1;background:var(--bg);border-radius:12px;padding:10px 12px;min-width:0}
+.slip{background:var(--slip,#ffe0ea);color:#4a1f30;border-radius:6px;padding:26px 18px;text-align:center;font-size:22px;font-weight:700;transform:rotate(-1.5deg);box-shadow:0 6px 14px rgba(125,35,65,.15);margin:6px 4px 16px}
+:root[data-theme=paper] .slip{font-family:var(--hand);font-weight:400;font-size:30px;line-height:1.15}
+.jarhd{display:flex;align-items:center;gap:12px;margin:4px 0 12px}
+.jarhd .jn{font-size:24px;font-weight:800;color:var(--accent)}
+:root[data-theme=paper] .jarhd .jn{font-family:var(--hand);font-weight:400;font-size:32px}
+.jaradd{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:6px 12px;border-radius:99px;background:var(--bg);color:var(--text);font-size:14px;font-weight:600;border:2px solid transparent}
+:root[data-theme=paper] .chips button{font-family:var(--hand);font-weight:400;font-size:18px;padding:3px 12px}
+.chips button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.chips.flt{margin:0 2px 8px}
+.slipr{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.slipr .dot{width:12px;height:12px;border-radius:3px;flex:none;transform:rotate(-12deg)}
+.slipr .main{flex:1;text-align:left;min-width:0;color:var(--text)}
+.slipr .t{font-weight:600;font-size:16px}
+:root[data-theme=paper] .slipr .t{font-family:var(--hand);font-weight:400;font-size:21px}
+.slipr .s{font-size:12px;color:var(--sub)}
+.pill{padding:4px 10px;border-radius:99px;border:2px dashed var(--line);font-size:13px;font-weight:700;color:var(--sub);white-space:nowrap;flex:none}
+.pill.on{border-style:solid;border-color:transparent;background:var(--accent-soft);color:var(--accent)}
+.mapcard{position:relative;margin:8px 0 12px}
+.mapslot{height:270px;border-radius:18px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);border:2px solid var(--line)}
+.mapbox{width:100%;height:100%}
+.mapempty{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:var(--sub);font-size:14px;line-height:1.6;padding:16px}
+.mapempty a{color:var(--accent);font-weight:700;text-decoration:none}
+.distpill{position:absolute;left:12px;top:12px;z-index:500;background:var(--card);color:var(--accent);border:2px dashed #d9819f;border-radius:99px;padding:3px 12px;font-weight:800;font-size:15px}
+:root[data-theme=paper] .distpill{font-family:var(--hand);font-weight:400;font-size:21px}
+.pinw{background:none;border:0}
+.av.pin{width:40px;height:40px;box-shadow:0 3px 8px rgba(0,0,0,.25);border-style:solid;font-size:19px}
+.prow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.prow:last-child,.bk:last-of-type,.slipr:last-child{border-bottom:0}
+.prow .main{flex:1;min-width:0}
+.prow .t{font-weight:600;font-size:15px}
+:root[data-theme=paper] .prow .t{font-family:var(--hand);font-weight:400;font-size:20px}
+.ago-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--note,#ffe0ea);border-radius:16px;padding:12px 14px;margin:14px 0 4px;color:var(--text)}
+.ago-card .th2{width:56px;height:56px;border-radius:10px;background:#f6c4d4;flex:none;overflow:hidden;display:grid;place-items:center;font-size:24px}
+.ago-card .th2 img{width:100%;height:100%;object-fit:cover}
+.ago-card .lab{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.3px}
+.ago-card .tt{font-size:17px;font-weight:600}
+:root[data-theme=paper] .ago-card .tt{font-family:var(--hand);font-weight:400;font-size:22px}
+.modeseg{padding:12px 14px 4px}
+.modeseg .seg{margin:0}
+@media (prefers-color-scheme:dark){.mapbox .leaflet-tile-pane{filter:brightness(.72) contrast(1.15) saturate(.8)}.pola{background:#2f2027;color:#fbe9ef}.pola .ph{background:#3a2a31}.pola .who{color:#ff8fb3}}
 .heart-fx{position:fixed;pointer-events:none;z-index:30;font-size:20px;animation:heartUp 1.1s ease-out forwards}
 @keyframes heartUp{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),-140px) scale(1.25);opacity:0}}
 .theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px 14px}
@@ -306,6 +388,7 @@ textarea{resize:none;min-height:64px}
 </div>
 <div class="toast" id="toast"></div>
 <input type="file" id="fileIn" accept=".json,application/json" hidden>
+<input type="file" id="photoIn" accept="image/*" hidden>
 
 <script>
 'use strict';
@@ -325,7 +408,17 @@ db.cycle = Object.assign(defCycle(), db.cycle || {});
 db.deletedEvents = db.deletedEvents || {};
 db.ui = Object.assign({ theme: 'paper', font: 'round', hearts: true, pattern: false, cute: true }, db.ui || {});
 if (!db.ui.v4) { db.ui.theme = 'paper'; db.ui.v4 = true; }
+let darkRules = null;
+function applyMode(){ // Tự động / Sáng / Tối: bật tắt các khối CSS dành cho chế độ tối
+  const mode = db.ui.mode || 'auto';
+  if (!darkRules) { darkRules = [];
+    for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; }
+      for (const r of rs) if (r.media && /prefers-color-scheme:\s*dark/.test(r.media.mediaText)) darkRules.push([r, r.media.mediaText]); } }
+  for (const [r, orig] of darkRules) r.media.mediaText = mode === 'dark' ? 'all' : mode === 'light' ? 'not all' : orig;
+  document.documentElement.style.colorScheme = mode === 'auto' ? 'light dark' : mode;
+}
 function applyUI(){
+  applyMode();
   const r = document.documentElement, u = db.ui;
   if (u.theme && u.theme !== 'default') r.dataset.theme = u.theme; else delete r.dataset.theme;
   if (u.font === 'round') { r.dataset.font = 'round';
@@ -346,6 +439,8 @@ db.us.delSp = db.us.delSp || {};
 if (db.us.start && !db.us.startAt) db.us.startAt = 1;
 for (const x of db.us.specials) if (!x.updated) x.updated = 1;
 db.mine = db.mine || {}; db.peers = db.peers || {};
+db.dates = db.dates || []; db.bucket = db.bucket || []; db.jar = db.jar || [];
+db.del = Object.assign({ dates: {}, bucket: {}, jar: {} }, db.del || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } if (typeof scheduleSync === 'function') scheduleSync(); }
 
 /* ---------- tiện ích ngày ---------- */
@@ -681,7 +776,14 @@ function roomBody(){
   for (const [id, ts] of Object.entries(db.us.delSp)) if (!specials[id]) specials[id] = { id, deleted: true, updated: ts };
   const meta = db.us.startAt ? { start: { v: db.us.start || '', updated: db.us.startAt } } : {};
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
-  return { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
+  const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
+  for (const c of ['dates', 'bucket', 'jar']) {
+    const m = {};
+    for (const x of db[c]) m[x.id] = Object.assign({}, x, { updated: x.updated || 1 });
+    for (const [id, ts] of Object.entries(db.del[c] || {})) if (!m[id]) m[id] = { id, deleted: true, updated: ts };
+    out[c] = m;
+  }
+  return out;
 }
 function applyRoom(merged){
   const map = merged.events;
@@ -690,7 +792,7 @@ function applyRoom(merged){
     if (e.deleted) { deleted[e.id] = e.updated; continue; }
     (events[e.date] = events[e.date] || []).push({ id: e.id, title: e.title, time: e.time || '', note: e.note || '', by: e.by || '', updated: e.updated });
   }
-  const before = JSON.stringify([db.events, db.deletedEvents, db.us, db.peers]);
+  const before = JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar]);
   db.events = events; db.deletedEvents = deleted;
   if (merged.specials) { // máy chủ cũ không có mục này thì giữ nguyên
     const sp = [], del = {};
@@ -700,7 +802,12 @@ function applyRoom(merged){
   const st = merged.meta && merged.meta.start;
   if (st && (+st.updated || 0) >= (db.us.startAt || 0)) { db.us.start = st.v || ''; db.us.startAt = st.updated; }
   if (merged.people) { const me = ensureDevice(), pp = {}; for (const [id, x] of Object.entries(merged.people)) if (id !== me) pp[id] = x; db.peers = pp; }
-  if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers]) !== before) {
+  for (const c of ['dates', 'bucket', 'jar']) if (merged[c]) {
+    const arr = [], del = {};
+    for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
+    db[c] = arr; db.del[c] = del;
+  }
+  if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar]) !== before) {
     try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){}
     return true;
   }
@@ -947,17 +1054,17 @@ function todayHeader(){
 const FACE = (fill, stroke, eyes, mouth) => `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="${fill}" stroke="${stroke}" stroke-width="1.4"/>${eyes}${mouth}</svg>`;
 const DOTS = c => `<circle cx="11.5" cy="13" r="1.5" fill="${c}"/><circle cx="20.5" cy="13" r="1.5" fill="${c}"/>`;
 const MOODS = [
-  { v: 'vui', l: 'vui', emo: '😊', bg: '#fff6d9', label: () => 'đang vui', tip: 'Vui lây nè, nhắn một câu cho người ấy nha',
+  { v: 'vui', hint: 'VD: Được khen nè 😆', l: 'vui', emo: '😊', bg: '#fff6d9', label: () => 'đang vui', tip: 'Vui lây nè, nhắn một câu cho người ấy nha',
     svg: FACE('#ffd66b', '#5a3a1a', DOTS('#5a3a1a'), '<path d="M10 18.5c3.5 4 8.5 4 12 0" fill="none" stroke="#5a3a1a" stroke-width="1.6" stroke-linecap="round"/>') },
-  { v: 'nho', l: 'nhớ', emo: '🥰', bg: '#ffe0ea', label: p => ('đang nhớ ' + p).trim(), tip: 'Nhắn lại hoặc gọi liền nha 💕',
+  { v: 'nho', hint: 'VD: Tối nay gọi em nha', l: 'nhớ', emo: '🥰', bg: '#ffe0ea', label: p => ('đang nhớ ' + p).trim(), tip: 'Nhắn lại hoặc gọi liền nha 💕',
     svg: FACE('#ffc2d4', '#6b1d3d', '<path d="M11.5 15.6s-3-1.9-3-4a1.6 1.6 0 0 1 3-.9 1.6 1.6 0 0 1 3 .9c0 2.1-3 4-3 4zM20.5 15.6s-3-1.9-3-4a1.6 1.6 0 0 1 3-.9 1.6 1.6 0 0 1 3 .9c0 2.1-3 4-3 4z" fill="#d6336c"/>', '<path d="M11 19.5c3 3 7 3 10 0" fill="none" stroke="#6b1d3d" stroke-width="1.6" stroke-linecap="round"/>') },
-  { v: 'on', l: 'ổn', emo: '🙂', bg: '#f1eef5', label: () => 'thấy bình thường', tip: 'Hỏi thăm một câu nha',
+  { v: 'on', hint: 'VD: Đang làm việc, tí nói chuyện', l: 'ổn', emo: '🙂', bg: '#f1eef5', label: () => 'thấy bình thường', tip: 'Hỏi thăm một câu nha',
     svg: FACE('#d9d4e6', '#3d3550', DOTS('#3d3550'), '<path d="M11 20h10" stroke="#3d3550" stroke-width="1.6" stroke-linecap="round"/>') },
-  { v: 'met', l: 'mệt', emo: '😪', bg: '#ffeedd', label: () => 'đang mệt', tip: 'Hỏi han, mua gì ngon ngon cho người ấy nha',
+  { v: 'met', hint: 'VD: Hôm nay việc nhiều quá', l: 'mệt', emo: '😪', bg: '#ffeedd', label: () => 'đang mệt', tip: 'Hỏi han, mua gì ngon ngon cho người ấy nha',
     svg: FACE('#ffc99a', '#5e3414', '<path d="M9.5 13.5h4M18.5 13.5h4" stroke="#5e3414" stroke-width="1.6" stroke-linecap="round"/>', '<path d="M12 21c2.5-1.5 5.5-1.5 8 0" fill="none" stroke="#5e3414" stroke-width="1.6" stroke-linecap="round"/>') },
-  { v: 'buon', l: 'buồn', emo: '🥺', bg: '#e3eefe', label: () => 'đang buồn', tip: 'Gọi điện an ủi liền nha',
+  { v: 'buon', hint: 'VD: Ôm em cái', l: 'buồn', emo: '🥺', bg: '#e3eefe', label: () => 'đang buồn', tip: 'Gọi điện an ủi liền nha',
     svg: FACE('#a9c7f5', '#24395e', DOTS('#24395e'), '<path d="M10.5 22c3-3.5 8-3.5 11 0" fill="none" stroke="#24395e" stroke-width="1.6" stroke-linecap="round"/>') },
-  { v: 'doi', l: 'dỗi', emo: '😤', bg: '#ffe6dc', label: () => 'đang dỗi', tip: 'Dỗ liền đi 😅',
+  { v: 'doi', hint: 'VD: Hứa rồi mà quên', l: 'dỗi', emo: '😤', bg: '#ffe6dc', label: () => 'đang dỗi', tip: 'Dỗ liền đi 😅',
     svg: FACE('#ff9f84', '#5e2414', '<path d="M9.5 11.5l4 2M22.5 11.5l-4 2" stroke="#5e2414" stroke-width="1.6" stroke-linecap="round"/>', '<path d="M11 21.5c3-2 7-2 10 0" fill="none" stroke="#5e2414" stroke-width="1.6" stroke-linecap="round"/>') },
 ];
 const moodOf = v => MOODS.find(m => m.v === v);
@@ -989,9 +1096,10 @@ const fmtKm = d => d < 1 ? `${Math.max(10, Math.round(d * 100) * 10)} m` : `${d 
 const mapLink = (loc, name) => `https://maps.apple.com/?ll=${loc.lat},${loc.lng}&q=${encodeURIComponent(name)}`;
 const isToday = ms => !!ms && keyOf(new Date(ms)) === todayKey();
 function peerDistance(p){
-  if (!p || !p.loc || !db.mine.loc) return null;
-  if (Math.abs(p.loc.at - db.mine.loc.at) > 6 * 3600e3) return null; // hai vị trí cách nhau quá lâu thì không so
-  return distKm(p.loc, db.mine.loc);
+  const st = locState(p), my = myLoc();
+  if (st.k !== 'shown' || !my) return null;
+  if (Math.abs(st.loc.at - my.at) > 6 * 3600e3) return null; // hai vị trí cách nhau quá lâu thì không so
+  return distKm(st.loc, my);
 }
 let locBusy = false;
 function duoCard(){
@@ -1006,8 +1114,11 @@ function duoCard(){
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
     h += `<div class="peer"><span class="av ${av}">${esc(pn[0].toUpperCase())}</span><div style="min-width:0">
       <div class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} ${m.emo}` : `${esc(pn)} chưa gửi tâm trạng`}</div>
+      ${fresh && p.mood.note ? `<div class="mnote">“${esc(p.mood.note)}”</div>` : ''}
       <div class="s">${fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now())}</div></div></div>`;
-    if (p.loc && Date.now() - p.loc.at < 24 * 3600e3) {
+    const ls = locState(p);
+    if (ls.k === 'hidden' || ls.k === 'off') h += `<div class="pl">📍 ${esc(pn)} ${ls.k === 'off' ? 'đã tắt chia sẻ vị trí' : 'đang tạm ẩn vị trí tới ' + hm(ls.until)}</div>`;
+    if (ls.k === 'shown') {
       const d = peerDistance(p);
       h += `<div class="pl">📍 ${d != null ? 'Cách nhau ' + fmtKm(d) : esc(pn) + ' gửi vị trí'} · ${ago(p.loc.at)} <a href="${mapLink(p.loc, pn)}" target="_blank" rel="noopener">Bản đồ ›</a></div>`;
     }
@@ -1021,21 +1132,34 @@ function duoCard(){
   return h;
 }
 const sentTo = () => sync.room ? `Đã gửi cho ${peerName(peerMain())}` : 'Đã lưu · ghép đôi để gửi cho người ấy';
-async function sendMood(v, x, y){
+function openMood(v){
+  const m = moodOf(v); if (!m) return;
+  openSheet(`Mình đang thấy ${m.l}`, `<div class="moodpick" style="background:${m.bg}">${m.svg}<b>${m.l}</b></div>
+    <div class="card"><label class="f"><span>Nhắn thêm (không bắt buộc)</span><input id="moodNote" maxlength="100" placeholder="${esc(m.hint)}" autocomplete="off" enterkeyhint="send"></label></div>
+    <button class="btn" id="moodSend">Gửi ${m.emo}</button>`, () => {
+    const go = () => { const r = $('#moodSend').getBoundingClientRect(); closeSheet(); sendMood(v, $('#moodNote').value.trim(), r.left + r.width / 2, r.top); };
+    $('#moodSend').onclick = go;
+    $('#moodNote').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
+    setTimeout(() => $('#moodNote').focus(), 300);
+  });
+}
+async function sendMood(v, note, x, y){
   const m = moodOf(v); if (!m) return;
   const cur = db.mine.mood;
-  if (cur && cur.v === v && Date.now() - cur.at < 60000) return toast('Vừa gửi rồi nè');
-  db.mine.mood = { v, emo: m.emo, label: m.label(partnerPron()), tip: m.tip, at: Date.now() };
+  if (!note && cur && cur.v === v && !cur.note && Date.now() - cur.at < 60000) return toast('Vừa gửi rồi nè');
+  db.mine.mood = { v, emo: m.emo, label: m.label(partnerPron()), tip: m.tip, note: note || '', at: Date.now() };
   save(); render(); heartsAt(x, y);
   if (!sync.room) return toast(sentTo());
   const ok = await syncRoom(); toast(ok ? sentTo() : 'Chưa gửi được, sẽ tự thử lại');
 }
 function sendLoc(){
   if (!navigator.geolocation) return toast('Máy này không lấy được vị trí');
+  if (db.mine.share === false) return toast('Đang tắt chia sẻ vị trí (Hai đứa → Đang ở đâu)');
+  if (db.mine.loc && db.mine.loc.hidden && db.mine.loc.until > Date.now() && !confirm('Đang tạm ẩn vị trí. Gửi vị trí sẽ hiện lại, được không?')) return;
   locBusy = true; render();
   navigator.geolocation.getCurrentPosition(async pos => {
     locBusy = false;
-    db.mine.loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0), at: Date.now() };
+    db.mine.loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0), at: Date.now() }; db.myLoc = db.mine.loc;
     save(); render();
     if (!sync.room) return toast(sentTo());
     const ok = await syncRoom(); render();
@@ -1052,6 +1176,291 @@ async function sendHome(x, y){
   if (!sync.room) return toast(sentTo());
   const ok = await syncRoom(); toast(ok ? sentTo() : 'Chưa gửi được, sẽ tự thử lại');
 }
+/* ---------- đợt 3: hẹn hò & kỷ niệm, hũ, định vị ---------- */
+const COLLS3 = ['dates', 'bucket', 'jar'];
+function upsert(c, rec){ rec.updated = Date.now(); db[c] = db[c].filter(x => x.id !== rec.id).concat([rec]); save(); }
+function removeItem(c, id){ db[c] = db[c].filter(x => x.id !== id); db.del[c][id] = Date.now(); save(); }
+const meKey = () => sync.me || 'Mình';
+const photoUrl = id => `${syncBase()}/photo/${sync.room}/${id}`;
+const wdUp = k => WD_LONG[parseKey(k).getDay()].toUpperCase();
+function relDay(ms){ const k = keyOf(new Date(ms)), d = diffDays(k, todayKey()); return d === 0 ? 'hôm nay' : d === 1 ? 'hôm qua' : fmtDM(k); }
+const subBack = () => `<button class="backbtn" data-act="usp" data-s="">‹ Hai đứa</button>`;
+
+/* --- hẹn hò --- */
+const IDEAS = ['Đi ăn lẩu rồi xem phim', 'Picnic công viên, mang đồ ăn tự làm', 'Nấu một bữa tối cùng nhau', 'Đi cà phê sách, mỗi đứa chọn cuốn cho đứa kia',
+  'Chụp photobooth 4 tấm', 'Đi chợ đêm ăn vặt', 'Ngắm hoàng hôn ở chỗ cao', 'Đi bowling hoặc bi-a', 'Làm gốm hoặc vẽ tranh cùng nhau',
+  'Xem phim ở nhà, tự làm bắp', 'Đạp xe dạo phố buổi sáng', 'Đi karaoke hát song ca', 'Thử một quán chưa từng ăn', 'Đi bảo tàng hoặc triển lãm',
+  'Ăn sáng ở quán quen rồi đi dạo', 'Chơi board game ở quán', 'Đi chùa hoặc nhà thờ ngắm kiến trúc', 'Làm bánh cùng nhau', 'Đi biển hoặc đi hồ gần nhà',
+  'Một ngày không điện thoại', 'Đi siêu thị mua đồ ăn vặt cả tuần', 'Chụp ảnh film một cuộn', 'Đi xem ca nhạc acoustic', 'Đi spa hoặc gội đầu dưỡng sinh',
+  'Trồng một chậu cây chung', 'Đi trượt patin', 'Viết thư tay cho nhau rồi đổi', 'Đi ăn kem đêm', 'Cắm trại một đêm', 'Đi chơi thủy cung hoặc sở thú'];
+const sortDates = a => a.slice().sort((x, y) => (x.date + (x.time || '')).localeCompare(y.date + (y.time || '')));
+function upcomingDates(){ const tk = todayKey(); return sortDates(db.dates.filter(d => d.date >= tk)); }
+function pastDates(){ const tk = todayKey(); return sortDates(db.dates.filter(d => d.date < tk)).reverse(); }
+function dateLine(d){ return [d.time, d.place].filter(Boolean).map(esc).join(' · '); }
+function nextDateCard(d){
+  const left = diffDays(todayKey(), d.date), p = parseKey(d.date);
+  return `<button class="nextdate" data-act="dateEdit" data-id="${d.id}"><span class="bigd"><small>${wdUp(d.date)}</small><b>${p.getDate()}</b><small>THÁNG ${p.getMonth() + 1}</small></span>
+    <span class="main"><span class="lab">${left === 0 ? 'HẸN HÔM NAY NÈ' : 'BUỔI HẸN TỚI · CÒN ' + left + ' NGÀY'}</span><span class="tt">${esc(d.title)}</span>${dateLine(d) ? `<span class="s">${dateLine(d)}</span>` : ''}${d.note ? `<span class="s">${esc(d.note)}</span>` : ''}</span></button>`;
+}
+function dateRow(d){
+  const left = diffDays(todayKey(), d.date), p = parseKey(d.date);
+  return `<button class="row" data-act="dateEdit" data-id="${d.id}"><span class="dbox"><b>${p.getDate()}</b><small>TH${p.getMonth() + 1}</small></span>
+    <span class="main"><div class="t">${esc(d.title)}</div>${dateLine(d) ? `<div class="s">${dateLine(d)}</div>` : ''}</span><span class="left">${left === 0 ? 'Hôm nay!' : 'còn ' + left + ' ngày'}</span></button>`;
+}
+function notesOf(d){ return Object.entries(d.notes || {}).filter(([, v]) => v); }
+function polaroid(d, i){
+  const ph = d.photo && sync.room ? `<img src="${photoUrl(d.photo)}" alt="" loading="lazy">` : `<span class="addph">＋ Thêm ảnh</span>`;
+  const ns = notesOf(d);
+  return `<button class="pola ${i % 2 ? 'r' : ''}" data-act="memo" data-id="${d.id}"><span class="ph">${ph}</span>
+    <span class="cap">${fmtDM(d.date)} · ${esc(d.title)}</span>
+    ${ns.length ? ns.map(([k, v]) => `<span class="who">${esc(k.toUpperCase())} VIẾT</span><span class="ln">${esc(v)}</span>`).join('') : `<span class="ln muted">Viết một dòng về hôm đó…</span>`}</button>`;
+}
+function viewDates(){
+  const up = upcomingDates(), past = pastDates(), bk = db.bucket.slice().sort((a, b) => (a.done - b.done) || (a.at || 0) - (b.at || 0));
+  let h = subBack() + `<h1>Hẹn hò &amp; kỷ niệm</h1>`;
+  h += `<div class="section-title"><span>Sắp hẹn</span><button class="linkbtn" data-act="dateNew">+ Hẹn mới</button></div>`;
+  if (up.length) { h += nextDateCard(up[0]); if (up.length > 1) h += `<div class="card">${up.slice(1, 6).map(dateRow).join('')}</div>`; }
+  else h += `<div class="card"><button class="row" data-act="dateNew"><span class="main"><div class="t">Chưa có buổi hẹn nào</div><div class="s">Bấm để lên kế hoạch, máy kia sẽ nhận thông báo</div></span><span class="linkbtn">+ Hẹn</span></button></div>`;
+  h += `<button class="btn ghost" data-act="dateIdea" style="margin-top:10px">🎲 Gợi ý hẹn ngẫu nhiên</button>`;
+  h += `<div class="section-title"><span>Kỷ niệm</span>${past.length ? `<span class="s">${past.length} buổi</span>` : ''}</div>`;
+  if (!past.length) h += `<div class="card"><div class="empty" style="padding:16px">Buổi hẹn nào đã qua sẽ thành kỷ niệm ở đây: thêm ảnh và mỗi đứa viết một dòng</div></div>`;
+  else { const n = state.memMore ? past.length : 4; h += `<div class="polas">${past.slice(0, n).map(polaroid).join('')}</div>`; if (past.length > n) h += `<button class="btn ghost" data-act="memMore">Xem thêm ${past.length - n} kỷ niệm</button>`; }
+  h += `<div class="section-title"><span>Cùng nhau làm · ${db.bucket.filter(x => x.done).length}/${db.bucket.length}</span></div>
+    <div class="card bucket">${bk.map(x => `<div class="bk ${x.done ? 'done' : ''}"><button class="chk" data-act="bkToggle" data-id="${x.id}" aria-label="Đánh dấu">${x.done ? '✓' : ''}</button><button class="bt" data-act="bkEdit" data-id="${x.id}">${esc(x.text)}</button></div>`).join('')}
+    <div class="bkadd"><input id="bkIn" placeholder="VD: Đi Đà Lạt ngắm hoa" autocomplete="off"><button class="linkbtn" data-act="bkAdd">Thêm</button></div></div>`;
+  return h;
+}
+function openDate(id, preset){
+  const ex = db.dates.find(d => d.id === id);
+  const d = ex || Object.assign({ id: uid(), title: '', date: addDays(todayKey(), 1), time: '19:00', place: '', note: '', by: sync.me || '' }, preset || {});
+  openSheet(ex ? 'Sửa buổi hẹn' : 'Hẹn mới 💌', `<div class="card">
+    <label class="f"><span>Đi đâu, làm gì</span><input id="dtTitle" value="${esc(d.title)}" placeholder="VD: Ăn lẩu &amp; xem phim" autocomplete="off"></label>
+    <label class="f"><span>Ngày</span><input type="date" id="dtDate" value="${d.date}"></label>
+    <label class="f"><span>Giờ</span><input type="time" id="dtTime" value="${d.time || ''}"></label>
+    <label class="f"><span>Ở đâu</span><input id="dtPlace" value="${esc(d.place || '')}" placeholder="Tên quán, địa chỉ…" autocomplete="off"></label>
+    <label class="f"><span>Ghi chú</span><input id="dtNote" value="${esc(d.note || '')}" placeholder="VD: HoPu đón lúc 18:30" autocomplete="off"></label></div>
+    <button class="btn" id="dtSave">${ex ? 'Lưu' : 'Hẹn luôn'}</button>${ex ? '<button class="btn danger" id="dtDel">Xóa buổi hẹn</button>' : ''}`, () => {
+    $('#dtSave').onclick = () => {
+      const title = $('#dtTitle').value.trim(), date = $('#dtDate').value;
+      if (!title) return toast('Nhập đi đâu, làm gì nha'); if (!date) return toast('Chọn ngày');
+      upsert('dates', Object.assign({}, d, { title, date, time: $('#dtTime').value || '', place: $('#dtPlace').value.trim(), note: $('#dtNote').value.trim() }));
+      closeSheet(); render(); toast(sync.room ? 'Đã lưu, máy kia sẽ nhận thông báo' : 'Đã lưu');
+    };
+    if (ex) $('#dtDel').onclick = () => { if (!confirm(`Xóa "${ex.title}"?`)) return; if (ex.photo && sync.room) fetch(photoUrl(ex.photo), { method: 'DELETE' }).catch(() => {}); removeItem('dates', ex.id); closeSheet(); render(); };
+  });
+}
+function openMemo(id){
+  const d = db.dates.find(x => x.id === id); if (!d) return;
+  const mine = (d.notes || {})[meKey()] || '', others = notesOf(d).filter(([k]) => k !== meKey());
+  openSheet(`${fmtDM(d.date)} · ${d.title}`, `
+    <div class="pola big"><span class="ph" id="memPh">${d.photo && sync.room ? `<img src="${photoUrl(d.photo)}" alt="">` : '<span class="addph">Chưa có ảnh</span>'}</span></div>
+    <button class="btn ghost" id="memPhBtn">${d.photo ? 'Đổi ảnh' : '📸 Thêm ảnh'}</button>
+    <div class="card"><label class="f"><span>${esc(meKey())} viết</span><input id="memNote" maxlength="120" value="${esc(mine)}" placeholder="Một dòng về hôm đó…" autocomplete="off"></label>
+    ${others.map(([k, v]) => `<div class="frow"><span class="lbl">${esc(k)} viết<div class="s">${esc(v)}</div></span></div>`).join('')}</div>
+    <button class="btn" id="memSave">Lưu</button><button class="btn ghost" id="memEdit">Sửa tên, ngày</button>`, () => {
+    $('#memSave').onclick = () => { const notes = Object.assign({}, d.notes || {}, { [meKey()]: $('#memNote').value.trim() }); upsert('dates', Object.assign({}, d, { notes })); closeSheet(); render(); toast('Đã lưu kỷ niệm'); };
+    $('#memEdit').onclick = () => { closeSheet(); setTimeout(() => openDate(d.id), 250); };
+    $('#memPhBtn').onclick = () => {
+      if (!syncBase() || !sync.room) return toast('Ghép đôi ở tab Khác để lưu ảnh nha');
+      const inp = $('#photoIn'); inp.value = ''; inp.onchange = async () => {
+        const f = inp.files && inp.files[0]; if (!f) return;
+        $('#memPhBtn').textContent = 'Đang tải ảnh…'; $('#memPhBtn').disabled = true;
+        try {
+          const blob = await shrinkImage(f), pid = uid();
+          const r = await fetch(photoUrl(pid), { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: blob });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const cur = db.dates.find(x => x.id === d.id) || d;
+          if (cur.photo) fetch(photoUrl(cur.photo), { method: 'DELETE' }).catch(() => {});
+          upsert('dates', Object.assign({}, cur, { photo: pid }));
+          d.photo = pid; $('#memPh').innerHTML = `<img src="${photoUrl(pid)}" alt="">`; $('#memPhBtn').textContent = 'Đổi ảnh'; render(); toast('Đã thêm ảnh 📸');
+        } catch (e) { toast('Tải ảnh lỗi, thử lại nha'); $('#memPhBtn').textContent = d.photo ? 'Đổi ảnh' : '📸 Thêm ảnh'; }
+        finally { $('#memPhBtn').disabled = false; }
+      };
+      inp.click();
+    };
+  });
+}
+async function shrinkImage(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image(); img.src = url; await img.decode();
+    const k = Math.min(1, 1100 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise((ok, no) => c.toBlob(b => b ? ok(b) : no(new Error('toBlob')), 'image/jpeg', 0.78));
+  } finally { URL.revokeObjectURL(url); }
+}
+function openIdea(){
+  const pick = () => IDEAS[Math.floor(Math.random() * IDEAS.length)];
+  let idea = pick();
+  openSheet('Gợi ý hẹn 🎲', `<div class="slip big" id="ideaTx">${esc(idea)}</div><button class="btn" id="ideaGo">Lên lịch luôn</button><button class="btn ghost" id="ideaNext">Gợi ý khác</button>`, () => {
+    $('#ideaNext').onclick = () => { let n = pick(); while (n === idea) n = pick(); idea = n; $('#ideaTx').textContent = idea; };
+    $('#ideaGo').onclick = () => { closeSheet(); setTimeout(() => openDate(null, { title: idea }), 250); };
+  });
+}
+function openBucket(id){
+  const x = db.bucket.find(b => b.id === id); if (!x) return;
+  openSheet('Cùng nhau làm', `<div class="card"><label class="f"><span>Điều muốn cùng làm</span><input id="bkTx" value="${esc(x.text)}" autocomplete="off"></label></div>
+    <button class="btn" id="bkSave">Lưu</button><button class="btn danger" id="bkDel">Xóa</button>`, () => {
+    $('#bkSave').onclick = () => { const t = $('#bkTx').value.trim(); if (!t) return; upsert('bucket', Object.assign({}, x, { text: t })); closeSheet(); render(); };
+    $('#bkDel').onclick = () => { removeItem('bucket', x.id); closeSheet(); render(); };
+  });
+}
+function lastYearToday(){
+  const tk = todayKey(), md = tk.slice(5);
+  return pastDates().find(d => d.date.slice(5) === md && d.date < tk) || null;
+}
+
+/* --- hũ điều em thích --- */
+const JCATS = [['food', 'Đồ ăn', 'đã mua', '#ffb3cb'], ['gift', 'Quà', 'đã tặng', '#ffd66b'], ['place', 'Chỗ đi chơi', 'đã đi', '#a9c7f5'], ['film', 'Phim, nhạc', 'đã xem', '#c9b5f0'], ['other', 'Khác', 'đã làm', '#b9e4c9']];
+const jcat = id => JCATS.find(c => c[0] === id) || JCATS[4];
+function jarSvg(n){
+  let slips = '';
+  for (let i = 0; i < Math.min(n, 28); i++) {
+    const row = Math.floor(i / 5), col = i % 5, x = 34 + col * 19 + (row % 2 ? 9 : 0), y = 168 - row * 13 - (col % 2) * 4;
+    const c = JCATS[(i * 7 + row) % 4][3];
+    slips += `<rect x="${x}" y="${y}" width="17" height="10" rx="2" fill="${c}" stroke="#7d2341" stroke-opacity=".25" transform="rotate(${((i * 37) % 40) - 20} ${x + 8} ${y + 5})"/>`;
+  }
+  return `<svg viewBox="0 0 160 200" width="132" height="165" aria-hidden="true"><defs><clipPath id="jarClip"><path d="M30 54h100c6 0 10 4 10 10v110c0 10-8 18-18 18H38c-10 0-18-8-18-18V64c0-6 4-10 10-10z"/></clipPath></defs>
+    <rect x="40" y="22" width="80" height="22" rx="6" fill="#e7a9bd" stroke="#7d2341" stroke-width="2"/><rect x="34" y="40" width="92" height="12" rx="5" fill="#f3c6d4" stroke="#7d2341" stroke-width="2"/>
+    <g clip-path="url(#jarClip)">${slips}</g>
+    <path d="M30 54h100c6 0 10 4 10 10v110c0 10-8 18-18 18H38c-10 0-18-8-18-18V64c0-6 4-10 10-10z" fill="rgba(255,255,255,.25)" stroke="#7d2341" stroke-width="2.5"/>
+    <path d="M34 70v80" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/></svg>`;
+}
+function viewJar(){
+  const cat = state.jarCat || 'food', filt = state.jarFilter || 'all';
+  const all = db.jar.slice().sort((a, b) => (b.at || 0) - (a.at || 0)), list = filt === 'all' ? all : all.filter(x => x.cat === filt);
+  const open = db.jar.filter(x => !x.done).length;
+  let h = subBack() + `<h1>Hũ điều em thích</h1>`;
+  h += `<div class="jarhd">${jarSvg(db.jar.length)}<div><div class="jn">${db.jar.length} mảnh giấy</div><div class="s">${open} điều chưa làm · cả hai cùng xem được</div>
+    <button class="btn" data-act="jarDraw" style="margin-top:10px" ${open ? '' : 'disabled'}>🎲 Rút một điều</button></div></div>`;
+  h += `<div class="card jaradd"><input id="jarIn" maxlength="80" placeholder="Hôm nay em thích…" autocomplete="off">
+    <div class="chips">${JCATS.map(c => `<button data-act="jarCat" data-id="${c[0]}" class="${cat === c[0] ? 'on' : ''}">${c[1]}</button>`).join('')}</div>
+    <button class="btn" data-act="jarAdd">Bỏ vào hũ</button></div>`;
+  h += `<div class="section-title"><span>Mới bỏ vào</span></div><div class="chips flt">${[['all', 'Tất cả']].concat(JCATS).map(c => `<button data-act="jarFilter" data-id="${c[0]}" class="${filt === c[0] ? 'on' : ''}">${c[1]}</button>`).join('')}</div>`;
+  h += `<div class="card">${list.length ? list.slice(0, state.jarMore ? 999 : 15).map(x => { const c = jcat(x.cat);
+    return `<div class="slipr"><span class="dot" style="background:${c[3]}"></span><button class="main" data-act="jarEdit" data-id="${x.id}"><div class="t">${esc(x.text)}</div><div class="s">${c[1]} · ${relDay(x.at || x.updated)}${x.by ? ' · ' + esc(x.by) : ''}</div></button>
+      <button class="pill ${x.done ? 'on' : ''}" data-act="jarDone" data-id="${x.id}">${x.done ? c[2] + ' ✓' : 'chưa'}</button></div>`; }).join('')
+    : '<div class="empty" style="padding:16px">Hũ đang trống. Thích món gì, quà gì, chỗ nào thì bỏ vào đây nha</div>'}</div>`;
+  if (!state.jarMore && list.length > 15) h += `<button class="btn ghost" data-act="jarMore">Xem hết ${list.length} mảnh</button>`;
+  return h;
+}
+function openJarSlip(id, drawn){
+  const x = db.jar.find(j => j.id === id); if (!x) return;
+  const c = jcat(x.cat);
+  openSheet(drawn ? 'Rút được nè 🎉' : 'Mảnh giấy', `<div class="slip big" style="--slip:${c[3]}">${esc(x.text)}</div>
+    <p class="subtitle" style="text-align:center">${c[1]} · bỏ vào ${relDay(x.at || x.updated)}${x.by ? ' · ' + esc(x.by) : ''}</p>
+    <button class="btn" id="jsDone">${x.done ? 'Đánh dấu chưa làm' : 'Đánh dấu ' + c[2]}</button>
+    ${drawn ? '<button class="btn ghost" id="jsAgain">Rút cái khác</button>' : '<button class="btn danger" id="jsDel">Xóa khỏi hũ</button>'}`, () => {
+    $('#jsDone').onclick = () => { toggleJar(x.id); closeSheet(); render(); };
+    if (drawn) $('#jsAgain').onclick = () => drawJar(x.id);
+    else $('#jsDel').onclick = () => { if (!confirm('Xóa mảnh giấy này?')) return; removeItem('jar', x.id); closeSheet(); render(); };
+  });
+}
+function toggleJar(id){ const x = db.jar.find(j => j.id === id); if (!x) return; upsert('jar', Object.assign({}, x, x.done ? { done: false, doneAt: 0 } : { done: true, doneAt: Date.now(), doneBy: sync.me || '' })); }
+function drawJar(prev){
+  const open = db.jar.filter(x => !x.done && x.id !== prev), pool = open.length ? open : db.jar.filter(x => !x.done);
+  if (!pool.length) return toast('Hũ chưa có điều nào chưa làm');
+  openJarSlip(pool[Math.floor(Math.random() * pool.length)].id, true);
+}
+
+/* --- định vị --- */
+function locState(p){
+  if (!p || !p.loc) return { k: 'none' };
+  if (p.loc.hidden) { if (!p.loc.until) return { k: 'off' }; if (p.loc.until > Date.now()) return { k: 'hidden', until: p.loc.until }; return { k: 'none' }; }
+  if (Date.now() - p.loc.at > 24 * 3600e3) return { k: 'none' };
+  return { k: 'shown', loc: p.loc };
+}
+const myLoc = () => db.myLoc || (db.mine.loc && !db.mine.loc.hidden ? db.mine.loc : null);
+const nearPlace = (loc, place) => !!(loc && place && place.lat != null && distKm(loc, place) < 0.15);
+function personLine(p, isMe){
+  const st = isMe ? (db.mine.loc && db.mine.loc.hidden ? locState(db.mine) : (myLoc() ? { k: 'shown', loc: myLoc() } : { k: 'none' })) : locState(p);
+  const place = isMe ? db.mine.place : p && p.place;
+  if (st.k === 'off') return ['đã tắt chia sẻ vị trí', ''];
+  if (st.k === 'hidden') return [`đang tạm ẩn vị trí tới ${hm(st.until)}`, ''];
+  if (st.k === 'none') return ['chưa gửi vị trí', p && p.home && isToday(p.home.at) ? `🏠 về tới nhà lúc ${hm(p.home.at)}` : ''];
+  return [nearPlace(st.loc, place) ? 'đang ở nhà' : 'đã gửi vị trí', 'cập nhật ' + ago(st.loc.at) + (st.loc.acc > 150 ? ` · sai số ~${st.loc.acc} m` : '')];
+}
+function viewLoc(){
+  const p = peerMain(), pn = peerName(p), me = sync.me || 'Mình', pst = locState(p), d = pst.k === 'shown' && myLoc() ? distKm(pst.loc, myLoc()) : null;
+  const pav = p && norm(p.name) === norm(db.love.nameFrom) ? 'h' : 'q', mav = pav === 'h' ? 'q' : 'h';
+  const share = db.mine.share !== false, hid = db.mine.loc && db.mine.loc.hidden && db.mine.loc.until > Date.now();
+  let h = subBack() + `<h1>Đang ở đâu nè</h1><p class="subtitle" style="margin-top:-4px">chỉ hai đứa mình thấy</p>`;
+  if (!syncBase() || !sync.room) h += `<div class="card"><button class="row" data-act="goTab" data-t="more"><span class="main"><div class="t">Chưa ghép đôi</div><div class="s">Ghép đôi hai máy ở tab Khác để thấy vị trí của nhau</div></span><span class="linkbtn">Ghép →</span></button></div>`;
+  h += `<div class="mapcard"><div id="mapSlot" class="mapslot"></div>${d != null ? `<span class="distpill">cách ${fmtKm(d)}</span>` : ''}</div>`;
+  const [pl1, pl2] = personLine(p, false), [ml1, ml2] = personLine(null, true);
+  h += `<div class="card">
+    <div class="prow"><span class="av ${pav}">${esc(pn[0].toUpperCase())}</span><span class="main"><div class="t">${esc(pn)} · ${pl1}</div>${pl2 ? `<div class="s">${pl2}</div>` : ''}</span>${pst.k === 'shown' ? `<a class="linkbtn" href="${mapLink(pst.loc, pn)}" target="_blank" rel="noopener">Chỉ đường</a>` : ''}</div>
+    <div class="prow"><span class="av ${mav}">${esc(me[0].toUpperCase())}</span><span class="main"><div class="t">${esc(me)} · ${ml1}</div>${ml2 ? `<div class="s">${ml2}</div>` : ''}</span></div></div>`;
+  h += `<div class="locbtns"><button data-act="sendLoc" ${locBusy || !share ? 'disabled' : ''}>📍 ${locBusy ? 'Đang lấy…' : 'Gửi vị trí'}</button><button data-act="sendHome">🏠 Về tới nhà rồi</button></div>
+    <button class="btn ghost" data-act="askLoc" style="margin-top:8px">🙋 Hỏi ${esc(pn)} đang ở đâu</button>`;
+  h += `<div class="section-title"><span>Riêng tư</span></div><div class="card">
+    <label class="frow"><span class="lbl">Chia sẻ vị trí với ${esc(pn)}<div class="s">Tắt lúc nào cũng được. Vị trí chỉ gửi khi mình bấm nút.</div></span><input type="checkbox" class="switch" id="shareSw" ${share ? 'checked' : ''}></label>
+    ${share ? `<div class="frow"><span class="lbl">${hid ? `Đang tạm ẩn tới ${hm(db.mine.loc.until)}` : 'Tạm ẩn vị trí'}<div class="s">${hid ? 'Hết giờ là tự hết ẩn, nhưng cần bấm Gửi vị trí lại' : 'Người kia sẽ không thấy vị trí cũ nữa'}</div></span>
+      ${hid ? '<button class="linkbtn" data-act="locUnhide">Hiện lại</button>' : '<button class="linkbtn" data-act="locHide">Ẩn 1 tiếng</button>'}</div>` : ''}
+    <div class="frow"><span class="lbl">Nhà của ${esc(me)}<div class="s">${db.mine.place && db.mine.place.lat != null ? 'Đã lưu · khi gửi vị trí ở gần đây sẽ hiện "đang ở nhà"' : 'Đứng ở nhà rồi bấm Lưu'}</div></span>
+      ${db.mine.place && db.mine.place.lat != null ? '<button class="linkbtn" data-act="placeDel" style="color:var(--sub)">Xóa</button>' : '<button class="linkbtn" data-act="placeSet">Lưu</button>'}</div></div>`;
+  return h;
+}
+function hideLoc(ms){
+  db.mine.loc = { hidden: true, until: ms ? Date.now() + ms : 0, at: Date.now() };
+  save(); render(); syncRoom();
+}
+async function askLoc(){
+  if (!syncBase() || !sync.room) return toast('Ghép đôi ở tab Khác trước nha');
+  if (Date.now() - (db.askedAt || 0) < 120000) return toast('Vừa hỏi rồi, đợi chút nha');
+  db.askedAt = Date.now(); save();
+  const pron = partnerPron();
+  try { await fetch(`${syncBase()}/notify/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: `🙋 ${sync.me || 'Người ấy'} hỏi: ${pron ? pron + ' ' : ''}đang ở đâu đó?`, body: 'Mở Sổ Tay bấm Gửi vị trí nha' }) }); toast('Đã hỏi ' + peerName(peerMain())); }
+  catch (e) { toast('Chưa gửi được, thử lại nha'); }
+}
+function setPlace(){
+  if (!navigator.geolocation) return toast('Máy này không lấy được vị trí');
+  toast('Đang lấy vị trí…');
+  navigator.geolocation.getCurrentPosition(pos => {
+    db.mine.place = { lat: pos.coords.latitude, lng: pos.coords.longitude, at: Date.now() }; save(); render(); toast('Đã lưu vị trí nhà 🏠');
+  }, err => toast(err.code === 1 ? 'Chưa cho phép vị trí' : 'Không lấy được vị trí, thử lại nha'), { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+}
+let leafletP = null, mapEl = null, mapObj = null, mapLayer = null, mapSig = '';
+function loadLeaflet(){
+  if (window.L) return Promise.resolve();
+  if (leafletP) return leafletP;
+  leafletP = new Promise((ok, no) => {
+    const c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(c);
+    const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'; s.onload = ok; s.onerror = () => { leafletP = null; no(new Error('leaflet')); }; document.head.appendChild(s);
+  });
+  return leafletP;
+}
+function mountMap(){
+  const slot = $('#mapSlot'); if (!slot) return;
+  const p = peerMain(), pst = locState(p), pts = [];
+  const pav = p && norm(p.name) === norm(db.love.nameFrom) ? 'h' : 'q';
+  if (pst.k === 'shown') pts.push({ ...pst.loc, name: peerName(p), av: pav });
+  if (myLoc()) pts.push({ ...myLoc(), name: sync.me || 'Mình', av: pav === 'h' ? 'q' : 'h' });
+  if (!pts.length) { slot.innerHTML = '<div class="mapempty">Chưa có vị trí nào.<br>Bấm <b>Gửi vị trí</b> bên dưới nha</div>'; return; }
+  slot.innerHTML = mapEl ? '' : '<div class="mapempty">Đang mở bản đồ…</div>';
+  loadLeaflet().then(() => {
+    const slot = $('#mapSlot'); if (!slot) return;
+    slot.innerHTML = '';
+    if (!mapEl) {
+      mapEl = document.createElement('div'); mapEl.className = 'mapbox'; slot.appendChild(mapEl);
+      mapObj = L.map(mapEl, { zoomControl: false, attributionControl: true });
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapObj);
+      mapLayer = L.layerGroup().addTo(mapObj);
+    } else slot.appendChild(mapEl);
+    mapObj.invalidateSize();
+    const sig = JSON.stringify(pts.map(x => [x.lat, x.lng, x.av]));
+    if (sig === mapSig) return;
+    mapSig = sig; mapLayer.clearLayers();
+    for (const x of pts) L.marker([x.lat, x.lng], { icon: L.divIcon({ className: 'pinw', html: `<span class="av ${x.av} pin">${esc(x.name[0].toUpperCase())}</span>`, iconSize: [40, 40], iconAnchor: [20, 20] }) }).addTo(mapLayer);
+    if (pts.length > 1) mapObj.fitBounds(pts.map(x => [x.lat, x.lng]), { padding: [50, 50], maxZoom: 16 }); else mapObj.setView([pts[0].lat, pts[0].lng], 15);
+  }).catch(() => {
+    const slot = $('#mapSlot'); if (!slot) return;
+    slot.innerHTML = `<div class="mapempty">Không tải được bản đồ (mạng yếu?).<br>${pts.map(x => `<a href="${mapLink(x, x.name)}" target="_blank" rel="noopener">Xem vị trí ${esc(x.name)} ›</a>`).join('<br>')}</div>`;
+  });
+}
+function afterRender(){ if (state.tab === 'us' && state.usp === 'loc') mountMap(); }
 function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
@@ -1075,8 +1484,8 @@ function viewToday(){
     if (done === ds.length) { const nl = nextDoseLine(); if (nl) h += `<div class="card">${nl}</div>`; }
   }
   h += eventsBlock(k);
-  const up = specialList().filter(x => x.left <= 14);
-  if (up.length) h += `<div class="section-title"><span>Sắp tới</span></div><div class="card">${up.slice(0, 3).map(specialRow).join('')}</div>`;
+  const up = specialList().filter(x => x.left <= 14), ud = upcomingDates().filter(d => diffDays(todayKey(), d.date) <= 7);
+  if (up.length || ud.length) h += `<div class="section-title"><span>Sắp tới</span></div><div class="card">${ud.slice(0, 2).map(dateRow).join('')}${up.slice(0, 3).map(specialRow).join('')}</div>`;
   return h;
 }
 
@@ -1192,6 +1601,9 @@ function specialRow(s){
     <span class="main"><div class="t">${esc(s.name)}</div>${s.sub ? `<div class="s">${s.sub}</div>` : ''}</span><span class="left">${s.left === 0 ? 'Hôm nay!' : 'còn ' + s.left + ' ngày'}</span></button>`;
 }
 function viewUs(){
+  if (state.usp === 'dates') return viewDates();
+  if (state.usp === 'jar') return viewJar();
+  if (state.usp === 'loc') return viewLoc();
   const tk = todayKey();
   const qa = esc((db.love.nameTo || 'Q')[0].toUpperCase()), ha = esc((db.love.nameFrom || 'H')[0].toUpperCase());
   const pair = `<span class="av q">${qa}</span><svg width="22" height="22" viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="av h">${ha}</span>`;
@@ -1205,20 +1617,27 @@ function viewUs(){
     h += `<button class="uscount taped" data-act="usEditStart"><div class="pair">${pair}<div style="min-width:0"><div class="num">${n} ngày</div><div class="s">${ymdSpan(db.us.start, tk)} · từ ${fmtShort(db.us.start)}</div></div></div>
       ${next ? `<div class="prog"><i style="width:${pct}%"></i></div><div class="s" style="margin-top:6px">còn ${next - n} ngày tới mốc ${next} ngày</div>` : ''}</button>`;
   }
+  const ly = lastYearToday();
+  if (ly) h += `<button class="ago-card" data-act="memo" data-id="${ly.id}"><span class="th2">${ly.photo && sync.room ? `<img src="${photoUrl(ly.photo)}" alt="">` : '📷'}</span><span style="min-width:0"><div class="lab">${parseKey(todayKey()).getFullYear() - parseKey(ly.date).getFullYear()} NĂM TRƯỚC HÔM NAY</div><div class="tt">${esc(ly.title)}</div></span></button>`;
   const list = specialList();
   h += `<div class="section-title"><span>Ngày đặc biệt</span><button class="linkbtn" data-act="spAdd">+ Thêm</button></div>
     <div class="card">${list.length ? list.slice(0, 6).map(specialRow).join('') : '<div class="empty" style="padding:16px">Thêm sinh nhật, ngày kỷ niệm… app sẽ đếm ngược giúp</div>'}</div>`;
   const tile = (ic, bg, fg, t, s) => `<div class="tile soon"><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${s}</div><span class="soonbadge">Sắp có</span></div>`;
   const pm = peerMain(), pmn = peerName(pm), pd = peerDistance(pm);
-  const locSub = !sync.room ? 'cần ghép đôi ở tab Khác' : pm && pm.loc ? (pd != null ? `cách nhau ${fmtKm(pd)} · ${ago(pm.loc.at)}` : `${esc(pmn)} gửi ${ago(pm.loc.at)}`) : 'gửi vị trí ở tab Hôm nay';
+  const pls = locState(pm);
+  const locSub = !sync.room ? 'cần ghép đôi ở tab Khác' : pls.k === 'shown' ? (pd != null ? `cách nhau ${fmtKm(pd)} · ${ago(pls.loc.at)}` : `${esc(pmn)} gửi ${ago(pls.loc.at)}`) : pls.k === 'hidden' ? `${esc(pmn)} đang tạm ẩn` : 'xem bản đồ, gửi vị trí';
   const pmm = pm && pm.mood && moodOf(pm.mood.v);
   const moodSub = !sync.room ? 'cần ghép đôi ở tab Khác' : pmm ? `${esc(pmn)} ${pmm.emo} ${pmm.l} · ${ago(pm.mood.at)}` : 'gửi cảm xúc ở tab Hôm nay';
-  const liveTile = (ic, bg, fg, t, sub) => `<button class="tile" data-act="goTab" data-t="today"><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${sub}</div></button>`;
+  const liveTile_ = (ic, bg, fg, t, sub) => `<button class="tile" data-act="goTab" data-t="today"><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${sub}</div></button>`;
+  const nd = upcomingDates()[0], wk = Date.now() - 7 * 864e5, newJ = db.jar.filter(x => (x.at || 0) > wk).length;
+  const dateSub = nd ? `${WD_SHORT[parseKey(nd.date).getDay()]} ${fmtDM(nd.date)} · ${esc(nd.title)} · ${diffDays(tk, nd.date) ? 'còn ' + diffDays(tk, nd.date) + ' ngày' : 'hôm nay'}` : pastDates().length ? `${pastDates().length} kỷ niệm · lên kèo hẹn mới` : 'lên kế hoạch, lưu kỷ niệm';
+  const jarSub = db.jar.length ? `${db.jar.length} mảnh${newJ ? ' · ' + newJ + ' mới tuần này' : ''}` : 'thích gì bỏ vào hũ';
+  const T = (s2, ic, bg, fg, t, sub) => `<button class="tile live" data-act="${s2 === 'mood' ? 'goTab' : 'usp'}" ${s2 === 'mood' ? 'data-t="today"' : `data-s="${s2}"`}><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${sub}</div></button>`;
   h += `<div class="tiles">
-    ${tile('<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', 'buổi hẹn, ảnh, nhật ký')}
-    ${tile('<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', 'thích gì bỏ vào hũ')}
-    ${liveTile('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/>', '#e4effa', '#2f5f8f', 'Đang ở đâu', locSub)}
-    ${liveTile('<circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01M9 15c1.6 1.4 4.4 1.4 6 0"/>', '#efe7fb', '#6b4fb3', 'Tâm trạng', moodSub)}
+    ${T('dates', '<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', dateSub)}
+    ${T('jar', '<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', jarSub)}
+    ${T('loc', '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/>', '#e4effa', '#2f5f8f', 'Đang ở đâu', locSub)}
+    ${T('mood', '<circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01M9 15c1.6 1.4 4.4 1.4 6 0"/>', '#efe7fb', '#6b4fb3', 'Tâm trạng', moodSub)}
   </div>`;
   return h;
 }
@@ -1377,6 +1796,7 @@ function viewMore(){
   <div class="card"><div class="note">Lời chúc lấy từ file <b>loichuc.txt</b> trên GitHub (mỗi dòng một câu, có thể dùng <b>{a}</b> cho người gửi, <b>{e}</b> cho người nhận). Sửa file đó là cả thẻ trong app lẫn thông báo 8h đều tự đổi, không cần đụng vào máy này.<br>Thông báo đi qua phần <b>Thông báo tự động</b> bên dưới.</div></div>` : ''}
   <div class="section-title"><span>Giao diện 🎀</span></div>
   <div class="card">
+    <div class="modeseg"><div class="seg">${[['auto', 'Tự động'], ['light', '☀️ Sáng'], ['dark', '🌙 Tối']].map(([m, l]) => `<button data-act="uiMode" data-id="${m}" class="${(db.ui.mode || 'auto') === m ? 'on' : ''}">${l}</button>`).join('')}</div></div>
     <div class="theme-grid" id="themeGrid">
       ${[['paper','Sổ tay giấy',['#b5385f','#ffe0ea','#fbf1ec']],['pink','Hồng ngọt ngào',['#ff5c93','#ffd1e3','#fff0f6']],['peach','Đào pastel',['#ff8a65','#ffd9c9','#fff5ef']],['lavender','Tím mộng mơ',['#a06bff','#e3d6ff','#f6f1ff']],['default','Mặc định',['#007aff','#d1e6ff','#f2f2f7']]]
         .map(([id, name, cs]) => `<button data-th="${id}" class="${(db.ui.theme || 'default') === id ? 'on' : ''}"><div class="sw2">${cs.map(c => `<i style="background:${c}"></i>`).join('')}</div><b style="font-size:14px">${name}</b></button>`).join('')}
@@ -1428,7 +1848,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.1</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.2</p>`;
 }
 
 function viewCycle(){
@@ -1532,6 +1952,7 @@ function cycleHistory(){
 function render(){
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
   $('#main').innerHTML = ({ today: viewToday, health: viewHealth, us: viewUs, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore }[state.tab] || viewToday)();
+  afterRender();
 }
 
 /* ---------- sheet ---------- */
@@ -1818,7 +2239,7 @@ function toast(msg){
 /* ---------- sự kiện ---------- */
 $('#nav').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
-  state.tab = b.dataset.tab;
+  state.tab = b.dataset.tab; state.usp = "";
   state.loveAdmin = false;
   if (state.tab === 'cal') { /* giữ ngày đang chọn */ }
   ($('#main').scrollTop = 0); render();
@@ -1902,12 +2323,34 @@ $('#main').addEventListener('click', async e => {
     case 'pushOn': await enablePush(); break;
     case 'wxSet': openWeather(); break;
     case 'goMeds': state.tab = 'health'; state.hseg = 'meds'; ($('#main').scrollTop = 0); render(); break;
-    case 'goTab': state.tab = b.dataset.t; ($('#main').scrollTop = 0); render(); break;
+    case 'goTab': state.tab = b.dataset.t; state.usp = ''; ($('#main').scrollTop = 0); render(); break;
+    case 'usp': state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
+    case 'dateNew': openDate(); break;
+    case 'dateEdit': openDate(id); break;
+    case 'dateIdea': openIdea(); break;
+    case 'memo': openMemo(id); break;
+    case 'memMore': state.memMore = true; render(); break;
+    case 'bkAdd': { const t = ($('#bkIn').value || '').trim(); if (!t) return toast('Nhập điều muốn cùng làm'); upsert('bucket', { id: uid(), text: t, done: false, at: Date.now(), by: sync.me || '' }); render(); break; }
+    case 'bkToggle': { const x = db.bucket.find(q => q.id === id); if (x) { upsert('bucket', Object.assign({}, x, { done: !x.done, doneAt: x.done ? 0 : Date.now() })); render(); if (!x.done) heartsAt(e.clientX, e.clientY); } break; }
+    case 'bkEdit': openBucket(id); break;
+    case 'jarCat': state.jarCat = id; document.querySelectorAll('[data-act=jarCat]').forEach(q => q.classList.toggle('on', q.dataset.id === id)); break;
+    case 'jarFilter': state.jarFilter = id; render(); break;
+    case 'jarMore': state.jarMore = true; render(); break;
+    case 'jarAdd': { const t = ($('#jarIn').value || '').trim(); if (!t) return toast('Ghi điều em thích vào nha'); upsert('jar', { id: uid(), text: t, cat: state.jarCat || 'food', by: sync.me || '', at: Date.now(), done: false }); render(); heartsAt(e.clientX, e.clientY); toast('Đã bỏ vào hũ 🫙'); break; }
+    case 'jarDone': { const x = db.jar.find(q => q.id === id); toggleJar(id); render(); if (x && !x.done) heartsAt(e.clientX, e.clientY); break; }
+    case 'jarEdit': openJarSlip(id, false); break;
+    case 'jarDraw': drawJar(); break;
+    case 'askLoc': await askLoc(); break;
+    case 'locHide': hideLoc(3600e3); toast('Đã ẩn vị trí 1 tiếng'); break;
+    case 'locUnhide': db.mine.loc = null; save(); render(); syncRoom(); toast('Đã hết ẩn. Bấm Gửi vị trí khi muốn chia sẻ'); break;
+    case 'placeSet': setPlace(); break;
+    case 'placeDel': db.mine.place = { at: Date.now() }; save(); render(); break;
+    case 'uiMode': db.ui.mode = id; save(); applyUI(); render(); break;
     case 'hseg': state.hseg = b.dataset.s; render(); break;
     case 'hPick': openDaySheet(k); break;
     case 'usStartSave': { const v = ($('#usStart') || {}).value; if (!v) return toast('Chọn ngày bắt đầu nha'); db.us.start = v; db.us.startAt = Date.now(); save(); render(); heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break; }
     case 'usEditStart': openUsStart(); break;
-    case 'mood': await sendMood(id, e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break;
+    case 'mood': openMood(id); break;
     case 'sendLoc': if (!locBusy) sendLoc(); break;
     case 'sendHome': await sendHome(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break;
     case 'spAdd': openSpecial(); break;
@@ -1945,7 +2388,7 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs(), mine: {}, peers: {} }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs(), mine: {}, peers: {}, dates: [], bucket: [], jar: [], del: { dates: {}, bucket: {}, jar: {} } }; save(); render(); toast('Đã xóa');
       break;
   }
 });
@@ -1960,6 +2403,7 @@ $('#main').addEventListener('change', e => {
   if (t.id === 'uiHearts') { db.ui.hearts = t.checked; save(); if (t.checked) { const r = t.getBoundingClientRect(); heartsAt(r.left + 20, r.top); } return; }
   if (t.id === 'uiPattern') { db.ui.pattern = t.checked; save(); applyUI(); return; }
   if (t.id === 'medPushSw') { sync.medPush = t.checked; saveSync(); syncNow(false); toast(t.checked ? 'Nhắc thuốc qua thông báo app' : 'Nhắc thuốc qua app Lịch'); return; }
+  if (t.id === 'shareSw') { db.mine.share = t.checked; if (!t.checked) hideLoc(0); else { db.mine.loc = null; save(); render(); syncRoom(); } toast(t.checked ? 'Đã bật chia sẻ vị trí' : 'Đã tắt chia sẻ, người kia không thấy vị trí nữa'); return; }
   if (t.id === 'syMe') { sync.me = t.value.trim(); saveSync(); toast('Đã lưu'); return; }
   if (t.id === 'lvOn') { db.love.enabled = t.checked; save(); toast(t.checked ? 'Đã bật' : 'Đã tắt'); return; }
   if (t.id === 'cyAuto') { c.auto = t.checked; save(); render(); }
@@ -1974,7 +2418,7 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}), mine: db.mine || {}, peers: db.peers || {} };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}), mine: db.mine || {}, peers: db.peers || {}, dates: data.dates || [], bucket: data.bucket || [], jar: data.jar || [], del: Object.assign({ dates: {}, bucket: {}, jar: {} }, data.del || {}) };
     if (obj.sync && obj.sync.key) { sync = Object.assign({}, obj.sync, { sent: '', push: false, subJson: null }); saveSync(); }
     save(); applyUI(); render(); scheduleSync(300); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
