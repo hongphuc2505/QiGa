@@ -100,6 +100,21 @@ textarea{resize:none;min-height:64px}
 .note b{color:var(--text)}
 .pad{padding:0 14px 14px}
 .btn.pink{background:var(--pink)}
+.hero{background:var(--card);border-radius:20px;padding:16px 18px;margin:10px 0 16px;box-shadow:var(--shadow)}
+.hero .greet{font-size:15px;color:var(--sub);font-weight:500}
+.hero .clock{font-size:64px;font-weight:700;letter-spacing:-2px;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:2px}
+.hero .clock .colon{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+.hero .date{font-size:21px;font-weight:600;margin-top:4px;letter-spacing:-.2px}
+.hero .lunar{font-size:14px;color:var(--sub);margin-top:2px}
+.hero .wx{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:.5px solid var(--line);width:100%;text-align:left}
+.hero .wx .ic{font-size:36px;line-height:1}
+.hero .wx .tp{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.hero .wx .ds{font-size:14px;color:var(--sub)}
+.hero .addwx{margin-top:14px;padding-top:12px;border-top:.5px solid var(--line);display:block;width:100%;text-align:left}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chips span{font-size:13px;padding:5px 10px;border-radius:99px;background:var(--bg);font-weight:500}
+.reslist .row{min-height:48px}
 .love{position:relative;padding:18px 16px;background:linear-gradient(135deg,#ff6b8b,#ff9a76);color:#fff;border-radius:16px;margin-bottom:16px;overflow:hidden}
 .love .k{font-size:13px;font-weight:600;opacity:.9;letter-spacing:.3px;text-transform:uppercase}
 .love .msg{font-size:19px;font-weight:600;line-height:1.4;margin-top:8px}
@@ -187,9 +202,18 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const nowMin = () => { const n = new Date(); return n.getHours()*60 + n.getMinutes(); };
 const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60 + m; };
 
+function cycleWindows(m){
+  const c = m.cyc || { anchor: 'end', offset: 1, dur: 14 };
+  return cycleStarts().map(s => {
+    const anchor = c.anchor === 'start' ? s.start : addDays(s.start, s.len - 1);
+    const a = addDays(anchor, +c.offset || 0);
+    return [a, addDays(a, Math.max(1, +c.dur || 1) - 1), s.pred];
+  });
+}
 function medOn(m, k){
   if (k < m.start) return false;
   if (m.end && k > m.end) return false;
+  if (m.mode === 'cycle') return cycleWindows(m).some(([a, b]) => k >= a && k <= b);
   if (m.days && m.days.length) return m.days.includes(parseKey(k).getDay());
   return true;
 }
@@ -376,6 +400,14 @@ function syncEvents(){
   const ev = [], tk = todayKey();
   // thuốc
   for (const m of db.meds) {
+    if (m.mode === 'cycle') {
+      for (let i = -1, d = addDays(tk, -1); i < 90; i++, d = addDays(d, 1)) {
+        if (!medOn(m, d)) continue;
+        for (const t of m.times) ev.push({ uid: `med-${m.id}-${t.replace(':', '')}-${ymd(d)}@sotay`, date: ymd(d), time: t.replace(':', ''), dur: 10,
+          title: '💊 ' + m.name + (m.dose ? ' – ' + m.dose : ''), desc: m.note || '', alarms: ['PT0M'] });
+      }
+      continue;
+    }
     const first = firstMatchingDay(m);
     if (m.end && keyOf(first) > m.end) continue;
     for (const t of m.times) {
@@ -501,6 +533,139 @@ async function disablePush(){
 }
 function fmtTime(ms){ const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getDate()}/${d.getMonth() + 1}`; }
 
+/* ---------- âm lịch (thuật toán Hồ Ngọc Đức) ---------- */
+function jdFromDate(dd, mm, yy){ const a = Math.floor((14 - mm) / 12), y = yy + 4800 - a, m = mm + 12 * a - 3;
+  let jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+  if (jd < 2299161) jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083; return jd; }
+function newMoon(k){ const T = k / 1236.85, T2 = T * T, T3 = T2 * T, dr = Math.PI / 180;
+  let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+  Jd1 += 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+  const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+  const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+  const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+  let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
+  C1 = C1 - 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(dr * 2 * Mpr) - 0.0004 * Math.sin(dr * 3 * Mpr);
+  C1 = C1 + 0.0104 * Math.sin(dr * 2 * F) - 0.0051 * Math.sin(dr * (M + Mpr)) - 0.0074 * Math.sin(dr * (M - Mpr));
+  C1 = C1 + 0.0004 * Math.sin(dr * (2 * F + M)) - 0.0004 * Math.sin(dr * (2 * F - M)) - 0.0006 * Math.sin(dr * (2 * F + Mpr));
+  C1 = C1 + 0.0010 * Math.sin(dr * (2 * F - Mpr)) + 0.0005 * Math.sin(dr * (2 * Mpr + M));
+  const deltat = T < -11 ? 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3 : -0.000278 + 0.000265 * T + 0.000262 * T2;
+  return Jd1 + C1 - deltat; }
+function sunLong(jdn){ const T = (jdn - 2451545.0) / 36525, T2 = T * T, dr = Math.PI / 180;
+  const M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2, L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
+  let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M) + (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000290 * Math.sin(dr * 3 * M);
+  let L = (L0 + DL) * dr; L = L - Math.PI * 2 * Math.floor(L / (Math.PI * 2)); return L; }
+const sunLongAt = (d, tz) => Math.floor(sunLong(d - 0.5 - tz / 24) / Math.PI * 6);
+const newMoonDay = (k, tz) => Math.floor(newMoon(k) + 0.5 + tz / 24);
+function lunarMonth11(yy, tz){ const k = Math.floor((jdFromDate(31, 12, yy) - 2415021) / 29.530588853); let nm = newMoonDay(k, tz); if (sunLongAt(nm, tz) >= 9) nm = newMoonDay(k - 1, tz); return nm; }
+function leapOffset(a11, tz){ const k = Math.floor((a11 - 2415021.076998695) / 29.530588853 + 0.5); let last, i = 1, arc = sunLongAt(newMoonDay(k + i, tz), tz);
+  do { last = arc; i++; arc = sunLongAt(newMoonDay(k + i, tz), tz); } while (arc != last && i < 14); return i - 1; }
+function solar2lunar(dd, mm, yy, tz = 7){
+  const dn = jdFromDate(dd, mm, yy), k = Math.floor((dn - 2415021.076998695) / 29.530588853);
+  let ms = newMoonDay(k + 1, tz); if (ms > dn) ms = newMoonDay(k, tz);
+  let a11 = lunarMonth11(yy, tz), b11 = a11, ly;
+  if (a11 >= ms) { ly = yy; a11 = lunarMonth11(yy - 1, tz); } else { ly = yy + 1; b11 = lunarMonth11(yy + 1, tz); }
+  const ld = dn - ms + 1, diff = Math.floor((ms - a11) / 29); let leap = 0, lm = diff + 11;
+  if (b11 - a11 > 365) { const lo = leapOffset(a11, tz); if (diff >= lo) { lm = diff + 10; if (diff == lo) leap = 1; } }
+  if (lm > 12) lm -= 12; if (lm >= 11 && diff < 4) ly -= 1;
+  return [ld, lm, ly, leap];
+}
+const CAN = ['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'], CHI = ['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi','Thân','Dậu','Tuất','Hợi'];
+function lunarText(d){
+  const [ld, lm, ly, leap] = solar2lunar(d.getDate(), d.getMonth() + 1, d.getFullYear());
+  const day = ld === 15 ? 'Rằm' : ld <= 10 ? 'Mùng ' + ld : ld;
+  const mon = lm === 1 ? 'Giêng' : lm === 12 ? 'Chạp' : lm;
+  return `${day} tháng ${mon}${leap ? ' (nhuận)' : ''} âm lịch · năm ${CAN[(ly + 6) % 10]} ${CHI[(ly + 8) % 12]}`;
+}
+
+/* ---------- thời tiết (Open-Meteo, miễn phí) ---------- */
+const WX = c => c === 0 ? ['☀️', 'Trời quang'] : c <= 2 ? ['🌤️', 'Ít mây'] : c === 3 ? ['☁️', 'Nhiều mây'] : c <= 48 ? ['🌫️', 'Sương mù']
+  : c <= 57 ? ['🌦️', 'Mưa phùn'] : c <= 67 ? ['🌧️', 'Mưa'] : c <= 77 ? ['❄️', 'Tuyết'] : c <= 82 ? ['🌦️', 'Mưa rào'] : ['⛈️', 'Dông'];
+function wxCache(){ try { return JSON.parse(localStorage.getItem('sotay-wx') || 'null'); } catch(e){ return null; } }
+let wxLoading = false;
+async function loadWeather(force){
+  const loc = db.weather; if (!loc || wxLoading) return;
+  const c = wxCache();
+  if (!force && c && c.lat === loc.lat && c.lon === loc.lon && Date.now() - c.at < 30 * 60000) return;
+  wxLoading = true;
+  try {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,apparent_temperature,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1`;
+    const d = await (await fetch(u)).json();
+    if (d && d.current) {
+      try { localStorage.setItem('sotay-wx', JSON.stringify({ at: Date.now(), lat: loc.lat, lon: loc.lon, d })); } catch(e){}
+      if (state.tab === 'today' && !sheetOpen()) render();
+    }
+  } catch(e){} finally { wxLoading = false; }
+}
+function wxBlock(){
+  if (!db.weather) return `<button class="addwx linkbtn" data-act="wxSet">☀️ Thêm thời tiết</button>`;
+  const c = wxCache();
+  if (!c || c.lat !== db.weather.lat) return `<button class="wx" data-act="wxSet"><span class="ic">⏳</span><span class="ds">Đang tải thời tiết ở ${esc(db.weather.name)}…</span></button>`;
+  const cur = c.d.current, dl = c.d.daily || {};
+  let [ic, txt] = WX(cur.weather_code);
+  if (cur.is_day === 0 && cur.weather_code <= 1) ic = '🌙';
+  const lo = dl.temperature_2m_min ? Math.round(dl.temperature_2m_min[0]) : null, hi = dl.temperature_2m_max ? Math.round(dl.temperature_2m_max[0]) : null;
+  const rain = dl.precipitation_probability_max ? dl.precipitation_probability_max[0] : null;
+  return `<button class="wx" data-act="wxSet"><span class="ic">${ic}</span><span style="flex:1;min-width:0">
+    <div><span class="tp">${Math.round(cur.temperature_2m)}°</span> <span class="ds">${txt} · ${esc(db.weather.name)}</span></div>
+    <div class="ds">${lo !== null ? `Thấp ${lo}° · Cao ${hi}°` : ''}${rain !== null ? ` · Mưa ${rain}%` : ''}${rain >= 50 ? ' · nhớ mang ô ☂️' : ''}</div>
+  </span></button>`;
+}
+function greeting(){ const h = new Date().getHours(); return h < 5 ? 'Khuya rồi, ngủ sớm nha 🌙' : h < 11 ? 'Chào buổi sáng ☀️' : h < 13 ? 'Chào buổi trưa 🍱' : h < 18 ? 'Chào buổi chiều 🌤️' : 'Chào buổi tối 🌙'; }
+function clockHTML(){ const n = new Date(); return `${pad(n.getHours())}<span class="colon">:</span>${pad(n.getMinutes())}`; }
+function heroCard(){
+  const n = new Date(), tk = todayKey();
+  const chips = [];
+  const ds = dosesOn(tk);
+  if (ds.length) chips.push(`💊 ${ds.filter(d => d.taken).length}/${ds.length} liều`);
+  const S = cycleStarts();
+  if (S.length) {
+    const inf = cycleInfo(tk, S, avgCycle());
+    const nextP = S.find(x => x.start > tk);
+    if (inf && inf.type === 'period') chips.push(`🩸 Ngày ${inf.day} kỳ kinh`);
+    else if (nextP && diffDays(tk, nextP.start) <= 5) chips.push(`🩸 Còn ${diffDays(tk, nextP.start)} ngày tới tháng`);
+    else if (inf) chips.push(`🩸 ${CY[inf.type][0]}`);
+  }
+  const ev = (db.events[tk] || []).length;
+  if (ev) chips.push(`📌 ${ev} sự kiện`);
+  return `<div class="hero">
+    <div class="greet">${greeting()}</div>
+    <div class="clock" id="clock">${clockHTML()}</div>
+    <div class="date">${WD_LONG[n.getDay()]}, ${n.getDate()} tháng ${n.getMonth() + 1}, ${n.getFullYear()}</div>
+    <div class="lunar">${lunarText(n)}</div>
+    ${chips.length ? `<div class="chips">${chips.map(c => `<span>${c}</span>`).join('')}</div>` : ''}
+    ${wxBlock()}
+  </div>`;
+}
+function openWeather(){
+  const body = `
+  <div class="card"><label class="f"><span>Tìm thành phố</span><input id="wxQ" placeholder="VD: Hà Nội, Đà Nẵng, Cần Thơ…" autocomplete="off"></label></div>
+  <button class="btn" id="wxFind">Tìm</button>
+  <div class="card reslist" id="wxRes" style="margin-top:12px;display:none"></div>
+  <button class="btn ghost" id="wxGeo">📍 Dùng vị trí hiện tại</button>
+  ${db.weather ? '<button class="btn danger" id="wxDel">Ẩn thời tiết</button>' : ''}`;
+  openSheet('Thời tiết', body, () => {
+    const pick = loc => { db.weather = loc; save(); try { localStorage.removeItem('sotay-wx'); } catch(e){} closeSheet(); render(); loadWeather(true); };
+    const find = async () => {
+      const q = $('#wxQ').value.trim(); if (!q) return;
+      const box = $('#wxRes'); box.style.display = 'block'; box.innerHTML = '<div class="empty" style="padding:14px">Đang tìm…</div>';
+      try {
+        const d = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=vi&format=json`)).json();
+        const rs = d.results || [];
+        box.innerHTML = rs.length ? rs.map((r, i) => `<button class="row" data-i="${i}"><span class="main"><div class="t">${esc(r.name)}</div><div class="s">${esc([r.admin1, r.country].filter(Boolean).join(', '))}</div></span></button>`).join('') : '<div class="empty" style="padding:14px">Không tìm thấy</div>';
+        box.onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; const r = rs[+b.dataset.i]; pick({ lat: +r.latitude.toFixed(3), lon: +r.longitude.toFixed(3), name: r.name }); };
+      } catch(e) { box.innerHTML = '<div class="empty" style="padding:14px">Cần có mạng để tìm</div>'; }
+    };
+    $('#wxFind').onclick = find;
+    $('#wxQ').onkeydown = e => { if (e.key === 'Enter') find(); };
+    $('#wxGeo').onclick = () => {
+      if (!navigator.geolocation) return toast('Máy không hỗ trợ định vị');
+      navigator.geolocation.getCurrentPosition(p => pick({ lat: +p.coords.latitude.toFixed(3), lon: +p.coords.longitude.toFixed(3), name: 'Vị trí của bạn' }),
+        () => toast('Không lấy được vị trí'), { timeout: 10000, maximumAge: 3600000 });
+    };
+    if (db.weather) $('#wxDel').onclick = () => { db.weather = null; save(); closeSheet(); render(); };
+  });
+}
+
 /* ---------- state ---------- */
 const state = { tab: 'today', month: null, cmonth: null, sel: todayKey() };
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
@@ -536,7 +701,7 @@ function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
   const done = ds.filter(d => d.taken).length;
-  let h = `<h1>Hôm nay</h1><p class="subtitle">${fmtLong(k)}</p>` + loveCard();
+  let h = heroCard() + loveCard();
   if (!db.meds.length) {
     h += `<div class="card empty">Chưa có thuốc nào trong danh sách.<div style="height:14px"></div><button class="btn" data-act="addMed">+ Thêm thuốc</button></div>`;
   } else if (!ds.length) {
@@ -599,7 +764,17 @@ function viewCal(){
   return h + eventsBlock(sel);
 }
 
+function cycText(m){
+  const c = m.cyc || {};
+  return `${c.dur} ngày, bắt đầu ${+c.offset ? c.offset + ' ngày sau' : 'từ'} ${c.anchor === 'start' ? 'ngày đầu' : 'ngày cuối'} kỳ kinh`;
+}
+function nextWindowText(m){
+  const tk = todayKey(), w = cycleWindows(m).find(([a, b]) => b >= tk);
+  if (!w) return 'Chưa có dữ liệu kỳ kinh để tính';
+  return (w[0] <= tk ? 'Đợt này: ' : 'Đợt tới: ') + fmtShort(w[0]) + ' → ' + fmtShort(w[1]) + (w[2] ? ' (dự kiến)' : '');
+}
 function daysText(m){
+  if (m.mode === 'cycle') return '🩸 ' + cycText(m);
   if (!m.days || !m.days.length) return 'Hằng ngày';
   return [1,2,3,4,5,6,0].filter(d => m.days.includes(d)).map(d => WD_SHORT[d]).join(', ');
 }
@@ -611,7 +786,7 @@ function viewMeds(){
       <span class="dot" style="background:${m.color};margin-top:6px"></span>
       <span class="main">
         <div class="t">${esc(m.name)}${m.dose ? ` <span class="s" style="font-weight:400">· ${esc(m.dose)}</span>` : ''}</div>
-        <div class="s">${daysText(m)} · từ ${fmtShort(m.start)}${m.end ? ` đến ${fmtShort(m.end)}` : ''}</div>
+        <div class="s">${daysText(m)}${m.mode === 'cycle' ? '<br>' + nextWindowText(m) : ` · từ ${fmtShort(m.start)}${m.end ? ` đến ${fmtShort(m.end)}` : ''}`}</div>
         <div>${m.times.map(t => `<span class="chip">${t}</span>`).join('')}</div>
       </span><span style="color:var(--sub);font-size:20px">›</span></button>`).join('')}</div>`;
   }
@@ -675,7 +850,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 2.1</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 2.2</p>`;
 }
 
 function viewCycle(){
@@ -778,6 +953,7 @@ function openMed(id){
   const ex = db.meds.find(x => x.id === id);
   const m = ex || { id: uid(), name: '', dose: '', color: COLORS[db.meds.length % COLORS.length], times: ['08:00'], days: [], start: todayKey(), end: '', note: '' };
   const days = m.days && m.days.length ? m.days : [0,1,2,3,4,5,6];
+  const cyc = Object.assign({ anchor: 'end', offset: 1, dur: 14 }, m.cyc || {});
   const body = `
   <div class="card">
     <label class="f"><span>Tên thuốc</span><input id="fName" value="${esc(m.name)}" placeholder="VD: Vitamin D" autocomplete="off"></label>
@@ -785,8 +961,26 @@ function openMed(id){
   </div>
   <div class="section-title"><span>Giờ uống</span></div>
   <div class="card"><div id="fTimes">${m.times.map(timeRow).join('')}</div><div style="padding:12px 14px"><button type="button" class="linkbtn" id="addTime">+ Thêm giờ</button></div></div>
+  <div class="section-title"><span>Cách dùng</span></div>
+  <div class="card"><div class="days" id="fMode">
+    <button type="button" data-m="week" class="${m.mode !== 'cycle' ? 'on' : ''}" style="width:auto;padding:0 14px;border-radius:99px">Theo ngày trong tuần</button>
+    <button type="button" data-m="cycle" class="${m.mode === 'cycle' ? 'on' : ''}" style="width:auto;padding:0 14px;border-radius:99px">🩸 Theo chu kỳ kinh</button>
+  </div></div>
+  <div id="fWeekBox" style="${m.mode === 'cycle' ? 'display:none' : ''}">
   <div class="section-title"><span>Ngày trong tuần</span></div>
   <div class="card"><div class="days" id="fDays">${[1,2,3,4,5,6,0].map(d => `<button type="button" data-d="${d}" class="${days.includes(d) ? 'on' : ''}">${WD_SHORT[d]}</button>`).join('')}</div></div>
+  </div>
+  <div id="fCycBox" style="${m.mode === 'cycle' ? '' : 'display:none'}">
+  <div class="section-title"><span>Theo chu kỳ kinh</span></div>
+  <div class="card">
+    <div class="frow"><span class="lbl">Tính từ</span><span class="days" id="fAnchor" style="padding:0">
+      <button type="button" data-a="start" class="${cyc.anchor === 'start' ? 'on' : ''}" style="width:auto;padding:0 12px;border-radius:99px">Ngày đầu</button>
+      <button type="button" data-a="end" class="${cyc.anchor !== 'start' ? 'on' : ''}" style="width:auto;padding:0 12px;border-radius:99px">Ngày cuối</button></span></div>
+    <div class="frow"><span class="lbl">Bắt đầu sau (ngày)<div class="s">0 = ngay ngày đó, 1 = ngày hôm sau</div></span><input type="number" inputmode="numeric" id="fOff" min="0" max="60" value="${cyc.offset}"></div>
+    <div class="frow"><span class="lbl">Uống trong (ngày)</span><input type="number" inputmode="numeric" id="fDur" min="1" max="40" value="${cyc.dur}"></div>
+    <div class="note" id="fCycPrev"></div>
+  </div>
+  </div>
   <div class="section-title"><span>Thời gian dùng</span></div>
   <div class="card">
     <label class="f"><span>Bắt đầu</span><input type="date" id="fStart" value="${m.start}"></label>
@@ -802,6 +996,21 @@ function openMed(id){
   openSheet(ex ? 'Sửa thuốc' : 'Thêm thuốc', body, () => {
     $('#fColor').onclick = e => { const b = e.target.closest('.sw'); if (b) $('#fColor').querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); };
     $('#fDays').onclick = e => { const b = e.target.closest('button'); if (b) b.classList.toggle('on'); };
+    const curMode = () => ($('#fMode button.on') || {}).dataset?.m || 'week';
+    const readCyc = () => ({ anchor: ($('#fAnchor button.on') || {}).dataset?.a || 'end', offset: Math.round(+$('#fOff').value || 0), dur: Math.round(+$('#fDur').value || 0) });
+    const prev = () => {
+      const c = readCyc();
+      if (!db.cycle.periods.length) { $('#fCycPrev').innerHTML = 'Chưa có kỳ kinh nào. Hãy ghi ngày tới tháng ở tab <b>Chu kỳ</b> để app tính ngày uống.'; return; }
+      const fake = { cyc: c };
+      const tk = todayKey(), ws = cycleWindows(fake).filter(([a, b]) => b >= addDays(tk, -40)).slice(0, 3);
+      $('#fCycPrev').innerHTML = `Ví dụ: ${c.dur} ngày, bắt đầu ${c.offset ? c.offset + ' ngày sau' : 'ngay'} ${c.anchor === 'start' ? 'ngày đầu' : 'ngày cuối'} kỳ kinh.<br>` +
+        ws.map(([a, b, pr]) => `• ${fmtShort(a)} → ${fmtShort(b)}${pr ? ' <i>(dự kiến)</i>' : ''}`).join('<br>');
+    };
+    $('#fMode').onclick = e => { const b = e.target.closest('button'); if (!b) return;
+      $('#fMode').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      $('#fWeekBox').style.display = b.dataset.m === 'cycle' ? 'none' : ''; $('#fCycBox').style.display = b.dataset.m === 'cycle' ? '' : 'none'; prev(); };
+    $('#fAnchor').onclick = e => { const b = e.target.closest('button'); if (!b) return; $('#fAnchor').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); prev(); };
+    $('#fOff').oninput = prev; $('#fDur').oninput = prev; prev();
     $('#addTime').onclick = () => $('#fTimes').insertAdjacentHTML('beforeend', timeRow('12:00'));
     $('#fTimes').onclick = e => { const b = e.target.closest('.rm'); if (b) b.parentElement.remove(); };
     $('#saveMed').onclick = () => {
@@ -809,14 +1018,23 @@ function openMed(id){
       if (!name) return toast('Nhập tên thuốc');
       const times = [...new Set([...document.querySelectorAll('#fTimes input')].map(i => i.value).filter(Boolean))].sort();
       if (!times.length) return toast('Thêm ít nhất 1 giờ uống');
+      const mode = curMode();
       let dsel = [...document.querySelectorAll('#fDays button.on')].map(b => +b.dataset.d);
-      if (!dsel.length) return toast('Chọn ít nhất 1 ngày');
-      if (dsel.length === 7) dsel = [];
+      const cy = readCyc();
+      if (mode === 'cycle') {
+        if (!(cy.offset >= 0 && cy.offset <= 60)) return toast('Số ngày bắt đầu từ 0 đến 60');
+        if (!(cy.dur >= 1 && cy.dur <= 40)) return toast('Số ngày uống từ 1 đến 40');
+        dsel = [];
+      } else {
+        if (!dsel.length) return toast('Chọn ít nhất 1 ngày');
+        if (dsel.length === 7) dsel = [];
+      }
       const start = $('#fStart').value || todayKey();
       const end = $('#fEnd').value || '';
       if (end && end < start) return toast('Ngày kết thúc phải sau ngày bắt đầu');
       const color = ($('#fColor .sw.on') || {}).dataset?.c || COLORS[0];
-      const rec = { id: m.id, name, dose: $('#fDose').value.trim(), color, times, days: dsel, start, end, note: $('#fNote').value.trim() };
+      const rec = { id: m.id, name, dose: $('#fDose').value.trim(), color, times, days: dsel, start, end, note: $('#fNote').value.trim(), mode, cyc: mode === 'cycle' ? cy : undefined };
+      if (mode === 'cycle' && !db.cycle.periods.length) setTimeout(() => toast('Nhớ ghi kỳ kinh ở tab Chu kỳ để app tính ngày uống'), 1900);
       const i = db.meds.findIndex(x => x.id === m.id);
       if (i >= 0) db.meds[i] = rec; else db.meds.push(rec);
       save(); closeSheet(); render(); toast('Đã lưu');
@@ -941,6 +1159,18 @@ function buildICS(){
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
   const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SoTay//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Uống thuốc'];
   for (const m of db.meds) {
+    if (m.mode === 'cycle') {
+      for (let i = 0, d = todayKey(); i < 120; i++, d = addDays(d, 1)) {
+        if (!medOn(m, d)) continue;
+        for (const t of m.times) {
+          const hm = t.replace(':', ''), ds = d.replace(/-/g, '');
+          L.push('BEGIN:VEVENT', `UID:${m.id}-${hm}-${ds}@sotay`, 'DTSTAMP:' + stamp, `DTSTART:${ds}T${hm}00`, 'DURATION:PT10M',
+            'SUMMARY:' + icsEsc('💊 ' + m.name + (m.dose ? ' – ' + m.dose : '')),
+            'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Đến giờ uống ' + m.name), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
+        }
+      }
+      continue;
+    }
     const first = firstMatchingDay(m);
     const dstr = keyOf(first).replace(/-/g, '');
     if (m.end && keyOf(first) > m.end) continue;
@@ -1053,6 +1283,7 @@ $('#main').addEventListener('click', async e => {
     }
     case 'roomNow': await syncRoom(); toast('Đã cập nhật'); break;
     case 'pushOn': await enablePush(); break;
+    case 'wxSet': openWeather(); break;
     case 'pushOff': await disablePush(); break;
     case 'roomCopy':
       try { await navigator.clipboard.writeText(sync.room); toast('Đã sao chép mã'); } catch (e) { prompt('Mã ghép đôi:', sync.room); }
@@ -1117,12 +1348,14 @@ $('#fileIn').onchange = async () => {
 
 /* cập nhật trạng thái "quá giờ" và đổi ngày */
 setInterval(() => { if (!sheetOpen() && state.tab !== 'more' && state.tab !== 'meds') render(); }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); loadWeather(false); } });
 
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 fetchLoveLines();
 scheduleSync(800);
+loadWeather(false);
+setInterval(() => { const c = document.getElementById('clock'); if (c) { const h = clockHTML(); if (c.innerHTML !== h) c.innerHTML = h; } }, 1000);
 setInterval(() => { if (!document.hidden) syncRoom(); }, 120000);
 </script>
 </body>
