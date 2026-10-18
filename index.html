@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sổ Tay">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<title>Sổ Tay</title>
+<style>
+:root{--bg:#f2f2f7;--card:#fff;--text:#1c1c1e;--sub:#8e8e93;--line:#e5e5ea;--accent:#007aff;--accent-soft:rgba(0,122,255,.12);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--shadow:0 1px 2px rgba(0,0,0,.04)}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--sub:#8e8e93;--line:#2c2c2e;--accent:#0a84ff;--accent-soft:rgba(10,132,255,.18);--green:#30d158;--orange:#ff9f0a;--red:#ff453a;--shadow:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{padding-top:env(safe-area-inset-top)}
+main{padding:8px 16px calc(96px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+h1{font-size:32px;font-weight:700;margin:12px 0 2px;letter-spacing:-.5px}
+.subtitle{color:var(--sub);margin:0 0 16px;font-size:15px}
+.card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.section-title{font-size:13px;text-transform:uppercase;color:var(--sub);margin:20px 4px 6px;letter-spacing:.3px;display:flex;justify-content:space-between;align-items:center}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:52px;border-bottom:.5px solid var(--line);width:100%;text-align:left}
+.row:last-child{border-bottom:0}
+.row .main{flex:1;min-width:0}
+.t{font-weight:600}
+.s{color:var(--sub);font-size:14px}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.check{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:.15s}
+.check.on{background:var(--green);border-color:var(--green)}
+.check.on::after{content:"";width:7px;height:12px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translate(0,-1px) rotate(45deg)}
+.check.off{opacity:.35}
+.badge{font-size:12px;font-weight:600;padding:3px 8px;border-radius:99px;flex:none}
+.badge.late{background:rgba(255,149,0,.15);color:var(--orange)}
+.badge.miss{background:rgba(255,59,48,.12);color:var(--red)}
+.time{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;color:var(--sub);width:46px;flex:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.btn{display:block;width:100%;padding:14px;border-radius:12px;background:var(--accent);color:#fff;font-weight:600;text-align:center}
+.btn.ghost{background:var(--accent-soft);color:var(--accent)}
+.btn.danger{background:rgba(255,59,48,.12);color:var(--red)}
+.btn+.btn{margin-top:10px}
+.progress{padding:16px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .3s}
+.big{font-size:28px;font-weight:700}
+.big small{font-size:16px;color:var(--sub);font-weight:500}
+.empty{text-align:center;color:var(--sub);padding:28px 16px}
+.linkbtn{color:var(--accent);font-weight:600;font-size:15px;text-transform:none;letter-spacing:0}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){nav{background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}}
+nav button{flex:1;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--sub)}
+nav button.on{color:var(--accent)}
+nav svg{width:26px;height:26px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 10px 6px}
+.cal-head .m{font-weight:700;font-size:18px}
+.navbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--accent);font-size:26px;line-height:1}
+.wk,.grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 6px}
+.wk div{text-align:center;font-size:12px;color:var(--sub);padding:4px 0}
+.grid{padding-bottom:8px}
+.day{display:flex;flex-direction:column;align-items:center;padding:4px 0 6px;gap:3px;font-variant-numeric:tabular-nums}
+.day.out{opacity:.3}
+.day .n{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font-size:16px}
+.day.today .n{color:var(--accent);font-weight:700}
+.day.sel .n{background:var(--accent);color:#fff;font-weight:700}
+.marks{display:flex;gap:3px;height:6px}
+.marks i{width:6px;height:6px;border-radius:50%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:2px 16px 14px;font-size:12px;color:var(--sub)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:50%}
+.chip{display:inline-block;font-size:13px;padding:3px 9px;border-radius:99px;background:var(--bg);margin:6px 4px 0 0;font-variant-numeric:tabular-nums}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.overlay.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg);border-radius:16px 16px 0 0;transform:translateY(105%);transition:transform .25s ease,visibility 0s .25s;visibility:hidden;z-index:11;padding:0 16px calc(20px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+.sheet.open{transform:none;visibility:visible;transition:transform .25s ease}
+.sheet-head{position:sticky;top:0;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:14px 0 6px;z-index:1}
+.sheet-head b{font-size:17px}
+label.f{display:block;padding:10px 14px;border-bottom:.5px solid var(--line)}
+label.f:last-child{border-bottom:0}
+label.f span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+input,textarea{font:inherit;font-size:16px;color:var(--text);background:transparent;border:0;outline:0;width:100%;padding:4px 0}
+input[type=time],input[type=date]{-webkit-appearance:none;appearance:none;min-height:32px;text-align:left}
+textarea{resize:none;min-height:64px}
+.swatches{display:flex;gap:10px;padding:12px 14px;flex-wrap:wrap}
+.sw{width:32px;height:32px;border-radius:50%;border:3px solid var(--card)}
+.sw.on{box-shadow:0 0 0 2px var(--text)}
+.days{display:flex;gap:6px;padding:12px 14px;flex-wrap:wrap}
+.days button{width:40px;height:40px;border-radius:50%;background:var(--bg);font-size:13px;font-weight:600}
+.days button.on{background:var(--accent);color:#fff}
+.timerow{display:flex;align-items:center;gap:10px;padding:6px 14px;border-bottom:.5px solid var(--line)}
+.timerow input{flex:1}
+.rm{color:var(--red);font-size:24px;width:32px;height:32px}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;opacity:0;transition:.25s;z-index:20;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.note{font-size:14px;color:var(--sub);padding:12px 14px;line-height:1.5}
+.note ol{margin:6px 0 0;padding-left:20px}
+.note b{color:var(--text)}
+.pad{padding:0 14px 14px}
+</style>
+</head>
+<body>
+<main id="main"></main>
+
+<nav id="nav">
+  <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></svg>Hôm nay</button>
+  <button data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Lịch</button>
+  <button data-tab="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="8.2" width="18.4" height="7.6" rx="3.8" transform="rotate(-45 12 12)"/><path d="m8.8 8.8 6.4 6.4"/></svg>Thuốc</button>
+  <button data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg>Khác</button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="sheet-head"><b id="sheetTitle"></b><button class="linkbtn" id="sheetClose">Đóng</button></div>
+  <div id="sheetBody"></div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const KEY = 'sotay-v1';
+const COLORS = ['#ff3b30','#ff9500','#ffcc00','#34c759','#00c7be','#007aff','#af52de','#ff2d55'];
+const WD_SHORT = ['CN','T2','T3','T4','T5','T6','T7'];
+const WD_LONG = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+const ICS_DAYS = ['SU','MO','TU','WE','TH','FR','SA'];
+
+/* ---------- dữ liệu ---------- */
+function load(){ try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){ return null; } }
+let db = load() || { meds: [], logs: {}, events: {} };
+db.meds = db.meds || []; db.logs = db.logs || {}; db.events = db.events || {};
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } }
+
+/* ---------- tiện ích ngày ---------- */
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const todayKey = () => keyOf(new Date());
+const fmtLong = k => { const d = parseKey(k); return `${WD_LONG[d.getDay()]}, ${d.getDate()} tháng ${d.getMonth()+1}`; };
+const fmtShort = k => { const d = parseKey(k); return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`; };
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowMin = () => { const n = new Date(); return n.getHours()*60 + n.getMinutes(); };
+const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60 + m; };
+
+function medOn(m, k){
+  if (k < m.start) return false;
+  if (m.end && k > m.end) return false;
+  if (m.days && m.days.length) return m.days.includes(parseKey(k).getDay());
+  return true;
+}
+function dosesOn(k){
+  const out = [];
+  for (const m of db.meds) {
+    if (!medOn(m, k)) continue;
+    for (const t of m.times) {
+      const id = m.id + '@' + t;
+      out.push({ med: m, time: t, id, taken: !!(db.logs[k] && db.logs[k][id]) });
+    }
+  }
+  return out.sort((a, b) => a.time.localeCompare(b.time));
+}
+function toggleDose(k, id){
+  const day = db.logs[k] || (db.logs[k] = {});
+  if (day[id]) delete day[id]; else day[id] = Date.now();
+  if (!Object.keys(day).length) delete db.logs[k];
+  save();
+}
+
+/* ---------- state ---------- */
+const state = { tab: 'today', month: null, sel: todayKey() };
+state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
+
+/* ---------- views ---------- */
+function doseRow(d, k){
+  const tk = todayKey();
+  const future = k > tk;
+  let badge = '';
+  if (!d.taken) {
+    if (k < tk) badge = '<span class="badge miss">Bỏ lỡ</span>';
+    else if (k === tk && nowMin() > toMin(d.time) + 15) badge = '<span class="badge late">Quá giờ</span>';
+  }
+  return `<button class="row" data-act="dose" data-k="${k}" data-id="${esc(d.id)}">
+    <span class="time">${d.time}</span>
+    <span class="dot" style="background:${d.med.color}"></span>
+    <span class="main"><div class="t">${esc(d.med.name)}</div>${d.med.dose ? `<div class="s">${esc(d.med.dose)}</div>` : ''}</span>
+    ${badge}<span class="check ${d.taken ? 'on' : ''} ${future ? 'off' : ''}"></span>
+  </button>`;
+}
+
+function eventsBlock(k){
+  const ev = (db.events[k] || []).slice().sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+  return `<div class="section-title"><span>Ghi chú & sự kiện</span><button class="linkbtn" data-act="addEvent" data-k="${k}">+ Thêm</button></div>
+  <div class="card">${ev.length ? ev.map(e => `<button class="row" data-act="editEvent" data-k="${k}" data-id="${e.id}">
+      <span class="time">${e.time || '—'}</span>
+      <span class="main"><div class="t">${esc(e.title)}</div>${e.note ? `<div class="s">${esc(e.note)}</div>` : ''}</span>
+    </button>`).join('') : '<div class="empty" style="padding:16px">Chưa có gì</div>'}</div>`;
+}
+
+function viewToday(){
+  const k = todayKey();
+  const ds = dosesOn(k);
+  const done = ds.filter(d => d.taken).length;
+  let h = `<h1>Hôm nay</h1><p class="subtitle">${fmtLong(k)}</p>`;
+  if (!db.meds.length) {
+    h += `<div class="card empty">Chưa có thuốc nào trong danh sách.<div style="height:14px"></div><button class="btn" data-act="addMed">+ Thêm thuốc</button></div>`;
+  } else if (!ds.length) {
+    h += `<div class="card empty">Hôm nay không có lịch uống thuốc 🎉</div>`;
+  } else {
+    const pct = Math.round(done / ds.length * 100);
+    h += `<div class="card progress"><div class="s">${done === ds.length ? 'Xong hết rồi 👏' : 'Đã uống'}</div>
+      <div class="big">${done}/${ds.length} <small>liều</small></div>
+      <div class="bar"><i style="width:${pct}%"></i></div></div>`;
+    h += `<div class="section-title"><span>Lịch uống</span></div><div class="card">${ds.map(d => doseRow(d, k)).join('')}</div>`;
+  }
+  return h + eventsBlock(k);
+}
+
+function dayMarks(k, tk){
+  const ds = dosesOn(k);
+  let m = '';
+  if (ds.length) {
+    const done = ds.filter(d => d.taken).length;
+    let c;
+    if (k > tk) c = 'var(--line)';
+    else if (done === ds.length) c = 'var(--green)';
+    else if (done > 0) c = 'var(--orange)';
+    else c = k < tk ? 'var(--red)' : 'var(--line)';
+    m += `<i style="background:${c}"></i>`;
+  }
+  if ((db.events[k] || []).length) m += `<i style="background:var(--accent)"></i>`;
+  return m;
+}
+
+function viewCal(){
+  const y = state.month.getFullYear(), mo = state.month.getMonth();
+  const offset = (new Date(y, mo, 1).getDay() + 6) % 7; // tuần bắt đầu từ T2
+  const dim = new Date(y, mo + 1, 0).getDate();
+  const cells = Math.ceil((offset + dim) / 7) * 7;
+  const tk = todayKey();
+  let grid = '';
+  for (let i = 0; i < cells; i++) {
+    const d = new Date(y, mo, 1 - offset + i);
+    const k = keyOf(d);
+    const cls = ['day', d.getMonth() !== mo ? 'out' : '', k === tk ? 'today' : '', k === state.sel ? 'sel' : ''].join(' ');
+    grid += `<button class="${cls}" data-act="pick" data-k="${k}"><span class="n">${d.getDate()}</span><span class="marks">${dayMarks(k, tk)}</span></button>`;
+  }
+  const sel = state.sel;
+  const ds = dosesOn(sel);
+  let h = `<h1>Lịch</h1><p class="subtitle">${db.meds.length ? 'Chạm vào một ngày để xem chi tiết' : 'Thêm thuốc để theo dõi trên lịch'}</p>
+  <div class="card">
+    <div class="cal-head">
+      <button class="navbtn" data-act="prev" aria-label="Tháng trước">‹</button>
+      <button class="m" data-act="goToday">Tháng ${mo + 1}, ${y}</button>
+      <button class="navbtn" data-act="next" aria-label="Tháng sau">›</button>
+    </div>
+    <div class="wk">${[1,2,3,4,5,6,0].map(d => `<div>${WD_SHORT[d]}</div>`).join('')}</div>
+    <div class="grid">${grid}</div>
+    <div class="legend"><span><i style="background:var(--green)"></i>Đủ</span><span><i style="background:var(--orange)"></i>Thiếu</span><span><i style="background:var(--red)"></i>Bỏ lỡ</span><span><i style="background:var(--accent)"></i>Sự kiện</span></div>
+  </div>
+  <div class="section-title"><span>${fmtLong(sel)}${sel === tk ? ' · Hôm nay' : ''}</span>${sel !== tk ? '<button class="linkbtn" data-act="goToday">Về hôm nay</button>' : ''}</div>
+  <div class="card">${ds.length ? ds.map(d => doseRow(d, sel)).join('') : '<div class="empty" style="padding:16px">Không có lịch uống thuốc</div>'}</div>`;
+  return h + eventsBlock(sel);
+}
+
+function daysText(m){
+  if (!m.days || !m.days.length) return 'Hằng ngày';
+  return [1,2,3,4,5,6,0].filter(d => m.days.includes(d)).map(d => WD_SHORT[d]).join(', ');
+}
+
+function viewMeds(){
+  let h = `<h1>Thuốc</h1><p class="subtitle">${db.meds.length ? db.meds.length + ' loại đang theo dõi' : 'Chưa có thuốc nào'}</p>`;
+  if (db.meds.length) {
+    h += `<div class="card">${db.meds.map(m => `<button class="row" style="align-items:flex-start" data-act="editMed" data-id="${m.id}">
+      <span class="dot" style="background:${m.color};margin-top:6px"></span>
+      <span class="main">
+        <div class="t">${esc(m.name)}${m.dose ? ` <span class="s" style="font-weight:400">· ${esc(m.dose)}</span>` : ''}</div>
+        <div class="s">${daysText(m)} · từ ${fmtShort(m.start)}${m.end ? ` đến ${fmtShort(m.end)}` : ''}</div>
+        <div>${m.times.map(t => `<span class="chip">${t}</span>`).join('')}</div>
+      </span><span style="color:var(--sub);font-size:20px">›</span></button>`).join('')}</div>`;
+  }
+  h += `<button class="btn" data-act="addMed">+ Thêm thuốc</button>
+  <div class="section-title"><span>Báo nhắc trên iPhone</span></div>
+  <div class="card">
+    <div class="note">Đưa lịch uống thuốc vào app <b>Lịch</b> của iPhone để được báo đúng giờ, kể cả khi không mở app và không có mạng.
+      <ol>
+        <li>Trong app Lịch, tạo một lịch mới tên <b>"Uống thuốc"</b>.</li>
+        <li>Bấm nút bên dưới, mở file vừa tải → <b>Thêm tất cả</b> → chọn lịch "Uống thuốc".</li>
+        <li>Mỗi lần sửa thuốc: xóa lịch "Uống thuốc" cũ, tạo lại rồi xuất lần nữa để không bị trùng.</li>
+      </ol>
+      Nếu bấm mà không thấy gì xảy ra khi đang mở từ màn hình chính, hãy mở trang này bằng Safari rồi bấm lại.
+    </div>
+    <div class="pad"><button class="btn ghost" data-act="ics">Xuất sang Lịch iPhone</button></div>
+  </div>`;
+  return h;
+}
+
+function viewMore(){
+  const days = Object.keys(db.logs).length;
+  return `<h1>Khác</h1><p class="subtitle">Dữ liệu chỉ lưu trên máy này</p>
+  <div class="section-title"><span>Sao lưu</span></div>
+  <div class="card">
+    <div class="note">Dữ liệu nằm trong trình duyệt của iPhone. Nên sao lưu định kỳ (lưu vào app Tệp hoặc iCloud Drive), nhất là trước khi xóa app khỏi màn hình chính.<br>Hiện có ${db.meds.length} thuốc, ${days} ngày có ghi nhận.</div>
+    <div class="pad"><button class="btn ghost" data-act="backup">Xuất file sao lưu</button><button class="btn ghost" data-act="restore">Khôi phục từ file</button></div>
+  </div>
+  <div class="section-title"><span>Nguy hiểm</span></div>
+  <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
+  <p class="subtitle" style="text-align:center;font-size:13px">Sổ Tay · bản 1.0</p>`;
+}
+
+function render(){
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
+  $('#main').innerHTML = ({ today: viewToday, cal: viewCal, meds: viewMeds, more: viewMore })[state.tab]();
+}
+
+/* ---------- sheet ---------- */
+function openSheet(title, body, mount){
+  $('#sheetTitle').textContent = title;
+  $('#sheetBody').innerHTML = body;
+  $('#sheet').scrollTop = 0;
+  $('#overlay').classList.add('open');
+  $('#sheet').classList.add('open');
+  if (mount) mount();
+}
+function closeSheet(){
+  $('#overlay').classList.remove('open');
+  $('#sheet').classList.remove('open');
+  if (document.activeElement) document.activeElement.blur();
+}
+const sheetOpen = () => $('#sheet').classList.contains('open');
+$('#sheetClose').onclick = closeSheet;
+$('#overlay').onclick = closeSheet;
+
+const timeRow = t => `<div class="timerow"><input type="time" value="${t}"><button type="button" class="rm" aria-label="Xóa giờ">−</button></div>`;
+
+function openMed(id){
+  const ex = db.meds.find(x => x.id === id);
+  const m = ex || { id: uid(), name: '', dose: '', color: COLORS[db.meds.length % COLORS.length], times: ['08:00'], days: [], start: todayKey(), end: '', note: '' };
+  const days = m.days && m.days.length ? m.days : [0,1,2,3,4,5,6];
+  const body = `
+  <div class="card">
+    <label class="f"><span>Tên thuốc</span><input id="fName" value="${esc(m.name)}" placeholder="VD: Vitamin D" autocomplete="off"></label>
+    <label class="f"><span>Liều lượng</span><input id="fDose" value="${esc(m.dose)}" placeholder="VD: 1 viên, sau ăn" autocomplete="off"></label>
+  </div>
+  <div class="section-title"><span>Giờ uống</span></div>
+  <div class="card"><div id="fTimes">${m.times.map(timeRow).join('')}</div><div style="padding:12px 14px"><button type="button" class="linkbtn" id="addTime">+ Thêm giờ</button></div></div>
+  <div class="section-title"><span>Ngày trong tuần</span></div>
+  <div class="card"><div class="days" id="fDays">${[1,2,3,4,5,6,0].map(d => `<button type="button" data-d="${d}" class="${days.includes(d) ? 'on' : ''}">${WD_SHORT[d]}</button>`).join('')}</div></div>
+  <div class="section-title"><span>Thời gian dùng</span></div>
+  <div class="card">
+    <label class="f"><span>Bắt đầu</span><input type="date" id="fStart" value="${m.start}"></label>
+    <label class="f"><span>Kết thúc (để trống nếu dùng lâu dài)</span><input type="date" id="fEnd" value="${m.end || ''}"></label>
+  </div>
+  <div class="section-title"><span>Màu</span></div>
+  <div class="card"><div class="swatches" id="fColor">${COLORS.map(c => `<button type="button" class="sw ${c === m.color ? 'on' : ''}" data-c="${c}" style="background:${c}" aria-label="Màu"></button>`).join('')}</div></div>
+  <div class="section-title"><span>Ghi chú</span></div>
+  <div class="card"><label class="f"><textarea id="fNote" placeholder="VD: uống với nhiều nước">${esc(m.note)}</textarea></label></div>
+  <button class="btn" id="saveMed">Lưu</button>
+  ${ex ? '<button class="btn danger" id="delMed">Xóa thuốc này</button>' : ''}`;
+
+  openSheet(ex ? 'Sửa thuốc' : 'Thêm thuốc', body, () => {
+    $('#fColor').onclick = e => { const b = e.target.closest('.sw'); if (b) $('#fColor').querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); };
+    $('#fDays').onclick = e => { const b = e.target.closest('button'); if (b) b.classList.toggle('on'); };
+    $('#addTime').onclick = () => $('#fTimes').insertAdjacentHTML('beforeend', timeRow('12:00'));
+    $('#fTimes').onclick = e => { const b = e.target.closest('.rm'); if (b) b.parentElement.remove(); };
+    $('#saveMed').onclick = () => {
+      const name = $('#fName').value.trim();
+      if (!name) return toast('Nhập tên thuốc');
+      const times = [...new Set([...document.querySelectorAll('#fTimes input')].map(i => i.value).filter(Boolean))].sort();
+      if (!times.length) return toast('Thêm ít nhất 1 giờ uống');
+      let dsel = [...document.querySelectorAll('#fDays button.on')].map(b => +b.dataset.d);
+      if (!dsel.length) return toast('Chọn ít nhất 1 ngày');
+      if (dsel.length === 7) dsel = [];
+      const start = $('#fStart').value || todayKey();
+      const end = $('#fEnd').value || '';
+      if (end && end < start) return toast('Ngày kết thúc phải sau ngày bắt đầu');
+      const color = ($('#fColor .sw.on') || {}).dataset?.c || COLORS[0];
+      const rec = { id: m.id, name, dose: $('#fDose').value.trim(), color, times, days: dsel, start, end, note: $('#fNote').value.trim() };
+      const i = db.meds.findIndex(x => x.id === m.id);
+      if (i >= 0) db.meds[i] = rec; else db.meds.push(rec);
+      save(); closeSheet(); render(); toast('Đã lưu');
+    };
+    if (ex) $('#delMed').onclick = () => {
+      if (!confirm(`Xóa "${ex.name}"?`)) return;
+      db.meds = db.meds.filter(x => x.id !== ex.id);
+      save(); closeSheet(); render(); toast('Đã xóa');
+    };
+  });
+}
+
+function openEvent(k, id){
+  const list = db.events[k] || [];
+  const ex = list.find(e => e.id === id);
+  const e = ex || { id: uid(), title: '', time: '', note: '' };
+  const body = `
+  <p class="subtitle" style="margin:0 4px 12px">${fmtLong(k)}</p>
+  <div class="card">
+    <label class="f"><span>Tiêu đề</span><input id="eTitle" value="${esc(e.title)}" placeholder="VD: Tái khám, sinh nhật mẹ…" autocomplete="off"></label>
+    <label class="f"><span>Giờ (không bắt buộc)</span><input type="time" id="eTime" value="${e.time || ''}"></label>
+    <label class="f"><span>Ghi chú</span><textarea id="eNote">${esc(e.note)}</textarea></label>
+  </div>
+  <button class="btn" id="saveEv">Lưu</button>
+  ${ex ? '<button class="btn danger" id="delEv">Xóa</button>' : ''}`;
+  openSheet(ex ? 'Sửa sự kiện' : 'Thêm sự kiện', body, () => {
+    $('#saveEv').onclick = () => {
+      const title = $('#eTitle').value.trim();
+      if (!title) return toast('Nhập tiêu đề');
+      const rec = { id: e.id, title, time: $('#eTime').value || '', note: $('#eNote').value.trim() };
+      const arr = (db.events[k] || []).filter(x => x.id !== e.id);
+      arr.push(rec); db.events[k] = arr;
+      save(); closeSheet(); render(); toast('Đã lưu');
+    };
+    if (ex) $('#delEv').onclick = () => {
+      const arr = (db.events[k] || []).filter(x => x.id !== e.id);
+      if (arr.length) db.events[k] = arr; else delete db.events[k];
+      save(); closeSheet(); render();
+    };
+  });
+}
+
+/* ---------- xuất lịch (.ics) ---------- */
+function icsEsc(s){ return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
+function fold(line){
+  const enc = new TextEncoder();
+  if (enc.encode(line).length <= 75) return line;
+  const parts = []; let cur = ''; let limit = 75;
+  for (const ch of line) {
+    if (enc.encode(cur + ch).length > limit) { parts.push(cur); cur = ch; limit = 74; }
+    else cur += ch;
+  }
+  parts.push(cur);
+  return parts.join('\r\n ');
+}
+function firstMatchingDay(m){
+  const d = parseKey(m.start);
+  if (!m.days || !m.days.length) return d;
+  for (let i = 0; i < 7; i++) { if (m.days.includes(d.getDay())) return d; d.setDate(d.getDate() + 1); }
+  return d;
+}
+function buildICS(){
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SoTay//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Uống thuốc'];
+  for (const m of db.meds) {
+    const first = firstMatchingDay(m);
+    const dstr = keyOf(first).replace(/-/g, '');
+    if (m.end && keyOf(first) > m.end) continue;
+    for (const t of m.times) {
+      const hm = t.replace(':', '');
+      let rr = 'RRULE:FREQ=' + (m.days && m.days.length ? 'WEEKLY;BYDAY=' + m.days.map(d => ICS_DAYS[d]).join(',') : 'DAILY');
+      if (m.end) rr += ';UNTIL=' + m.end.replace(/-/g, '') + 'T235959';
+      L.push('BEGIN:VEVENT', `UID:${m.id}-${hm}@sotay`, 'DTSTAMP:' + stamp, `DTSTART:${dstr}T${hm}00`, 'DURATION:PT10M', rr,
+        'SUMMARY:' + icsEsc('💊 ' + m.name + (m.dose ? ' – ' + m.dose : '')));
+      if (m.note) L.push('DESCRIPTION:' + icsEsc(m.note));
+      L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('Đến giờ uống ' + m.name), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
+    }
+  }
+  L.push('END:VCALENDAR');
+  return L.map(fold).join('\r\n') + '\r\n';
+}
+
+function downloadFile(name, text, type){
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 15000);
+}
+async function shareFile(name, text, type){
+  try {
+    const f = new File([text], name, { type });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return true; }
+  } catch (e) { if (e.name === 'AbortError') return true; }
+  return false;
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ---------- sự kiện ---------- */
+$('#nav').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.tab = b.dataset.tab;
+  if (state.tab === 'cal') { /* giữ ngày đang chọn */ }
+  window.scrollTo(0, 0); render();
+};
+
+$('#main').addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const { act, k, id } = b.dataset;
+  switch (act) {
+    case 'dose':
+      if (k > todayKey()) return toast('Chưa đến ngày này');
+      toggleDose(k, id); render(); break;
+    case 'addMed': openMed(); break;
+    case 'editMed': openMed(id); break;
+    case 'addEvent': openEvent(k); break;
+    case 'editEvent': openEvent(k, id); break;
+    case 'pick': {
+      state.sel = k;
+      const d = parseKey(k);
+      state.month = new Date(d.getFullYear(), d.getMonth(), 1);
+      render(); break;
+    }
+    case 'prev': state.month = new Date(state.month.getFullYear(), state.month.getMonth() - 1, 1); render(); break;
+    case 'next': state.month = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 1); render(); break;
+    case 'goToday': {
+      state.sel = todayKey();
+      const d = new Date(); state.month = new Date(d.getFullYear(), d.getMonth(), 1);
+      render(); break;
+    }
+    case 'ics':
+      if (!db.meds.length) return toast('Chưa có thuốc nào để xuất');
+      downloadFile('uong-thuoc.ics', buildICS(), 'text/calendar');
+      break;
+    case 'backup': {
+      const text = JSON.stringify({ app: 'sotay', version: 1, exportedAt: new Date().toISOString(), data: db }, null, 2);
+      const name = `sotay-backup-${todayKey()}.json`;
+      if (!(await shareFile(name, text, 'application/json'))) downloadFile(name, text, 'application/json');
+      break;
+    }
+    case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
+    case 'wipe':
+      if (!confirm('Xóa toàn bộ thuốc, lịch sử uống và sự kiện? Không thể hoàn tác.')) return;
+      db = { meds: [], logs: {}, events: {} }; save(); render(); toast('Đã xóa');
+      break;
+  }
+});
+
+$('#fileIn').onchange = async () => {
+  const f = $('#fileIn').files[0]; if (!f) return;
+  try {
+    const obj = JSON.parse(await f.text());
+    const data = obj.data || obj;
+    if (!Array.isArray(data.meds)) throw new Error('bad');
+    if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {} };
+    save(); render(); toast('Đã khôi phục');
+  } catch (e) { toast('File không hợp lệ'); }
+};
+
+/* cập nhật trạng thái "quá giờ" và đổi ngày */
+setInterval(() => { if (!sheetOpen() && state.tab !== 'more' && state.tab !== 'meds') render(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheetOpen()) render(); });
+
+render();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
