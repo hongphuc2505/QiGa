@@ -96,7 +96,7 @@ function cleanPerson(p) {
   if (p.place && p.place.at) o.place = isFinite(p.place.lat) && isFinite(p.place.lng) ? { lat: +(+p.place.lat).toFixed(5), lng: +(+p.place.lng).toFixed(5), at: +p.place.at } : { at: +p.place.at };
   return o;
 }
-const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar'];
+const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar', 'moods'];
 function mergeRoom(cur, inc) {
   inc = inc || {};
   const out = { meta: lww(cur.meta, inc.meta) };
@@ -116,6 +116,8 @@ function mergeRoom(cur, inc) {
   }
   const ids = Object.keys(people).sort((a, b) => (people[b].at || 0) - (people[a].at || 0));
   for (const id of ids.slice(6)) delete people[id]; // giữ tối đa 6 máy
+  const mk = Object.keys(out.moods || {});
+  if (mk.length > 150) { mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0)); for (const id of mk.slice(150)) delete out.moods[id]; } // lịch sử giữ 150 mục mới nhất
   out.people = people;
   return out;
 }
@@ -273,19 +275,26 @@ function distKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 const fmtKm = d => d < 1 ? `${Math.round(d * 1000 / 10) * 10} m` : `${d < 10 ? d.toFixed(1).replace('.', ',') : Math.round(d)} km`;
-function describePeople(cur, merged, dev, name) {
+function describePeople(cur, merged, dev, name, inc) {
   const recent = Date.now() - 10 * 60000, out = [];
   const before = (cur.people || {})[dev] || {}, now = (merged.people || {})[dev] || {};
   const who = name || now.name || 'Người ấy';
   if (now.mood && now.mood.at >= recent && (!before.mood || now.mood.at > before.mood.at))
-    out.push({ title: `${now.mood.emo || '💗'} ${who} ${now.mood.label || 'vừa gửi tâm trạng'}`, body: now.mood.note ? `“${now.mood.note}”` : (now.mood.tip || 'Mở Sổ Tay xem nha') });
+    out.push({ title: `${now.mood.emo || '💗'} ${who} ${now.mood.label || 'vừa gửi tâm trạng'}`, body: now.mood.note ? `“${now.mood.note}”` : (now.mood.tip || 'Mở Sổ Tay xem nha'), tab: 'today' });
   if (now.loc && !now.loc.hidden && now.loc.at >= recent && (!before.loc || now.loc.at > before.loc.at)) {
     const others = Object.entries(merged.people || {}).filter(([id, p]) => id !== dev && p.loc && !p.loc.hidden).map(([, p]) => p.loc);
     const d = others.length ? distKm(now.loc, others.sort((a, b) => b.at - a.at)[0]) : null;
-    out.push({ title: `📍 ${who} vừa gửi vị trí`, body: d != null ? `Đang cách nhau khoảng ${fmtKm(d)} · bấm để xem` : 'Bấm để xem trên bản đồ' });
+    out.push({ title: `📍 ${who} vừa gửi vị trí`, body: d != null ? `Đang cách nhau khoảng ${fmtKm(d)} · bấm để xem` : 'Bấm để xem trên bản đồ', tab: 'us', usp: 'loc' });
   }
   if (now.home && now.home.at >= recent && (!before.home || now.home.at > before.home.at))
-    out.push({ title: `🏠 ${who} về tới nhà rồi`, body: 'Yên tâm nha 💕' });
+    out.push({ title: `🏠 ${who} về tới nhà rồi`, body: 'Yên tâm nha 💕', tab: 'today' });
+  if (out.length) { // gửi kèm dữ liệu mới để app đang mở hiện ngay, không phải chờ máy chủ
+    const peer = { dev, name: now.name, at: now.at };
+    for (const f of ['mood', 'loc', 'home']) if (now[f]) peer[f] = now[f];
+    const hist = Object.values((inc && inc.moods) || {}).filter(x => x && !x.deleted && x.dev === dev && (+x.at || 0) >= recent)
+      .sort((a, b) => b.at - a.at).slice(0, 3).map(x => ({ id: cleanStr(x.id, 40), kind: cleanStr(x.kind, 8), dev, name: cleanStr(x.name, 40), v: cleanStr(x.v, 12), note: cleanStr(x.note, 120), at: +x.at, updated: +x.updated || +x.at }));
+    for (const m of out) { m.peer = peer; m.hist = hist; }
+  }
   return out;
 }
 const fmtEv = e => { if (!e || !e.date) return ''; const [y, m, d] = e.date.split('-'); return `${e.title} · ${+d}/${+m}${e.time ? ' ' + e.time : ''}`; };
@@ -426,7 +435,7 @@ export default {
         const dev = String(inc.device || ''), who = String(inc.name || '').slice(0, 40);
         const changes = describeChanges(cur, inc), usLines = describeUs(cur, inc), collLines = describeColls(cur, inc);
         const merged = mergeRoom(cur, inc);
-        const pplMsgs = describePeople(cur, merged, dev, who);
+        const pplMsgs = describePeople(cur, merged, dev, who, inc);
         if (JSON.stringify(merged) !== JSON.stringify(cur)) await env.SOTAY.put(rkey, JSON.stringify(merged));
         const jobs = [];
         if (changes.length) jobs.push(notifyRoom(env, r[1], dev, who, changes));

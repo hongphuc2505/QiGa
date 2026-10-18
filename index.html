@@ -215,6 +215,34 @@ textarea{resize:none;min-height:64px}
 .duo .s{font-size:13px;color:var(--sub)}
 .duo .mnote{font-size:15px;margin:2px 0 1px;color:var(--text)}
 :root[data-theme=paper] .duo .mnote{font-family:var(--hand);font-size:20px}
+.replyto{display:flex;gap:12px;align-items:center;background:var(--card);border:2px dashed #d9819f;border-radius:16px;padding:12px 14px;margin:0 0 12px}
+.replyto .e{font-size:30px;flex:none}
+.replyto .t{font-weight:700;font-size:15px}
+:root[data-theme=paper] .replyto .t{font-family:var(--hand);font-weight:400;font-size:21px}
+.replyto .q{font-size:16px;margin-top:2px}
+:root[data-theme=paper] .replyto .q{font-family:var(--hand);font-size:21px}
+.replyto .s{font-size:12px;color:var(--sub)}
+.week{padding:10px 12px}
+.wk-row{display:grid;grid-template-columns:64px repeat(7,minmax(0,1fr));align-items:center;gap:2px;padding:4px 0}
+.wk-row span{display:grid;place-items:center}
+.wk-row.hd span{font-size:11px;font-weight:700;color:var(--sub)}
+.wk-row .wn{justify-items:start;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root[data-theme=paper] .wk-row .wn{font-family:var(--hand);font-weight:400;font-size:18px}
+.wf svg{width:28px;height:28px;display:block}
+.wd{width:10px;height:10px;border-radius:50%;background:var(--line);display:block}
+.hist{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px}
+.hday{align-self:center;font-size:12px;font-weight:700;color:var(--sub);background:var(--card);border-radius:99px;padding:3px 12px;margin:10px 0 4px}
+.hb{display:flex;flex-direction:column;align-items:flex-start;max-width:82%}
+.hb.me{align-self:flex-end;align-items:flex-end}
+.bub{display:flex;gap:8px;align-items:center;background:var(--mb,var(--card));color:#3b2530;border-radius:18px 18px 18px 6px;padding:8px 12px 8px 8px;box-shadow:var(--shadow)}
+.hb.me .bub{border-radius:18px 18px 6px 18px}
+.bub.sys{background:var(--card);color:var(--text);padding:8px 12px}
+.bub .mf svg{width:30px;height:30px;display:block}
+.bub .bt{font-weight:700;font-size:14px}
+:root[data-theme=paper] .bub .bt{font-family:var(--hand);font-weight:400;font-size:19px}
+.bub .bn{font-size:15px;line-height:1.25}
+:root[data-theme=paper] .bub .bn{font-family:var(--hand);font-size:20px}
+.ht{font-size:11px;color:var(--sub);margin:2px 6px 0}
 .moodpick{display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:20px;padding:16px;margin:4px 0 12px;color:#3b2530;font-size:18px}
 .moodpick svg{width:64px;height:64px}
 :root[data-theme=paper] .moodpick b{font-family:var(--hand);font-weight:400;font-size:26px}
@@ -439,8 +467,8 @@ db.us.delSp = db.us.delSp || {};
 if (db.us.start && !db.us.startAt) db.us.startAt = 1;
 for (const x of db.us.specials) if (!x.updated) x.updated = 1;
 db.mine = db.mine || {}; db.peers = db.peers || {};
-db.dates = db.dates || []; db.bucket = db.bucket || []; db.jar = db.jar || [];
-db.del = Object.assign({ dates: {}, bucket: {}, jar: {} }, db.del || {});
+db.dates = db.dates || []; db.bucket = db.bucket || []; db.jar = db.jar || []; db.moods = db.moods || [];
+db.del = Object.assign({ dates: {}, bucket: {}, jar: {}, moods: {} }, db.del || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } if (typeof scheduleSync === 'function') scheduleSync(); }
 
 /* ---------- tiện ích ngày ---------- */
@@ -777,7 +805,7 @@ function roomBody(){
   const meta = db.us.startAt ? { start: { v: db.us.start || '', updated: db.us.startAt } } : {};
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
   const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
-  for (const c of ['dates', 'bucket', 'jar']) {
+  for (const c of ['dates', 'bucket', 'jar', 'moods']) {
     const m = {};
     for (const x of db[c]) m[x.id] = Object.assign({}, x, { updated: x.updated || 1 });
     for (const [id, ts] of Object.entries(db.del[c] || {})) if (!m[id]) m[id] = { id, deleted: true, updated: ts };
@@ -792,7 +820,7 @@ function applyRoom(merged){
     if (e.deleted) { deleted[e.id] = e.updated; continue; }
     (events[e.date] = events[e.date] || []).push({ id: e.id, title: e.title, time: e.time || '', note: e.note || '', by: e.by || '', updated: e.updated });
   }
-  const before = JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar]);
+  const before = JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods]);
   db.events = events; db.deletedEvents = deleted;
   if (merged.specials) { // máy chủ cũ không có mục này thì giữ nguyên
     const sp = [], del = {};
@@ -801,19 +829,29 @@ function applyRoom(merged){
   }
   const st = merged.meta && merged.meta.start;
   if (st && (+st.updated || 0) >= (db.us.startAt || 0)) { db.us.start = st.v || ''; db.us.startAt = st.updated; }
-  if (merged.people) { const me = ensureDevice(), pp = {}; for (const [id, x] of Object.entries(merged.people)) if (id !== me) pp[id] = x; db.peers = pp; }
-  for (const c of ['dates', 'bucket', 'jar']) if (merged[c]) {
+  if (merged.people) { // gộp theo từng mục, giữ cái mới hơn (dữ liệu nhận qua thông báo có thể mới hơn máy chủ)
+    const me = ensureDevice(), pp = {};
+    for (const [id, x] of Object.entries(merged.people)) {
+      if (id === me) continue;
+      const o = db.peers[id] || {}, n = Object.assign({}, x);
+      for (const f of ['mood', 'loc', 'home', 'place']) if (o[f] && (!x[f] || (o[f].at || 0) > (x[f].at || 0))) n[f] = o[f];
+      pp[id] = n;
+    }
+    db.peers = pp;
+  }
+  for (const c of ['dates', 'bucket', 'jar', 'moods']) if (merged[c]) {
     const arr = [], del = {};
     for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
-    db[c] = arr; db.del[c] = del;
+    if (c === 'moods') for (const x of db.moods) if (!merged.moods[x.id] && Date.now() - x.at < 5 * 60000) arr.push(x); // vừa nhận qua thông báo
+    db[c] = c === 'moods' ? arr.sort((a, b) => a.at - b.at).slice(-HIST_MAX) : arr; db.del[c] = del;
   }
-  if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar]) !== before) {
+  if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods]) !== before) {
     try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){}
     return true;
   }
   return false;
 }
-let roomBusy = false;
+let roomBusy = false, pendingRender = false;
 async function syncRoom(){
   if (!syncBase() || !sync.room) return false;
   for (let i = 0; roomBusy && i < 100; i++) await new Promise(r => setTimeout(r, 100)); // chờ lượt trước xong
@@ -824,7 +862,7 @@ async function syncRoom(){
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const merged = await r.json();
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
-    if (applyRoom(merged) && !sheetOpen()) render();
+    if (applyRoom(merged)) { if (!sheetOpen()) render(); else pendingRender = true; }
     else if (state.tab === 'more' && !sheetOpen()) render();
     return true;
   } catch (e) { sync.roomErr = String(e.message || e); saveSync(); return false; }
@@ -1004,6 +1042,7 @@ function openWeather(){
 
 /* ---------- state ---------- */
 const state = { tab: 'today', hseg: 'overview', month: null, cmonth: null, sel: todayKey() };
+{ const q = new URLSearchParams(location.search); if (['today', 'health', 'us', 'more'].includes(q.get('tab'))) { state.tab = q.get('tab'); state.usp = q.get('usp') || ''; history.replaceState(null, '', location.pathname); } }
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
 state.cmonth = new Date(state.month);
 
@@ -1076,8 +1115,22 @@ function partnerPron(){ // máy này là ai → gọi người kia là gì
   return '';
 }
 function peerMain(){
-  const list = Object.values(db.peers || {}).filter(p => p && (p.name || p.mood || p.loc || p.home));
-  return list.sort((a, b) => (b.at || 0) - (a.at || 0))[0] || null;
+  const me = norm(sync.me), groups = {};
+  for (const [id, p] of Object.entries(db.peers || {})) {
+    if (!p || !(p.name || p.mood || p.loc || p.home)) continue;
+    const k = norm(p.name) || id;
+    if (me && k === me) continue; // máy khác của chính mình (Safari, máy cũ…)
+    (groups[k] = groups[k] || []).push(p);
+  }
+  const act = p => Math.max(p.at || 0, p.mood ? p.mood.at || 0 : 0, p.loc ? p.loc.at || 0 : 0, p.home ? p.home.at || 0 : 0);
+  let best = null, bestAct = -1;
+  for (const list of Object.values(groups)) {
+    const c = { name: '', at: 0 };
+    for (const f of ['mood', 'loc', 'home', 'place']) for (const x of list) if (x[f] && (!c[f] || (x[f].at || 0) > (c[f].at || 0))) c[f] = x[f];
+    for (const x of list) if ((x.at || 0) >= c.at) { c.at = x.at || 0; c.name = x.name || c.name; }
+    const t = act(c); if (t > bestAct) { best = c; bestAct = t; }
+  }
+  return best;
 }
 const peerName = p => (p && p.name) || 'Người ấy';
 function ago(ms){
@@ -1105,7 +1158,7 @@ let locBusy = false;
 function duoCard(){
   const p = peerMain(), pn = peerName(p);
   const av = p && norm(p.name) === norm(db.love.nameFrom) ? 'h' : 'q';
-  let h = `<div class="section-title"><span>Hai đứa lúc này</span></div><div class="card duo">`;
+  let h = `<div class="section-title"><span>Hai đứa lúc này</span>${db.moods.length ? '<button class="linkbtn" data-act="goHist">Lịch sử ›</button>' : ''}</div><div class="card duo">`;
   if (!syncBase() || !sync.room) {
     h += `<button class="pairhint" data-act="goTab" data-t="more"><span>Ghép đôi hai máy ở tab Khác để gửi tâm trạng, vị trí cho nhau</span><span class="linkbtn">Ghép →</span></button>`;
   } else if (!p) {
@@ -1132,15 +1185,21 @@ function duoCard(){
   return h;
 }
 const sentTo = () => sync.room ? `Đã gửi cho ${peerName(peerMain())}` : 'Đã lưu · ghép đôi để gửi cho người ấy';
+function replyBox(){
+  const p = peerMain(), pm = p && p.mood && moodOf(p.mood.v);
+  if (!pm || Date.now() - p.mood.at > 36 * 3600e3) return '<div id="replyTo"></div>';
+  return `<div id="replyTo" class="replyto"><span class="e">${pm.emo}</span><div style="min-width:0"><div class="t">${esc(peerName(p))} ${esc(p.mood.label || pm.label(''))}</div>${p.mood.note ? `<div class="q">“${esc(p.mood.note)}”</div>` : ''}<div class="s">${ago(p.mood.at)} · đang trả lời</div></div></div>`;
+}
 function openMood(v){
   const m = moodOf(v); if (!m) return;
-  openSheet(`Mình đang thấy ${m.l}`, `<div class="moodpick" style="background:${m.bg}">${m.svg}<b>${m.l}</b></div>
+  openSheet(`Mình đang thấy ${m.l}`, replyBox() + `<div class="moodpick" style="background:${m.bg}">${m.svg}<b>${m.l}</b></div>
     <div class="card"><label class="f"><span>Nhắn thêm (không bắt buộc)</span><input id="moodNote" maxlength="100" placeholder="${esc(m.hint)}" autocomplete="off" enterkeyhint="send"></label></div>
     <button class="btn" id="moodSend">Gửi ${m.emo}</button>`, () => {
     const go = () => { const r = $('#moodSend').getBoundingClientRect(); closeSheet(); sendMood(v, $('#moodNote').value.trim(), r.left + r.width / 2, r.top); };
     $('#moodSend').onclick = go;
     $('#moodNote').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
     setTimeout(() => $('#moodNote').focus(), 300);
+    syncRoom().then(() => { const el = $('#replyTo'); if (el) el.outerHTML = replyBox(); }); // lấy tin mới nhất
   });
 }
 async function sendMood(v, note, x, y){
@@ -1148,6 +1207,7 @@ async function sendMood(v, note, x, y){
   const cur = db.mine.mood;
   if (!note && cur && cur.v === v && !cur.note && Date.now() - cur.at < 60000) return toast('Vừa gửi rồi nè');
   db.mine.mood = { v, emo: m.emo, label: m.label(partnerPron()), tip: m.tip, note: note || '', at: Date.now() };
+  logHistory('mood', { v, note: note || '' });
   save(); render(); heartsAt(x, y);
   if (!sync.room) return toast(sentTo());
   const ok = await syncRoom(); toast(ok ? sentTo() : 'Chưa gửi được, sẽ tự thử lại');
@@ -1160,6 +1220,7 @@ function sendLoc(){
   navigator.geolocation.getCurrentPosition(async pos => {
     locBusy = false;
     db.mine.loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0), at: Date.now() }; db.myLoc = db.mine.loc;
+    logHistory('loc');
     save(); render();
     if (!sync.room) return toast(sentTo());
     const ok = await syncRoom(); render();
@@ -1172,12 +1233,17 @@ function sendLoc(){
 }
 async function sendHome(x, y){
   if (db.mine.home && Date.now() - db.mine.home.at < 60000) return toast('Vừa báo rồi nè');
-  db.mine.home = { at: Date.now() }; save(); render(); heartsAt(x, y);
+  db.mine.home = { at: Date.now() }; logHistory('home'); save(); render(); heartsAt(x, y);
   if (!sync.room) return toast(sentTo());
   const ok = await syncRoom(); toast(ok ? sentTo() : 'Chưa gửi được, sẽ tự thử lại');
 }
 /* ---------- đợt 3: hẹn hò & kỷ niệm, hũ, định vị ---------- */
-const COLLS3 = ['dates', 'bucket', 'jar'];
+const COLLS3 = ['dates', 'bucket', 'jar', 'moods'];
+const HIST_MAX = 150;
+function logHistory(kind, extra){ // lưu vào lịch sử chung của hai đứa (không lưu tọa độ)
+  const rec = Object.assign({ id: uid(), kind, dev: ensureDevice(), name: sync.me || '', at: Date.now(), updated: Date.now() }, extra || {});
+  db.moods = db.moods.concat([rec]).sort((a, b) => a.at - b.at).slice(-HIST_MAX);
+}
 function upsert(c, rec){ rec.updated = Date.now(); db[c] = db[c].filter(x => x.id !== rec.id).concat([rec]); save(); }
 function removeItem(c, id){ db[c] = db[c].filter(x => x.id !== id); db.del[c][id] = Date.now(); save(); }
 const meKey = () => sync.me || 'Mình';
@@ -1460,7 +1526,38 @@ function mountMap(){
     slot.innerHTML = `<div class="mapempty">Không tải được bản đồ (mạng yếu?).<br>${pts.map(x => `<a href="${mapLink(x, x.name)}" target="_blank" rel="noopener">Xem vị trí ${esc(x.name)} ›</a>`).join('<br>')}</div>`;
   });
 }
-function afterRender(){ if (state.tab === 'us' && state.usp === 'loc') mountMap(); }
+function histItem(x, mine){
+  const m = x.kind === 'mood' && moodOf(x.v);
+  const body = x.kind === 'home' ? '🏠 Về tới nhà rồi' : x.kind === 'loc' ? '📍 Đã gửi vị trí' : m ? m.l : '';
+  return `<div class="hb ${mine ? 'me' : ''}"><div class="bub ${x.kind !== 'mood' ? 'sys' : ''}" ${m ? `style="--mb:${m.bg}"` : ''}>${m ? `<span class="mf">${m.svg}</span>` : ''}<div style="min-width:0"><div class="bt">${body}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div><div class="ht">${mine ? '' : esc(x.name || 'Người ấy') + ' · '}${hm(x.at)}</div></div>`;
+}
+function viewHistory(){
+  const me = ensureDevice(), myName = norm(sync.me);
+  const isMine = x => x.dev === me || (myName && norm(x.name) === myName);
+  const list = db.moods.slice().sort((a, b) => a.at - b.at);
+  let h = subBack() + `<h1>Lịch sử</h1><p class="subtitle" style="margin-top:-4px">tâm trạng, lời nhắn, về nhà, gửi vị trí</p>`;
+  // 7 ngày qua: mặt cuối cùng mỗi ngày của từng người
+  const tk = todayKey(), days = Array.from({ length: 7 }, (_, i) => addDays(tk, i - 6));
+  const lastOn = (k, mine) => { const xs = list.filter(x => x.kind === 'mood' && keyOf(new Date(x.at)) === k && isMine(x) === mine); return xs.length ? moodOf(xs[xs.length - 1].v) : null; };
+  const pn = peerName(peerMain());
+  h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
+    ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
+  if (!list.length) return h + `<div class="card"><div class="empty" style="padding:16px">Chưa có gì. Gửi cảm xúc ở tab Hôm nay là sẽ hiện ở đây</div></div>`;
+  const shown = state.histAll ? list : list.slice(-60);
+  if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
+  let lastDay = '';
+  h += `<div class="hist">`;
+  for (const x of shown) {
+    const k = keyOf(new Date(x.at));
+    if (k !== lastDay) { lastDay = k; const dd = diffDays(k, tk); h += `<div class="hday">${dd === 0 ? 'Hôm nay' : dd === 1 ? 'Hôm qua' : fmtLong(k)}</div>`; }
+    h += histItem(x, isMine(x));
+  }
+  h += `</div><div id="histEnd"></div>`;
+  return h;
+}
+function afterRender(){
+  if (state.tab === 'us' && state.usp === 'moods' && !state.histScrolled) { state.histScrolled = true; const e = $('#histEnd'); if (e) e.scrollIntoView({ block: 'end' }); }
+  if (state.usp !== 'moods') state.histScrolled = false; if (state.tab === 'us' && state.usp === 'loc') mountMap(); }
 function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
@@ -1604,6 +1701,7 @@ function viewUs(){
   if (state.usp === 'dates') return viewDates();
   if (state.usp === 'jar') return viewJar();
   if (state.usp === 'loc') return viewLoc();
+  if (state.usp === 'moods') return viewHistory();
   const tk = todayKey();
   const qa = esc((db.love.nameTo || 'Q')[0].toUpperCase()), ha = esc((db.love.nameFrom || 'H')[0].toUpperCase());
   const pair = `<span class="av q">${qa}</span><svg width="22" height="22" viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="av h">${ha}</span>`;
@@ -1632,7 +1730,7 @@ function viewUs(){
   const nd = upcomingDates()[0], wk = Date.now() - 7 * 864e5, newJ = db.jar.filter(x => (x.at || 0) > wk).length;
   const dateSub = nd ? `${WD_SHORT[parseKey(nd.date).getDay()]} ${fmtDM(nd.date)} · ${esc(nd.title)} · ${diffDays(tk, nd.date) ? 'còn ' + diffDays(tk, nd.date) + ' ngày' : 'hôm nay'}` : pastDates().length ? `${pastDates().length} kỷ niệm · lên kèo hẹn mới` : 'lên kế hoạch, lưu kỷ niệm';
   const jarSub = db.jar.length ? `${db.jar.length} mảnh${newJ ? ' · ' + newJ + ' mới tuần này' : ''}` : 'thích gì bỏ vào hũ';
-  const T = (s2, ic, bg, fg, t, sub) => `<button class="tile live" data-act="${s2 === 'mood' ? 'goTab' : 'usp'}" ${s2 === 'mood' ? 'data-t="today"' : `data-s="${s2}"`}><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${sub}</div></button>`;
+  const T = (s2, ic, bg, fg, t, sub) => `<button class="tile live" data-act="usp" data-s="${s2 === 'mood' ? 'moods' : s2}"><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${sub}</div></button>`;
   h += `<div class="tiles">
     ${T('dates', '<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', dateSub)}
     ${T('jar', '<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', jarSub)}
@@ -1848,7 +1946,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.2</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.3</p>`;
 }
 
 function viewCycle(){
@@ -1965,6 +2063,7 @@ function openSheet(title, body, mount){
   if (mount) mount();
 }
 function closeSheet(){
+  if (pendingRender) { pendingRender = false; setTimeout(render, 0); }
   $('#overlay').classList.remove('open');
   $('#sheet').classList.remove('open');
   if (document.activeElement) document.activeElement.blur();
@@ -2324,6 +2423,8 @@ $('#main').addEventListener('click', async e => {
     case 'wxSet': openWeather(); break;
     case 'goMeds': state.tab = 'health'; state.hseg = 'meds'; ($('#main').scrollTop = 0); render(); break;
     case 'goTab': state.tab = b.dataset.t; state.usp = ''; ($('#main').scrollTop = 0); render(); break;
+    case 'histAll': state.histAll = true; render(); break;
+    case 'goHist': state.tab = 'us'; state.usp = 'moods'; ($('#main').scrollTop = 0); render(); break;
     case 'usp': state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
     case 'dateNew': openDate(); break;
     case 'dateEdit': openDate(id); break;
@@ -2388,7 +2489,7 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs(), mine: {}, peers: {}, dates: [], bucket: [], jar: [], del: { dates: {}, bucket: {}, jar: {} } }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs(), mine: {}, peers: {}, dates: [], bucket: [], jar: [], moods: [], del: { dates: {}, bucket: {}, jar: {}, moods: {} } }; save(); render(); toast('Đã xóa');
       break;
   }
 });
@@ -2418,7 +2519,7 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}), mine: db.mine || {}, peers: db.peers || {}, dates: data.dates || [], bucket: data.bucket || [], jar: data.jar || [], del: Object.assign({ dates: {}, bucket: {}, jar: {} }, data.del || {}) };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}), mine: db.mine || {}, peers: db.peers || {}, dates: data.dates || [], bucket: data.bucket || [], jar: data.jar || [], moods: data.moods || [], del: Object.assign({ dates: {}, bucket: {}, jar: {}, moods: {} }, data.del || {}) };
     if (obj.sync && obj.sync.key) { sync = Object.assign({}, obj.sync, { sent: '', push: false, subJson: null }); saveSync(); }
     save(); applyUI(); render(); scheduleSync(300); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
@@ -2437,7 +2538,28 @@ if (sync.push && pushSupported()) navigator.serviceWorker.ready.then(r => r.push
   if (s && JSON.stringify(s.toJSON()) !== JSON.stringify(sync.subJson)) { sync.subJson = s.toJSON(); saveSync(); registerRoomPush(); scheduleSync(300); }
 }).catch(() => {});
 setInterval(() => { const c = document.getElementById('clock'); if (c) { const h = clockHTML(); if (c.innerHTML !== h) c.innerHTML = h; } }, 1000);
-setInterval(() => { if (!document.hidden) syncRoom(); }, 120000);
+setInterval(() => { if (!document.hidden && (state.tab === 'today' || state.tab === 'us')) syncRoom(); }, 10000); // đang mở Hôm nay / Hai đứa: hỏi máy chủ mỗi 10 giây
+setInterval(() => { if (!document.hidden && state.tab !== 'today' && state.tab !== 'us') syncRoom(); }, 30000);
+window.addEventListener('pageshow', () => scheduleSync(300));
+window.addEventListener('focus', () => scheduleSync(300));
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { // có thông báo mới → cập nhật liền
+  const d = ev.data || {};
+  if (d.type === 'open' && d.tab && !sheetOpen()) { state.tab = d.tab; state.usp = d.usp || ''; render(); }
+  if (d.type === 'push' && d.data) applyLive(d.data);
+  if (d.type === 'push' || d.type === 'open') { syncRoom(); setTimeout(syncRoom, 6000); setTimeout(syncRoom, 25000); } // máy chủ có thể trễ vài giây
+});
+function applyLive(m){ // dữ liệu đi kèm thông báo: hiện ngay
+  let changed = false;
+  if (m.peer && m.peer.dev && m.peer.dev !== ensureDevice()) {
+    const o = db.peers[m.peer.dev] || {}, n = Object.assign({}, o, { name: m.peer.name || o.name, at: Math.max(o.at || 0, m.peer.at || 0) });
+    for (const f of ['mood', 'loc', 'home']) if (m.peer[f] && (!o[f] || (m.peer[f].at || 0) > (o[f].at || 0))) { n[f] = m.peer[f]; changed = true; }
+    db.peers[m.peer.dev] = n;
+  }
+  for (const x of m.hist || []) if (x && x.id && !db.moods.some(y => y.id === x.id)) { db.moods = db.moods.concat([x]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); changed = true; }
+  if (!changed) return;
+  try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  if (!sheetOpen()) render(); else { pendingRender = true; const el = $('#replyTo'); if (el) el.outerHTML = replyBox(); }
+}
 </script>
 </body>
 </html>
