@@ -247,6 +247,52 @@ textarea{resize:none;min-height:64px}
 .fbig img{width:100%;height:100%;object-fit:cover;display:block}
 .rate{display:flex;gap:6px;margin-top:6px}
 .rate button{font-size:26px;line-height:1}
+.bub.touch{background:var(--accent-soft);padding:8px 14px;gap:8px}
+.bub .tbig{font-size:28px;animation:tbeat 1.2s ease-in-out 2}
+@keyframes tbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}}
+.lastmsg{display:flex;align-items:center;gap:8px;width:100%;text-align:left;margin-top:8px;background:var(--accent-soft);border-radius:12px;padding:8px 12px;color:var(--text)}
+.lastmsg .lm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+:root[data-theme=paper] .lastmsg .lm{font-family:var(--hand);font-weight:400;font-size:19px}
+.lastmsg small{color:var(--sub);font-size:12px;flex:none}
+.touchrow{display:grid;grid-template-columns:1fr 64px;gap:8px;margin-top:8px}
+.touchbtn{--hold:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:11px 8px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+:root[data-theme=paper] .touchbtn{font-family:var(--hand);font-weight:400;font-size:20px}
+.touchbtn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.28);transform:scaleX(var(--hold));transform-origin:left;transition:transform .1s linear}
+.touchbtn .th{font-size:20px;position:relative;transition:transform .1s;transform:scale(calc(1 + var(--hold) * .8))}
+.touchbtn .hl{position:relative}
+.touchbtn.holding .th{animation:tbeat .6s infinite}
+.spinbtn{border-radius:14px;background:var(--accent-soft);color:var(--accent);font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.spinbtn span{font-size:11px;font-weight:700;margin-top:2px}
+.bigfx{position:fixed;inset:0;z-index:80;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,224,234,.35);animation:fxfade 3.2s forwards}
+.bigfx .bigc{font-size:110px;animation:bigpop 1s ease-out}
+.bigfx .bigt{margin-top:10px;background:var(--card);color:var(--text);border-radius:99px;padding:8px 18px;font-weight:700;font-size:17px;box-shadow:0 6px 18px rgba(125,35,65,.2)}
+:root[data-theme=paper] .bigfx .bigt{font-family:var(--hand);font-weight:400;font-size:24px}
+.bigfx .bigh{position:absolute;bottom:-40px;animation:bigup 2.4s ease-in forwards}
+@keyframes bigpop{0%{transform:scale(.2)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes bigup{to{transform:translateY(-115vh) rotate(25deg);opacity:.2}}
+@keyframes fxfade{0%,80%{opacity:1}100%{opacity:0}}
+.letter{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);color:var(--text)}
+.letter:last-child{border-bottom:0}
+.letter .env{font-size:28px;flex:none}
+.letter.ready .env{animation:tbeat 1.2s infinite}
+.letter .main{flex:1;min-width:0}
+.letter .t{font-weight:700;font-size:15px}
+:root[data-theme=paper] .letter .t{font-family:var(--hand);font-weight:400;font-size:21px}
+.letter .s{font-size:12px;color:var(--sub)}
+.envbig{font-size:64px;text-align:center;margin:12px 0}
+.paperletter{background:#fffaf3;color:#3b2530;border-radius:6px;padding:22px 20px 16px;box-shadow:0 6px 16px rgba(125,35,65,.14);background-image:repeating-linear-gradient(transparent 0 31px,#f1d9e1 31px 32px);margin-bottom:14px}
+.paperletter .lbody{font-size:17px;line-height:32px;white-space:normal}
+:root[data-theme=paper] .paperletter .lbody{font-family:var(--hand);font-size:22px}
+.paperletter .lsig{text-align:right;margin-top:10px;font-weight:700;color:#b5385f}
+:root[data-theme=paper] .paperletter .lsig{font-family:var(--hand);font-weight:400;font-size:22px}
+.paperletter .ldate{font-size:11px;color:#9a7a86;text-align:right}
+textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--text);resize:vertical;outline:none}
+.spinbox{display:grid;place-items:center;height:150px;margin:6px 0}
+.spinw{font-size:30px;font-weight:800;text-align:center;color:var(--accent);padding:10px 18px;border-radius:18px;background:var(--accent-soft);min-width:70%}
+:root[data-theme=paper] .spinw{font-family:var(--hand);font-weight:400;font-size:40px}
+.spinw.pop{animation:spinpop .12s}
+.spinw.done{background:var(--accent);color:#fff;animation:bigpop .6s}
+@keyframes spinpop{from{transform:translateY(-8px);opacity:.4}to{transform:none;opacity:1}}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--accent);color:#fff}
@@ -516,8 +562,8 @@ db.us.delSp = db.us.delSp || {};
 if (db.us.start && !db.us.startAt) db.us.startAt = 1;
 for (const x of db.us.specials) if (!x.updated) x.updated = 1;
 db.mine = db.mine || {}; db.peers = db.peers || {};
-db.dates = db.dates || []; db.bucket = db.bucket || []; db.jar = db.jar || []; db.moods = db.moods || []; db.foods = db.foods || [];
-db.del = Object.assign({ dates: {}, bucket: {}, jar: {}, moods: {}, foods: {} }, db.del || {});
+db.dates = db.dates || []; db.bucket = db.bucket || []; db.jar = db.jar || []; db.moods = db.moods || []; db.foods = db.foods || []; db.letters = db.letters || [];
+db.del = Object.assign({ dates: {}, bucket: {}, jar: {}, moods: {}, foods: {}, letters: {} }, db.del || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } if (typeof scheduleSync === 'function') scheduleSync(); }
 
 /* ---------- tiện ích ngày ---------- */
@@ -854,7 +900,7 @@ function roomBody(){
   const meta = db.us.startAt ? { start: { v: db.us.start || '', updated: db.us.startAt } } : {};
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
   const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
-  for (const c of ['dates', 'bucket', 'jar', 'moods', 'foods']) {
+  for (const c of ['dates', 'bucket', 'jar', 'moods', 'foods', 'letters']) {
     const m = {};
     for (const x of db[c]) m[x.id] = Object.assign({}, x, { updated: x.updated || 1 });
     for (const [id, ts] of Object.entries(db.del[c] || {})) if (!m[id]) m[id] = { id, deleted: true, updated: ts };
@@ -869,7 +915,7 @@ function applyRoom(merged){
     if (e.deleted) { deleted[e.id] = e.updated; continue; }
     (events[e.date] = events[e.date] || []).push({ id: e.id, title: e.title, time: e.time || '', note: e.note || '', by: e.by || '', updated: e.updated });
   }
-  const before = JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods, db.foods]);
+  const before = JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods, db.foods, db.letters]);
   db.events = events; db.deletedEvents = deleted;
   if (merged.specials) { // máy chủ cũ không có mục này thì giữ nguyên
     const sp = [], del = {};
@@ -888,13 +934,14 @@ function applyRoom(merged){
     }
     db.peers = pp;
   }
-  for (const c of ['dates', 'bucket', 'jar', 'moods', 'foods']) if (merged[c]) {
+  for (const c of ['dates', 'bucket', 'jar', 'moods', 'foods', 'letters']) if (merged[c]) {
     const arr = [], del = {};
     for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
     if (c === 'moods') for (const x of db.moods) if (!merged.moods[x.id] && Date.now() - x.at < 5 * 60000) arr.push(x); // vừa nhận qua thông báo
+    if (c === 'moods') setTimeout(() => playIncomingTouch(db.moods), 0);
     db[c] = c === 'moods' ? arr.sort((a, b) => a.at - b.at).slice(-HIST_MAX) : arr; db.del[c] = del;
   }
-  if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods, db.foods]) !== before) {
+  if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods, db.foods, db.letters]) !== before) {
     try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){}
     return true;
   }
@@ -911,7 +958,7 @@ async function syncRoom(){
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const merged = await r.json();
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
-    if (applyRoom(merged)) { if (!sheetOpen()) render(); else pendingRender = true; }
+    if (applyRoom(merged)) softRender();
     else if (state.tab === 'more' && !sheetOpen()) render();
     setTimeout(syncPhotos, 1500);
     return true;
@@ -925,7 +972,7 @@ async function notifyTaken(k, ids){
   if (k !== todayKey()) return;
   const ds = dosesOn(k).filter(d => ids.includes(d.id));
   if (!ds.length) return;
-  act('💊', `đã uống thuốc: ${ds.map(d => `${d.med.name} (${d.time})`).join(', ')}`); save();
+  logAct('💊', `đã uống thuốc: ${ds.map(d => `${d.med.name} (${d.time})`).join(', ')}`); save();
   if (!syncBase() || !sync.room) return;
   const n = new Date(), at = `${pad(n.getHours())}:${pad(n.getMinutes())}`;
   try { await fetch(`${syncBase()}/notify/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -1094,7 +1141,7 @@ function openWeather(){
 
 /* ---------- state ---------- */
 const state = { grp: {}, tab: 'today', hseg: 'overview', month: null, cmonth: null, sel: todayKey() };
-{ const q = new URLSearchParams(location.search); if (['today', 'health', 'us', 'more'].includes(q.get('tab'))) { state.tab = q.get('tab'); state.usp = q.get('usp') || ''; history.replaceState(null, '', location.pathname); } }
+{ const q = new URLSearchParams(location.search); if (['today', 'health', 'us', 'more'].includes(q.get('tab'))) { state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; history.replaceState(null, '', location.pathname); } }
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
 state.cmonth = new Date(state.month);
 
@@ -1228,12 +1275,15 @@ function duoCard(){
       h += `<div class="pl">📍 ${d != null ? 'Cách nhau ' + fmtKm(d) : esc(pn) + ' gửi vị trí'} · ${ago(p.loc.at)} <a href="${mapLink(p.loc, pn)}" target="_blank" rel="noopener">Bản đồ ›</a></div>`;
     }
     if (p.home && isToday(p.home.at)) h += `<div class="pl">🏠 Về tới nhà lúc ${hm(p.home.at)}</div>`;
+    const lastMsg = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch') && !isMineH(x)).sort((a, b) => b.at - a.at)[0];
+    if (lastMsg && Date.now() - lastMsg.at < 48 * 3600e3) h += `<button class="lastmsg" data-act="goHist"><span>💬</span><span class="lm">${esc(lastMsg.kind === 'touch' ? lastMsg.text : lastMsg.note)}</span><small>${ago(lastMsg.at)} ›</small></button>`;
     if (locState(p).k === 'shown' || myLoc()) h += `<div class="minimap"><div id="mapSlot" class="mapslot mini" data-kind="mini"></div><button class="mapcover" data-act="goLoc" aria-label="Mở bản đồ"></button></div>`;
   }
   const mm = db.mine.mood && isToday(db.mine.mood.at) ? db.mine.mood.v : '';
   h += `<div class="mlab">Mình đang thấy${mm ? ' · gửi lúc ' + hm(db.mine.mood.at) : ''}</div>
     <div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" class="${mm === m.v ? 'on' : ''}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="locbtns"><button data-act="sendLoc" ${locBusy ? 'disabled' : ''}>📍 ${locBusy ? 'Đang lấy…' : 'Gửi vị trí'}</button><button data-act="sendHome">🏠 Về tới nhà rồi</button></div>
+    <div class="touchrow">${touchBtn()}<button class="spinbtn" data-act="spin">🎲<span>Ăn gì?</span></button></div>
   </div>`;
   return h;
 }
@@ -1272,7 +1322,7 @@ function sendLoc(){
   locBusy = true; render();
   navigator.geolocation.getCurrentPosition(async pos => {
     locBusy = false;
-    db.mine.loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0), at: Date.now() }; db.myLoc = db.mine.loc;
+    db.mine.loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0), at: Date.now() }; db.myLoc = db.mine.loc; autoLocAt = Date.now();
     logHistory('loc');
     save(); render();
     if (!sync.room) return toast(sentTo());
@@ -1293,7 +1343,7 @@ async function sendHome(x, y){
 /* ---------- đợt 3: hẹn hò & kỷ niệm, hũ, định vị ---------- */
 const COLLS3 = ['dates', 'bucket', 'jar', 'moods'];
 const HIST_MAX = 300;
-const act = (icon, text, photo) => logHistory('act', Object.assign({ icon, text: String(text).slice(0, 140) }, photo ? { photo } : {}));
+const logAct = (icon, text, photo) => logHistory('act', Object.assign({ icon, text: String(text).slice(0, 140) }, photo ? { photo } : {}));
 function logHistory(kind, extra){ // lưu vào lịch sử chung của hai đứa (không lưu tọa độ)
   const rec = Object.assign({ id: uid(), kind, dev: ensureDevice(), name: sync.me || '', at: Date.now(), updated: Date.now() }, extra || {});
   db.moods = db.moods.concat([rec]).sort((a, b) => a.at - b.at).slice(-HIST_MAX);
@@ -1363,11 +1413,11 @@ function openDate(id, preset){
     $('#dtSave').onclick = () => {
       const title = $('#dtTitle').value.trim(), date = $('#dtDate').value;
       if (!title) return toast('Nhập đi đâu, làm gì nha'); if (!date) return toast('Chọn ngày');
-      act('💌', ex ? `sửa buổi hẹn: ${title} · ${fmtDM(date)}` : `hẹn: ${title} · ${fmtDM(date)}${$('#dtTime').value ? ' ' + $('#dtTime').value : ''}`);
+      logAct('💌', ex ? `sửa buổi hẹn: ${title} · ${fmtDM(date)}` : `hẹn: ${title} · ${fmtDM(date)}${$('#dtTime').value ? ' ' + $('#dtTime').value : ''}`);
       upsert('dates', Object.assign({}, d, { title, date, time: $('#dtTime').value || '', place: $('#dtPlace').value.trim(), note: $('#dtNote').value.trim() }));
       closeSheet(); render(); toast(sync.room ? 'Đã lưu, máy kia sẽ nhận thông báo' : 'Đã lưu');
     };
-    if (ex) $('#dtDel').onclick = () => { if (!confirm(`Xóa "${ex.title}"?`)) return; if (ex.photo && sync.room) fetch(photoUrl(ex.photo), { method: 'DELETE' }).catch(() => {}); act('💌', `hủy buổi hẹn: ${ex.title}`); removeItem('dates', ex.id); closeSheet(); render(); };
+    if (ex) $('#dtDel').onclick = () => { if (!confirm(`Xóa "${ex.title}"?`)) return; if (ex.photo && sync.room) fetch(photoUrl(ex.photo), { method: 'DELETE' }).catch(() => {}); logAct('💌', `hủy buổi hẹn: ${ex.title}`); removeItem('dates', ex.id); closeSheet(); render(); };
   });
 }
 function openMemo(id){
@@ -1380,7 +1430,7 @@ function openMemo(id){
     ${others.map(([k, v]) => `<div class="frow"><span class="lbl">${esc(k)} viết<div class="s">${esc(v)}</div></span></div>`).join('')}</div>
     <button class="btn" id="memSave">Lưu</button>${d.photo ? '<button class="btn ghost" id="memDl">⬇️ Lưu ảnh vào Thư viện ảnh</button>' : ''}<button class="btn ghost" id="memEdit">Sửa tên, ngày</button>`, () => {
     if ($('#memDl')) $('#memDl').onclick = () => savePhotos([{ id: d.photo, name: d.title }]);
-    $('#memSave').onclick = () => { const nt = $('#memNote').value.trim(), notes = Object.assign({}, d.notes || {}, { [meKey()]: nt }); if (nt && nt !== mine) act('📝', `viết về "${d.title}": ${nt}`); upsert('dates', Object.assign({}, d, { notes })); closeSheet(); render(); toast('Đã lưu kỷ niệm'); };
+    $('#memSave').onclick = () => { const nt = $('#memNote').value.trim(), notes = Object.assign({}, d.notes || {}, { [meKey()]: nt }); if (nt && nt !== mine) logAct('📝', `viết về "${d.title}": ${nt}`); upsert('dates', Object.assign({}, d, { notes })); closeSheet(); render(); toast('Đã lưu kỷ niệm'); };
     $('#memEdit').onclick = () => { closeSheet(); setTimeout(() => openDate(d.id), 250); };
     $('#memPhBtn').onclick = () => {
       if (!syncBase() || !sync.room) return toast('Ghép đôi ở tab Khác để lưu ảnh nha');
@@ -1393,7 +1443,7 @@ function openMemo(id){
           if (!r.ok) throw new Error('HTTP ' + r.status);
           const cur = db.dates.find(x => x.id === d.id) || d;
           if (cur.photo) fetch(photoUrl(cur.photo), { method: 'DELETE' }).catch(() => {});
-          act('📸', `thêm ảnh kỷ niệm: ${cur.title}`, pid);
+          logAct('📸', `thêm ảnh kỷ niệm: ${cur.title}`, pid);
           upsert('dates', Object.assign({}, cur, { photo: pid }));
           d.photo = pid; $('#memPh').innerHTML = `<img src="${photoUrl(pid)}" alt="">`; $('#memPhBtn').textContent = 'Đổi ảnh'; render(); toast('Đã thêm ảnh 📸');
         } catch (e) { toast('Tải ảnh lỗi, thử lại nha'); $('#memPhBtn').textContent = d.photo ? 'Đổi ảnh' : '📸 Thêm ảnh'; }
@@ -1480,7 +1530,7 @@ function openJarSlip(id, drawn){
     else $('#jsDel').onclick = () => { if (!confirm('Xóa mảnh giấy này?')) return; removeItem('jar', x.id); closeSheet(); render(); };
   });
 }
-function toggleJar(id){ const x = db.jar.find(j => j.id === id); if (!x) return; if (!x.done) act('🎁', `${jcat(x.cat)[2]}: ${x.text}`); upsert('jar', Object.assign({}, x, x.done ? { done: false, doneAt: 0 } : { done: true, doneAt: Date.now(), doneBy: sync.me || '' })); }
+function toggleJar(id){ const x = db.jar.find(j => j.id === id); if (!x) return; if (!x.done) logAct('🎁', `${jcat(x.cat)[2]}: ${x.text}`); upsert('jar', Object.assign({}, x, x.done ? { done: false, doneAt: 0 } : { done: true, doneAt: Date.now(), doneBy: sync.me || '' })); }
 function drawJar(prev){
   const open = db.jar.filter(x => !x.done && x.id !== prev), pool = open.length ? open : db.jar.filter(x => !x.done);
   if (!pool.length) return toast('Hũ chưa có điều nào chưa làm');
@@ -1572,7 +1622,8 @@ function viewLoc(){
   h += `<div class="locbtns"><button data-act="sendLoc" ${locBusy || !share ? 'disabled' : ''}>📍 ${locBusy ? 'Đang lấy…' : 'Gửi vị trí'}</button><button data-act="sendHome">🏠 Về tới nhà rồi</button></div>
     <button class="btn ghost" data-act="askLoc" style="margin-top:8px">🙋 Hỏi ${esc(pn)} đang ở đâu</button>`;
   h += `<div class="section-title"><span>Riêng tư</span></div><div class="card">
-    <label class="frow"><span class="lbl">Chia sẻ vị trí với ${esc(pn)}<div class="s">Tắt lúc nào cũng được. Vị trí chỉ gửi khi mình bấm nút.</div></span><input type="checkbox" class="switch" id="shareSw" ${share ? 'checked' : ''}></label>
+    <label class="frow"><span class="lbl">Chia sẻ vị trí với ${esc(pn)}<div class="s">Tắt lúc nào cũng được</div></span><input type="checkbox" class="switch" id="shareSw" ${share ? 'checked' : ''}></label>
+    ${share ? `<label class="frow"><span class="lbl">Tự cập nhật khi mở app<div class="s">Mở app là bản đồ có vị trí mới, ${esc(pn)} không nhận thông báo. Tắt thì chỉ gửi khi bấm nút.</div></span><input type="checkbox" class="switch" id="autoLocSw" ${db.mine.autoLoc !== false ? 'checked' : ''}></label>` : ''}
     ${share ? `<div class="frow"><span class="lbl">${hid ? `Đang tạm ẩn tới ${hm(db.mine.loc.until)}` : 'Tạm ẩn vị trí'}<div class="s">${hid ? 'Hết giờ là tự hết ẩn, nhưng cần bấm Gửi vị trí lại' : 'Người kia sẽ không thấy vị trí cũ nữa'}</div></span>
       ${hid ? '<button class="linkbtn" data-act="locUnhide">Hiện lại</button>' : '<button class="linkbtn" data-act="locHide">Ẩn 1 tiếng</button>'}</div>` : ''}
     <div class="frow"><span class="lbl">Nhà của ${esc(me)}<div class="s">${db.mine.place && db.mine.place.lat != null ? 'Đã lưu · khi gửi vị trí ở gần đây sẽ hiện "đang ở nhà"' : 'Đứng ở nhà rồi bấm Lưu'}</div></span>
@@ -1589,7 +1640,7 @@ async function askLoc(){
   db.askedAt = Date.now(); save();
   const pron = partnerPron();
   try { await fetch(`${syncBase()}/notify/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title: (act('🙋', `hỏi ${pron ? pron + ' ' : ''}đang ở đâu`), save(), `🙋 ${sync.me || 'Người ấy'} hỏi: ${pron ? pron + ' ' : ''}đang ở đâu đó?`), body: 'Mở Sổ Tay bấm Gửi vị trí nha' }) }); toast('Đã hỏi ' + peerName(peerMain())); }
+    body: JSON.stringify({ title: (logAct('🙋', `hỏi ${pron ? pron + ' ' : ''}đang ở đâu`), save(), `🙋 ${sync.me || 'Người ấy'} hỏi: ${pron ? pron + ' ' : ''}đang ở đâu đó?`), body: 'Mở Sổ Tay bấm Gửi vị trí nha' }) }); toast('Đã hỏi ' + peerName(peerMain())); }
   catch (e) { toast('Chưa gửi được, thử lại nha'); }
 }
 function setPlace(){
@@ -1641,6 +1692,7 @@ function histItem(x, mine){
   const m = x.kind === 'mood' && moodOf(x.v);
   const who = mine ? '' : esc(x.name || 'Người ấy') + ' · ';
   if (x.kind === 'msg') return `<div class="hb ${mine ? 'me' : ''}"><div class="bub msg"><div class="bn">${esc(x.note)}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
+  if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
   if (x.kind === 'act' || x.kind === 'home' || x.kind === 'loc') {
     const t = x.kind === 'home' ? '🏠 về tới nhà rồi' : x.kind === 'loc' ? '📍 đã gửi vị trí' : `${x.icon || '•'} ${esc(x.text)}`;
     return `<div class="hact ${mine ? 'me' : ''}">${x.photo && sync.room ? `<img class="hph" src="${photoUrl(x.photo)}" alt="" loading="lazy">` : ''}<span>${esc(mine ? (sync.me || 'Mình') : (x.name || 'Người ấy'))} ${t}</span><small>${hm(x.at)}</small></div>`;
@@ -1648,6 +1700,8 @@ function histItem(x, mine){
   if (!m) return '';
   return `<div class="hb ${mine ? 'me' : ''}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
 }
+function openChat(){ state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
+function chatToEnd(){ const m = $('#main'); if (m) m.scrollTop = m.scrollHeight; }
 const isMineH = x => x.dev === ensureDevice() || (sync.me && norm(x.name) === norm(sync.me));
 function unreadChat(){ const seen = db.chatSeen || 0; return db.moods.filter(x => x.at > seen && !isMineH(x)).length; }
 function quickPhrases(){
@@ -1666,7 +1720,7 @@ function openJarQuick(){
     <button class="btn" id="jqSave">Bỏ vào hũ</button>`, () => {
     $('#jqCat').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; $('#jqCat').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
     $('#jqSave').onclick = () => { const t = $('#jqIn').value.trim(); if (!t) return toast('Ghi điều em thích vào nha');
-      act('🫙', `bỏ vào hũ: ${t}`); upsert('jar', { id: uid(), text: t, cat, by: sync.me || '', at: Date.now(), done: false }); closeSheet(); render(); toast('Đã bỏ vào hũ 🫙'); };
+      logAct('🫙', `bỏ vào hũ: ${t}`); upsert('jar', { id: uid(), text: t, cat, by: sync.me || '', at: Date.now(), done: false }); closeSheet(); render(); toast('Đã bỏ vào hũ 🫙'); };
     setTimeout(() => $('#jqIn').focus(), 300);
   });
 }
@@ -1689,7 +1743,7 @@ function viewHistory(){
   const pn = peerName(peerMain());
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const pr = partnerPron(), QA = [['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ']];
+  const pr = partnerPron(), QA = [['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ']];
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
@@ -1711,7 +1765,11 @@ function viewHistory(){
 function afterRender(){
   if (state.tab === 'more' && $('#phStat')) photoStats().then(st => { const e = $('#phStat'); if (e) e.textContent = !st ? 'Cần ghép đôi để lưu ảnh' : st.total ? `Đã có ${st.have}/${st.total} ảnh${st.have < st.total ? ' · đang tải tiếp' : ' ✓'}` : 'Chưa có ảnh nào'; if (st && st.have < st.total) syncPhotos(); });
   if (state.tab === 'today') mountMap();
-  if (state.tab === 'us' && state.usp === 'moods') { const mn = $('#main'), e = $('#histEnd'); if (e && (!state.histScrolled || state.histAtEnd)) e.scrollIntoView({ block: 'end' }); state.histScrolled = true; }
+  if (state.tab === 'us' && state.usp === 'moods') {
+    if (!state.histScrolled || state.histAtEnd) { chatToEnd(); requestAnimationFrame(chatToEnd); setTimeout(chatToEnd, 120);
+      document.querySelectorAll('.hist img').forEach(i => { if (!i.complete) i.addEventListener('load', () => { if (state.histAtEnd) chatToEnd(); }, { once: true }); }); }
+    state.histScrolled = true;
+  }
   if (state.usp !== 'moods') state.histScrolled = false; if (state.tab === 'us' && state.usp === 'loc') mountMap(); }
 function viewToday(){
   const k = todayKey();
@@ -1879,6 +1937,7 @@ function viewUs(){
   if (state.usp === 'loc') return viewLoc();
   if (state.usp === 'moods') return viewHistory();
   if (state.usp === 'foods') return viewFoods();
+  if (state.usp === 'letters') return viewLetters();
   const tk = todayKey();
   const qa = esc((db.love.nameTo || 'Q')[0].toUpperCase()), ha = esc((db.love.nameFrom || 'H')[0].toUpperCase());
   const pair = `<span class="av q">${qa}</span><svg width="22" height="22" viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="av h">${ha}</span>`;
@@ -1913,6 +1972,7 @@ function viewUs(){
     ${T('dates', '<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', dateSub)}
     ${T('jar', '<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', jarSub)}
     ${T('foods', '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/>', '#ffe6dc', '#b0461f', 'Món ngon', db.foods.length ? `${db.foods.length} món · ${esc(db.foods.slice().sort((a, b) => b.at - a.at)[0].name)}` : 'chụp món ăn cùng nhau')}
+    ${T('letters', '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>', '#efe7fb', '#6b4fb3', 'Thư hẹn giờ', (() => { const r = db.letters.filter(l => !letterMine(l)), ready = r.filter(l => Date.now() >= letterOpenAt(l) && !(l.opened && l.opened[sync.me || 'Mình'])); return ready.length ? `<b style="color:var(--accent)">${ready.length} thư mở được!</b>` : r.length ? `${r.length} thư đang chờ mở 🔒` : 'viết thư mở vào ngày đặc biệt'; })())}
     ${T('loc', '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/>', '#e4effa', '#2f5f8f', 'Đang ở đâu', locSub)}
     ${T('mood', '<circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01M9 15c1.6 1.4 4.4 1.4 6 0"/>', '#efe7fb', '#6b4fb3', 'Chat &amp; tâm trạng', moodSub)}
   </div>`;
@@ -1932,15 +1992,15 @@ function openSpecial(id){
       const name = $('#spName').value.trim(), date = $('#spDate').value;
       if (!name) return toast('Nhập tên ngày đặc biệt'); if (!date) return toast('Chọn ngày');
       const rec = { id: s.id, name, date, repeat: rp, yearly: rp === 'year', updated: Date.now() };
-      db.us.specials = (db.us.specials || []).filter(x => x.id !== s.id).concat([rec]); act('🎀', `${ex ? 'sửa' : 'thêm'} ngày đặc biệt: ${name} · ${fmtDM(date)}`); save(); closeSheet(); render(); toast('Đã lưu');
+      db.us.specials = (db.us.specials || []).filter(x => x.id !== s.id).concat([rec]); logAct('🎀', `${ex ? 'sửa' : 'thêm'} ngày đặc biệt: ${name} · ${fmtDM(date)}`); save(); closeSheet(); render(); toast('Đã lưu');
     };
-    if (ex) $('#spDel').onclick = () => { if (!confirm(`Xóa "${ex.name}"?`)) return; db.us.specials = db.us.specials.filter(x => x.id !== ex.id); db.us.delSp[ex.id] = Date.now(); act('🎀', `xóa ngày đặc biệt: ${ex.name}`); save(); closeSheet(); render(); };
+    if (ex) $('#spDel').onclick = () => { if (!confirm(`Xóa "${ex.name}"?`)) return; db.us.specials = db.us.specials.filter(x => x.id !== ex.id); db.us.delSp[ex.id] = Date.now(); logAct('🎀', `xóa ngày đặc biệt: ${ex.name}`); save(); closeSheet(); render(); };
   });
 }
 function openUsStart(){
   openSheet('Ngày bắt đầu yêu', `<div class="card"><label class="f"><span>Mình bắt đầu từ</span><input type="date" id="usStart2" value="${db.us.start}" max="${todayKey()}"></label></div>
     <button class="btn" id="usSave2">Lưu</button><button class="btn danger" id="usDel2">Xóa ngày bắt đầu</button>`, () => {
-    $('#usSave2').onclick = () => { const v = $('#usStart2').value; if (!v) return toast('Chọn ngày'); db.us.start = v; db.us.startAt = Date.now(); act('💞', `đặt ngày bắt đầu yêu: ${fmtShort(v)}`); save(); closeSheet(); render(); };
+    $('#usSave2').onclick = () => { const v = $('#usStart2').value; if (!v) return toast('Chọn ngày'); db.us.start = v; db.us.startAt = Date.now(); logAct('💞', `đặt ngày bắt đầu yêu: ${fmtShort(v)}`); save(); closeSheet(); render(); };
     $('#usDel2').onclick = () => { if (!confirm('Xóa ngày bắt đầu yêu?')) return; db.us.start = ''; db.us.startAt = Date.now(); save(); closeSheet(); render(); };
   });
 }
@@ -2131,7 +2191,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.7</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.9</p>`;
 }
 
 function viewCycle(){
@@ -2232,12 +2292,21 @@ function cycleHistory(){
   return h;
 }
 
+const typing = () => { const a = document.activeElement; return !!(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA') && a.type !== 'checkbox' && $('#main').contains(a)); };
+let softPending = false;
+function softRender(){ // làm mới nền: không phá chữ đang gõ
+  if (sheetOpen()) { pendingRender = true; return; }
+  if (typing()) { softPending = true; return; }
+  render();
+}
 function render(){
-  const ci = document.getElementById('chatIn'), keep = ci ? [ci.value, document.activeElement === ci] : null;
+  const keepVals = {}, ae = document.activeElement, focusId = ae && $('#main').contains(ae) && ae.id;
+  document.querySelectorAll('#main input[id], #main textarea[id]').forEach(i => { if (i.type !== 'checkbox' && i.type !== 'file' && i.value) keepVals[i.id] = i.value; });
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
   $('#main').innerHTML = ({ today: viewToday, health: viewHealth, us: viewUs, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore }[state.tab] || viewToday)();
   afterRender();
-  if (keep) { const c2 = document.getElementById('chatIn'); if (c2) { c2.value = keep[0]; if (keep[1]) c2.focus(); } }
+  for (const [id, v] of Object.entries(keepVals)) { const n = document.getElementById(id); if (n && !n.value && n.type !== 'date' && n.type !== 'time') n.value = v; }
+  if (focusId) { const n = document.getElementById(focusId); if (n && n.focus) n.focus(); }
 }
 
 /* ---------- sheet ---------- */
@@ -2379,14 +2448,14 @@ function openEvent(k, id){
       const rec = { id: e.id, title, time: $('#eTime').value || '', note: $('#eNote').value.trim(), by: e.by || sync.me || '', updated: Date.now() };
       const arr = (db.events[k] || []).filter(x => x.id !== e.id);
       arr.push(rec); db.events[k] = arr;
-      act('📌', `${ex ? 'sửa' : 'thêm'} sự kiện: ${title} · ${fmtDM(k)}${rec.time ? ' ' + rec.time : ''}`);
+      logAct('📌', `${ex ? 'sửa' : 'thêm'} sự kiện: ${title} · ${fmtDM(k)}${rec.time ? ' ' + rec.time : ''}`);
       save(); closeSheet(); render(); toast('Đã lưu');
     };
     if (ex) $('#delEv').onclick = () => {
       const arr = (db.events[k] || []).filter(x => x.id !== e.id);
       if (arr.length) db.events[k] = arr; else delete db.events[k];
       db.deletedEvents[e.id] = Date.now();
-      act('📌', `xóa sự kiện: ${e.title}`);
+      logAct('📌', `xóa sự kiện: ${e.title}`);
       save(); closeSheet(); render();
     };
   });
@@ -2517,6 +2586,154 @@ async function shareFile(name, text, type){
   return false;
 }
 
+/* ---------- đợt 4: thư hẹn giờ, chạm tim, ăn gì hôm nay, vị trí tự động ---------- */
+/* --- thư hẹn giờ --- */
+const letterOpenAt = l => +l.openAt || 0;
+const letterMine = l => l.dev === ensureDevice() || (sync.me && norm(l.name) === norm(sync.me));
+function fmtOpen(ms){ const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; }
+function leftText(ms){
+  const m = Math.ceil((ms - Date.now()) / 60000);
+  if (m <= 0) return 'mở được rồi'; if (m < 60) return `còn ${m} phút`;
+  const h = Math.ceil(m / 60); if (h < 48) return `còn ${h} tiếng`;
+  return `còn ${Math.ceil(h / 24)} ngày`;
+}
+function viewLetters(){
+  const all = db.letters.slice().sort((a, b) => letterOpenAt(a) - letterOpenAt(b));
+  const inbox = all.filter(l => !letterMine(l)), sent = all.filter(letterMine);
+  let h = subBack() + `<h1>Thư hẹn giờ</h1><p class="subtitle" style="margin-top:-4px">viết bây giờ, tới ngày mới mở được</p>
+    <button class="btn" data-act="letterNew">✍️ Viết thư</button>`;
+  const row = (l, mine) => {
+    const ready = Date.now() >= letterOpenAt(l), opened = l.opened && Object.keys(l.opened).length;
+    const st = mine ? (opened ? '💌 đã được mở' : ready ? 'tới ngày mở rồi' : leftText(letterOpenAt(l))) : (ready ? (l.opened && l.opened[sync.me || 'Mình'] ? 'đã đọc' : '✨ mở được rồi!') : leftText(letterOpenAt(l)));
+    return `<button class="letter ${!mine && ready ? 'ready' : ''}" data-act="letterOpen" data-id="${l.id}"><span class="env">${!mine && !ready ? '🔒' : '💌'}</span>
+      <span class="main"><div class="t">${esc(l.title || 'Thư không tên')}</div><div class="s">${mine ? 'gửi ' + esc(peerName(peerMain())) : 'từ ' + esc(l.name || 'Người ấy')} · mở lúc ${fmtOpen(letterOpenAt(l))}</div></span><span class="left">${st}</span></button>`;
+  };
+  h += `<div class="section-title"><span>Thư gửi mình</span></div><div class="card">${inbox.length ? inbox.map(l => row(l, false)).join('') : '<div class="empty" style="padding:16px">Chưa có thư nào</div>'}</div>`;
+  if (sent.length) h += `<div class="section-title"><span>Mình đã gửi</span></div><div class="card">${sent.map(l => row(l, true)).join('')}</div>`;
+  return h;
+}
+function openLetterNew(){
+  const d = addDays(todayKey(), 7);
+  openSheet('Viết thư hẹn giờ ✍️', `<div class="card"><label class="f"><span>Tiêu đề</span><input id="ltTitle" maxlength="60" placeholder="VD: Mở vào sinh nhật em nha" autocomplete="off"></label>
+    <label class="f"><span>Nội dung</span><textarea id="ltBody" rows="7" maxlength="3000" placeholder="Viết gì cũng được…"></textarea></label>
+    <label class="f"><span>Mở được vào ngày</span><input type="date" id="ltDate" value="${d}" min="${todayKey()}"></label>
+    <label class="f"><span>Lúc</span><input type="time" id="ltTime" value="08:00"></label></div>
+    <div class="note" style="padding:0 6px 10px">Trước giờ mở, máy kia chỉ thấy phong thư khóa 🔒 và đếm ngược, nội dung chưa được gửi sang. Tới giờ sẽ có thông báo.</div>
+    <button class="btn" id="ltSend">Gửi thư 💌</button>`, () => {
+    $('#ltSend').onclick = () => {
+      const body = $('#ltBody').value.trim(), date = $('#ltDate').value, time = $('#ltTime').value || '08:00';
+      if (!body) return toast('Viết gì đó đã nha'); if (!date) return toast('Chọn ngày mở');
+      const [hh, mm] = time.split(':').map(Number), openAt = parseKey(date).getTime() + (hh * 60 + mm) * 60000;
+      if (openAt < Date.now()) return toast('Chọn thời điểm trong tương lai nha');
+      if (!sync.room) return toast('Ghép đôi ở tab Khác để gửi thư nha');
+      const title = $('#ltTitle').value.trim();
+      logAct('💌', `gửi một lá thư hẹn giờ${title ? ' "' + title + '"' : ''} · mở lúc ${fmtOpen(openAt)}`);
+      upsert('letters', { id: uid(), title, body, openAt, dev: ensureDevice(), name: sync.me || '', at: Date.now(), opened: {} });
+      closeSheet(); render(); toast('Đã gửi thư 💌');
+    };
+  });
+}
+async function openLetter(id){
+  let l = db.letters.find(x => x.id === id); if (!l) return;
+  const mine = letterMine(l), ready = Date.now() >= letterOpenAt(l);
+  if (!mine && !ready) return openSheet('Thư đang khóa 🔒', `<div class="envbig">🔒💌</div><p class="subtitle" style="text-align:center">Từ ${esc(l.name || 'Người ấy')} · mở được lúc <b>${fmtOpen(letterOpenAt(l))}</b><br>${leftText(letterOpenAt(l))} nữa nha</p>`);
+  if (!mine && !l.body) { toast('Đang mở thư…'); await syncRoom(); l = db.letters.find(x => x.id === id) || l; if (!l.body) return toast('Chưa tải được thư, thử lại khi có mạng nha'); }
+  if (!mine && !(l.opened && l.opened[sync.me || 'Mình'])) {
+    logAct('💌', `đã mở thư${l.title ? ' "' + l.title + '"' : ''}`);
+    upsert('letters', Object.assign({}, l, { opened: Object.assign({}, l.opened || {}, { [sync.me || 'Mình']: Date.now() }) }));
+    bigHearts('💌');
+  }
+  openSheet(l.title || 'Thư', `<div class="paperletter"><div class="lbody">${esc(l.body).replace(/\n/g, '<br>')}</div><div class="lsig">— ${esc(l.name || 'Người ấy')}</div>
+    <div class="ldate">viết ngày ${fmtShort(keyOf(new Date(l.at)))} · mở lúc ${fmtOpen(letterOpenAt(l))}</div></div>
+    ${mine ? '<button class="btn danger" id="ltDel">Xóa thư</button>' : ''}`, () => {
+    if (mine) $('#ltDel').onclick = () => { if (!confirm('Xóa lá thư này?')) return; removeItem('letters', l.id); closeSheet(); render(); };
+  });
+}
+
+/* --- chạm tim / ôm từ xa --- */
+function bigHearts(center, text){
+  const wrap = document.createElement('div'); wrap.className = 'bigfx';
+  wrap.innerHTML = `<div class="bigc">${center || '💗'}</div>${text ? `<div class="bigt">${esc(text)}</div>` : ''}`;
+  const em = ['💗', '💖', '💕', '💞', '🩷', '❤️'];
+  for (let i = 0; i < 26; i++) {
+    const s = document.createElement('span'); s.className = 'bigh'; s.textContent = em[i % em.length];
+    s.style.left = Math.random() * 100 + 'vw'; s.style.animationDelay = (Math.random() * 1.2) + 's'; s.style.fontSize = (18 + Math.random() * 26) + 'px';
+    wrap.appendChild(s);
+  }
+  wrap.onclick = () => wrap.remove();
+  document.body.appendChild(wrap); setTimeout(() => wrap.remove(), 3200);
+}
+async function sendTouch(kind, sec){
+  const pr = partnerPron();
+  const text = kind === 'hug' ? `ôm ${pr ? pr + ' ' : ''}${sec >= 3 ? 'thật chặt ' : ''}🤗` : `chạm tim ${pr ? pr + ' ' : ''}💗`;
+  logHistory('touch', { t: kind, sec: Math.round(sec || 0), text }); db.chatSeen = Date.now(); save();
+  bigHearts(kind === 'hug' ? '🤗' : '💗', kind === 'hug' ? 'Đã gửi cái ôm' : 'Đã gửi tim');
+  if (state.tab === 'us' && state.usp === 'moods') { state.histAtEnd = true; render(); }
+  if (!sync.room) return toast('Ghép đôi để gửi cho người ấy nha');
+  await syncRoom();
+}
+let holdT = null, holdStart = 0, holdEl = null;
+function holdBegin(el){
+  holdStart = Date.now(); holdEl = el; el.classList.add('holding');
+  holdT = setInterval(() => { const s = (Date.now() - holdStart) / 1000; el.style.setProperty('--hold', Math.min(1, s / 3)); const l = el.querySelector('.hl'); if (l) l.textContent = s >= 1 ? `Đang ôm… ${Math.floor(s)}s` : 'Giữ để ôm'; }, 100);
+}
+function holdEnd(cancel){
+  if (!holdEl) return;
+  clearInterval(holdT); const el = holdEl, s = (Date.now() - holdStart) / 1000; holdEl = null;
+  el.classList.remove('holding'); el.style.setProperty('--hold', 0); const l = el.querySelector('.hl'); if (l) l.textContent = 'Chạm: tim · Giữ: ôm';
+  if (!cancel) sendTouch(s >= 1 ? 'hug' : 'heart', s);
+}
+const touchBtn = () => `<button class="touchbtn" data-touch="1"><span class="th">💗</span><span class="hl">Chạm: tim · Giữ: ôm</span></button>`;
+let lastFx = 0;
+function playIncomingTouch(items){ // tim / ôm mới từ người kia → hiệu ứng to
+  const seen = +(db.touchSeen || 0);
+  const fresh = items.filter(x => x.kind === 'touch' && !isMineH(x) && x.at > seen && Date.now() - x.at < 6 * 3600e3).sort((a, b) => a.at - b.at);
+  if (!fresh.length) return;
+  const x = fresh[fresh.length - 1]; db.touchSeen = x.at; try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  if (Date.now() - lastFx < 1500) return; lastFx = Date.now();
+  bigHearts(x.t === 'hug' ? '🤗' : '💗', `${x.name || 'Người ấy'} ${x.text || 'gửi tim'}`);
+}
+
+/* --- ăn gì hôm nay --- */
+const FOOD_DEFAULT = ['Bún bò', 'Phở', 'Cơm tấm', 'Lẩu', 'Sushi', 'Gà rán', 'Bánh xèo', 'Pizza', 'Bún chả', 'Mì cay', 'Ốc', 'Hủ tiếu', 'Dimsum', 'Nướng BBQ', 'Bánh mì', 'Bún đậu'];
+function foodPool(){
+  const mine = [...db.foods.filter(f => f.again).map(f => f.name), ...db.jar.filter(j => j.cat === 'food' && !j.done).map(j => j.text)];
+  const uniq = [...new Set(mine.map(x => x.trim()).filter(Boolean))];
+  return { list: uniq.length >= 4 ? uniq : [...new Set(uniq.concat(FOOD_DEFAULT))], own: uniq.length };
+}
+function openSpin(){
+  const { list, own } = foodPool();
+  openSheet('Ăn gì hôm nay? 🎲', `<div class="spinbox"><div class="spinw" id="spW">❓</div></div>
+    <p class="subtitle" style="text-align:center;margin-top:0">${own ? `Quay từ ${own} món "muốn ăn lại" và trong hũ` : 'Quay từ danh sách gợi ý (đánh dấu "Muốn ăn lại" ở Món ngon để quay món của hai đứa)'}</p>
+    <button class="btn" id="spGo">🎲 Quay</button><button class="btn ghost" id="spPick" disabled>Chốt món này, nhắn cho ${esc(peerName(peerMain()))}</button>`, () => {
+    let cur = '', spinning = false;
+    $('#spGo').onclick = () => {
+      if (spinning) return; spinning = true; $('#spPick').disabled = true;
+      let i = 0, delay = 50; const total = 20 + Math.floor(Math.random() * 6);
+      const tick = () => {
+        cur = list[Math.floor(Math.random() * list.length)]; const w = $('#spW'); if (!w) return;
+        w.textContent = cur; w.classList.remove('pop'); void w.offsetWidth; w.classList.add('pop');
+        if (++i < total) { delay *= 1.07; setTimeout(tick, delay); } else { spinning = false; $('#spPick').disabled = false; w.classList.add('done'); heartsAt(innerWidth / 2, innerHeight / 2); }
+      };
+      $('#spW').classList.remove('done'); tick();
+    };
+    $('#spPick').onclick = async () => { if (!cur) return; closeSheet(); await sendQuick(`🎲 Hôm nay ăn ${cur} nha!`); };
+  });
+}
+
+/* --- tự cập nhật vị trí khi mở app --- */
+let autoLocAt = 0;
+function autoLocate(){
+  if (db.mine.autoLoc === false || db.mine.share === false || !navigator.geolocation) return;
+  if (db.mine.loc && db.mine.loc.hidden && (!db.mine.loc.until || db.mine.loc.until > Date.now())) return;
+  if (Date.now() - autoLocAt < 3 * 60000) return; autoLocAt = Date.now();
+  navigator.geolocation.getCurrentPosition(pos => {
+    db.mine.loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy || 0), at: Date.now(), auto: true }; db.myLoc = db.mine.loc;
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+    softRender(); if (sync.room) syncRoom();
+  }, () => {}, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+}
+
 /* ---------- ảnh: luôn có sẵn trên máy ---------- */
 const PHOTO_CACHE = 'sotay-photos';
 function allPhotos(){
@@ -2536,7 +2753,7 @@ async function syncPhotos(){ // tải sẵn mọi ảnh (của cả hai) vào m�
       if (await c.match(url)) continue;
       try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) { await c.put(url, r); n++; } } catch (e) { break; } // mất mạng thì để lần sau
     }
-    if (n && state.tab === 'more' && !sheetOpen()) render();
+    if (n && state.tab === 'more') softRender();
   } finally { photoSyncing = false; }
 }
 async function photoStats(){
@@ -2586,6 +2803,10 @@ $('#nav').onclick = e => {
   ($('#main').scrollTop = 0); render();
 };
 
+$('#main').addEventListener('pointerdown', e => { const b = e.target.closest('[data-touch]'); if (b) { e.preventDefault(); holdBegin(b); } });
+['pointerup', 'pointerleave'].forEach(ev => $('#main').addEventListener(ev, e => { if (holdEl && (ev === 'pointerup' || e.target === holdEl)) holdEnd(ev !== 'pointerup'); }));
+$('#main').addEventListener('pointercancel', () => holdEnd(true));
+$('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-touch]')) e.preventDefault(); });
 $('#main').addEventListener('toggle', e => { const g = e.target.dataset && e.target.dataset.g; if (g) state.grp[g] = e.target.open; }, true);
 $('#main').addEventListener('keydown', e => { if (e.target.id === 'chatIn' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); sendChat(); } });
 $('#main').addEventListener('click', async e => {
@@ -2670,25 +2891,29 @@ $('#main').addEventListener('click', async e => {
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
+    case 'touchHeart': state.chatPanel = false; await sendTouch('heart', 0); break;
+    case 'spin': state.chatPanel = false; openSpin(); break;
+    case 'letterNew': state.chatPanel = false; openLetterNew(); break;
+    case 'letterOpen': await openLetter(id); break;
     case 'chatPlus': state.chatPanel = !state.chatPanel; state.histAtEnd = true; render(); break;
     case 'chatQuick': await sendQuick(quickPhrases()[+id]); break;
     case 'jarQuick': state.chatPanel = false; openJarQuick(); break;
     case 'foodAdd': state.chatPanel = false; pickPhoto(f => openFood(null, f)); break;
     case 'foodView': openFood(id); break;
-    case 'goHist': state.tab = 'us'; state.usp = 'moods'; ($('#main').scrollTop = 0); render(); break;
-    case 'usp': state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
+    case 'goHist': openChat(); break;
+    case 'usp': if (b.dataset.s === 'moods') { openChat(); break; } state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
     case 'dateNew': state.chatPanel = false; openDate(); break;
     case 'dateEdit': openDate(id); break;
     case 'dateIdea': openIdea(); break;
     case 'memo': openMemo(id); break;
     case 'memMore': state.memMore = true; render(); break;
-    case 'bkAdd': { const t = ($('#bkIn').value || '').trim(); if (!t) return toast('Nhập điều muốn cùng làm'); act('✨', `thêm vào "Cùng nhau làm": ${t}`); upsert('bucket', { id: uid(), text: t, done: false, at: Date.now(), by: sync.me || '' }); render(); break; }
-    case 'bkToggle': { const x = db.bucket.find(q => q.id === id); if (x) { if (!x.done) act('🎉', `đã cùng làm: ${x.text}`); upsert('bucket', Object.assign({}, x, { done: !x.done, doneAt: x.done ? 0 : Date.now() })); render(); if (!x.done) heartsAt(e.clientX, e.clientY); } break; }
+    case 'bkAdd': { const t = ($('#bkIn').value || '').trim(); if (!t) return toast('Nhập điều muốn cùng làm'); $('#bkIn').value = ''; logAct('✨', `thêm vào "Cùng nhau làm": ${t}`); upsert('bucket', { id: uid(), text: t, done: false, at: Date.now(), by: sync.me || '' }); render(); break; }
+    case 'bkToggle': { const x = db.bucket.find(q => q.id === id); if (x) { if (!x.done) logAct('🎉', `đã cùng làm: ${x.text}`); upsert('bucket', Object.assign({}, x, { done: !x.done, doneAt: x.done ? 0 : Date.now() })); render(); if (!x.done) heartsAt(e.clientX, e.clientY); } break; }
     case 'bkEdit': openBucket(id); break;
     case 'jarCat': state.jarCat = id; document.querySelectorAll('[data-act=jarCat]').forEach(q => q.classList.toggle('on', q.dataset.id === id)); break;
     case 'jarFilter': state.jarFilter = id; render(); break;
     case 'jarMore': state.jarMore = true; render(); break;
-    case 'jarAdd': { const t = ($('#jarIn').value || '').trim(); if (!t) return toast('Ghi điều em thích vào nha'); act('🫙', `bỏ vào hũ: ${t}`); upsert('jar', { id: uid(), text: t, cat: state.jarCat || 'food', by: sync.me || '', at: Date.now(), done: false }); render(); heartsAt(e.clientX, e.clientY); toast('Đã bỏ vào hũ 🫙'); break; }
+    case 'jarAdd': { const t = ($('#jarIn').value || '').trim(); if (!t) return toast('Ghi điều em thích vào nha'); $('#jarIn').value = ''; if (state.jarFilter && state.jarFilter !== 'all' && state.jarFilter !== (state.jarCat || 'food')) state.jarFilter = 'all'; logAct('🫙', `bỏ vào hũ: ${t}`); upsert('jar', { id: uid(), text: t, cat: state.jarCat || 'food', by: sync.me || '', at: Date.now(), done: false }); render(); heartsAt(e.clientX, e.clientY); toast('Đã bỏ vào hũ 🫙'); break; }
     case 'jarDone': { const x = db.jar.find(q => q.id === id); toggleJar(id); render(); if (x && !x.done) heartsAt(e.clientX, e.clientY); break; }
     case 'jarEdit': openJarSlip(id, false); break;
     case 'jarDraw': drawJar(); break;
@@ -2700,7 +2925,7 @@ $('#main').addEventListener('click', async e => {
     case 'uiMode': db.ui.mode = id; save(); applyUI(); render(); break;
     case 'hseg': state.hseg = b.dataset.s; render(); break;
     case 'hPick': openDaySheet(k); break;
-    case 'usStartSave': { const v = ($('#usStart') || {}).value; if (!v) return toast('Chọn ngày bắt đầu nha'); db.us.start = v; db.us.startAt = Date.now(); act('💞', `đặt ngày bắt đầu yêu: ${fmtShort(v)}`); save(); render(); heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break; }
+    case 'usStartSave': { const v = ($('#usStart') || {}).value; if (!v) return toast('Chọn ngày bắt đầu nha'); db.us.start = v; db.us.startAt = Date.now(); logAct('💞', `đặt ngày bắt đầu yêu: ${fmtShort(v)}`); save(); render(); heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break; }
     case 'usEditStart': openUsStart(); break;
     case 'mood': state.chatPanel = false; openMood(id); break;
     case 'sendLoc': state.chatPanel = false; if (!locBusy) sendLoc(); break;
@@ -2741,7 +2966,7 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs(), mine: {}, peers: {}, dates: [], bucket: [], jar: [], moods: [], foods: [], del: { dates: {}, bucket: {}, jar: {}, moods: {}, foods: {} } }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs(), mine: {}, peers: {}, dates: [], bucket: [], jar: [], moods: [], foods: [], letters: [], del: { dates: {}, bucket: {}, jar: {}, moods: {}, foods: {}, letters: {} } }; save(); render(); toast('Đã xóa');
       break;
   }
 });
@@ -2756,6 +2981,7 @@ $('#main').addEventListener('change', e => {
   if (t.id === 'uiHearts') { db.ui.hearts = t.checked; save(); if (t.checked) { const r = t.getBoundingClientRect(); heartsAt(r.left + 20, r.top); } return; }
   if (t.id === 'uiPattern') { db.ui.pattern = t.checked; save(); applyUI(); return; }
   if (t.id === 'medPushSw') { sync.medPush = t.checked; saveSync(); syncNow(false); toast(t.checked ? 'Nhắc thuốc qua thông báo app' : 'Nhắc thuốc qua app Lịch'); return; }
+  if (t.id === 'autoLocSw') { db.mine.autoLoc = t.checked; save(); if (t.checked) { autoLocAt = 0; autoLocate(); } toast(t.checked ? 'Mở app sẽ tự cập nhật vị trí' : 'Chỉ gửi vị trí khi bấm nút'); return; }
   if (t.id === 'shareSw') { db.mine.share = t.checked; if (!t.checked) hideLoc(0); else { db.mine.loc = null; save(); render(); syncRoom(); } toast(t.checked ? 'Đã bật chia sẻ vị trí' : 'Đã tắt chia sẻ, người kia không thấy vị trí nữa'); return; }
   if (t.id === 'syMe') { sync.me = t.value.trim(); saveSync(); toast('Đã lưu'); return; }
   if (t.id === 'lvOn') { db.love.enabled = t.checked; save(); toast(t.checked ? 'Đã bật' : 'Đã tắt'); return; }
@@ -2771,19 +2997,21 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}), mine: db.mine || {}, peers: db.peers || {}, dates: data.dates || [], bucket: data.bucket || [], jar: data.jar || [], moods: data.moods || [], foods: data.foods || [], del: Object.assign({ dates: {}, bucket: {}, jar: {}, moods: {}, foods: {} }, data.del || {}) };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}), mine: db.mine || {}, peers: db.peers || {}, dates: data.dates || [], bucket: data.bucket || [], jar: data.jar || [], moods: data.moods || [], foods: data.foods || [], letters: data.letters || [], del: Object.assign({ dates: {}, bucket: {}, jar: {}, moods: {}, foods: {}, letters: {} }, data.del || {}) };
     if (obj.sync && obj.sync.key) { sync = Object.assign({}, obj.sync, { sent: '', push: false, subJson: null }); saveSync(); }
     save(); applyUI(); render(); scheduleSync(300); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
 };
 
 /* cập nhật trạng thái "quá giờ" và đổi ngày */
-setInterval(() => { if (!sheetOpen() && state.tab !== 'more' && state.tab !== 'meds') render(); }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); loadWeather(false); } });
+setInterval(() => { if (state.tab !== 'more' && state.tab !== 'meds') softRender(); }, 60000);
+$('#main').addEventListener('focusout', () => setTimeout(() => { if (softPending && !typing() && !sheetOpen()) { softPending = false; render(); } }, 700));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { autoLocate(); if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); loadWeather(false); } });
 
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {} // xin iPhone giữ dữ liệu, không tự dọn
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+setTimeout(autoLocate, 1200); // xin iPhone giữ dữ liệu, không tự dọn
 fetchLoveLines();
 scheduleSync(800);
 loadWeather(false);
@@ -2798,7 +3026,7 @@ window.addEventListener('pageshow', () => scheduleSync(300));
 window.addEventListener('focus', () => scheduleSync(300));
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { // có thông báo mới → cập nhật liền
   const d = ev.data || {};
-  if (d.type === 'open' && d.tab && !sheetOpen()) { state.tab = d.tab; state.usp = d.usp || ''; render(); }
+  if (d.type === 'open') { if (sheetOpen()) closeSheet(); openChat(); }
   if (d.type === 'push' && d.data) applyLive(d.data);
   if (d.type === 'push' || d.type === 'open') { syncRoom(); setTimeout(syncRoom, 6000); setTimeout(syncRoom, 25000); } // máy chủ có thể trễ vài giây
 });
@@ -2810,9 +3038,10 @@ function applyLive(m){ // dữ liệu đi kèm thông báo: hiện ngay
     db.peers[m.peer.dev] = n;
   }
   for (const x of m.hist || []) if (x && x.id && !db.moods.some(y => y.id === x.id)) { db.moods = db.moods.concat([x]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); changed = true; }
+  if (m.hist && m.hist.length) playIncomingTouch(m.hist);
   if (!changed) return;
   try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
-  if (!sheetOpen()) render(); else { pendingRender = true; const el = $('#replyTo'); if (el) el.outerHTML = replyBox(); }
+  if (sheetOpen()) { pendingRender = true; const el = $('#replyTo'); if (el) el.outerHTML = replyBox(); } else softRender();
 }
 </script>
 </body>

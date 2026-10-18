@@ -1,5 +1,5 @@
 // Service worker: cho app chạy offline. Đổi số phiên bản khi cập nhật code.
-const CACHE = 'sotay-v5';
+const CACHE = 'sotay-v6';
 const PHOTOS = 'sotay-photos';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 
@@ -47,7 +47,7 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
     const d = e.notification.data || {};
-    for (const c of list) if ('focus' in c) { c.postMessage({ type: 'open', tab: d.tab, usp: d.usp }); return c.focus(); }
-    return clients.openWindow(d.tab ? `./?tab=${d.tab}&usp=${d.usp || ''}` : './');
+    for (const c of list) if ('focus' in c) { c.postMessage({ type: 'open' }); return c.focus(); } // bấm thông báo → mở Chat
+    return clients.openWindow('./?tab=us&usp=moods');
   }));
 });
