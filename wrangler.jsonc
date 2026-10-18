@@ -1,9 +1,11 @@
 {
   // Cấu hình máy chủ đồng bộ Sổ Tay — Cloudflare tự đọc file này khi deploy từ GitHub
-  "name": "sotay",
+  "name": "qigaa",
   "main": "worker.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
+  // Mỗi phút kiểm tra xem có liều thuốc nào đến giờ không
+  "triggers": { "crons": ["* * * * *"] },
   "kv_namespaces": [
     { "binding": "SOTAY", "id": "361ce3bcfe69461188660bdcf9ed5d26" }
   ]

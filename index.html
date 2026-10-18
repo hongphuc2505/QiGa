@@ -100,6 +100,38 @@ textarea{resize:none;min-height:64px}
 .note b{color:var(--text)}
 .pad{padding:0 14px 14px}
 .btn.pink{background:var(--pink)}
+/* ---- chủ đề ---- */
+:root[data-theme=pink]{--bg:#fff0f6;--card:#fff;--text:#4a2638;--sub:#b5809a;--line:#f8d7e5;--accent:#ff5c93;--accent-soft:rgba(255,92,147,.13);--pink:#ff4f87;--shadow:0 2px 10px rgba(255,92,147,.10)}
+:root[data-theme=peach]{--bg:#fff5ef;--card:#fff;--text:#4b2e22;--sub:#c08a72;--line:#f7dccd;--accent:#ff8a65;--accent-soft:rgba(255,138,101,.14);--shadow:0 2px 10px rgba(255,138,101,.10)}
+:root[data-theme=lavender]{--bg:#f6f1ff;--card:#fff;--text:#33264d;--sub:#9a88bd;--line:#e6dcfa;--accent:#a06bff;--accent-soft:rgba(160,107,255,.13);--shadow:0 2px 10px rgba(160,107,255,.10)}
+@media (prefers-color-scheme:dark){
+  :root[data-theme=pink]{--bg:#1a0e14;--card:#2a1720;--text:#ffe9f2;--sub:#c58ea8;--line:#43242f;--accent:#ff7aa8;--accent-soft:rgba(255,122,168,.18);--shadow:none}
+  :root[data-theme=peach]{--bg:#1b120e;--card:#2b1c16;--text:#ffeee6;--sub:#c99a85;--line:#45291f;--accent:#ff9f80;--accent-soft:rgba(255,159,128,.18);--shadow:none}
+  :root[data-theme=lavender]{--bg:#120e1a;--card:#1f1830;--text:#f1eaff;--sub:#a897c8;--line:#33284a;--accent:#b38aff;--accent-soft:rgba(179,138,255,.18);--shadow:none}
+}
+:root[data-theme=pink] .hero{background:linear-gradient(160deg,#ffe1ee 0%,var(--card) 70%)}
+:root[data-theme=peach] .hero{background:linear-gradient(160deg,#ffe6da 0%,var(--card) 70%)}
+:root[data-theme=lavender] .hero{background:linear-gradient(160deg,#ece2ff 0%,var(--card) 70%)}
+@media (prefers-color-scheme:dark){:root[data-theme] .hero{background:var(--card)}}
+:root[data-theme=lavender] .love{background:linear-gradient(135deg,#b48cff,#ff8fc7)}
+:root[data-theme=peach] .love{background:linear-gradient(135deg,#ff9a76,#ffc27a)}
+:root[data-cute] .card,:root[data-cute] .hero,:root[data-cute] .love{border-radius:22px}
+:root[data-cute] .btn{border-radius:16px}
+:root[data-font=round] body,:root[data-font=round] button,:root[data-font=round] input,:root[data-font=round] textarea{font-family:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif}
+:root[data-font=round] .hero .clock{letter-spacing:-1px}
+:root[data-pattern] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M28 38s-9-5.6-9-11.2A5 5 0 0 1 28 24a5 5 0 0 1 9 2.8C37 32.4 28 38 28 38z' fill='%23ff5c93' fill-opacity='.07'/%3E%3C/svg%3E");background-attachment:fixed}
+:root[data-theme] .switch:checked{background:var(--accent)}
+.heart-fx{position:fixed;pointer-events:none;z-index:30;font-size:20px;animation:heartUp 1.1s ease-out forwards}
+@keyframes heartUp{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),-140px) scale(1.25);opacity:0}}
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px 14px}
+.theme-grid button{border-radius:16px;padding:12px;text-align:left;border:2px solid transparent;background:var(--bg)}
+.theme-grid button.on{border-color:var(--accent)}
+.theme-grid .sw2{display:flex;gap:4px;margin-bottom:6px}
+.theme-grid .sw2 i{width:16px;height:16px;border-radius:50%}
+.due{background:linear-gradient(135deg,var(--accent),var(--pink));color:#fff;border-radius:20px;padding:16px;margin-bottom:16px}
+.due .t1{font-size:13px;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.3px}
+.due .t2{font-size:19px;font-weight:700;margin:4px 0 12px}
+.due button{background:#fff;color:var(--pink);font-weight:700;border-radius:14px;padding:12px;width:100%;font-size:17px}
 .hero{background:var(--card);border-radius:20px;padding:16px 18px;margin:10px 0 16px;box-shadow:var(--shadow)}
 .hero .greet{font-size:15px;color:var(--sub);font-weight:500}
 .hero .clock{font-size:64px;font-weight:700;letter-spacing:-2px;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:2px}
@@ -186,6 +218,19 @@ const defCycle = () => ({ periods: [], cycleLen: 28, periodLen: 5, auto: true })
 db.meds = db.meds || []; db.logs = db.logs || {}; db.events = db.events || {};
 db.cycle = Object.assign(defCycle(), db.cycle || {});
 db.deletedEvents = db.deletedEvents || {};
+db.ui = Object.assign({ theme: 'pink', font: 'round', hearts: true, pattern: false, cute: true }, db.ui || {});
+function applyUI(){
+  const r = document.documentElement, u = db.ui;
+  if (u.theme && u.theme !== 'default') r.dataset.theme = u.theme; else delete r.dataset.theme;
+  if (u.font === 'round') { r.dataset.font = 'round';
+    if (!document.getElementById('fontRound')) { const l = document.createElement('link'); l.id = 'fontRound'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap'; document.head.appendChild(l); }
+  } else delete r.dataset.font;
+  if (u.pattern) r.dataset.pattern = '1'; else delete r.dataset.pattern;
+  if (u.cute) r.dataset.cute = '1'; else delete r.dataset.cute;
+  const bg = getComputedStyle(r).getPropertyValue('--bg').trim();
+  document.querySelectorAll('meta[name=theme-color]').forEach(m => m.setAttribute('content', bg || '#f2f2f7'));
+}
+applyUI();
 const defLove = () => ({ nameFrom: 'HoPu', nameTo: 'QiGa', from: 'anh', to: 'em', time: '08:00', custom: [] });
 db.love = Object.assign(defLove(), db.love || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } if (typeof scheduleSync === 'function') scheduleSync(); }
@@ -227,6 +272,31 @@ function dosesOn(k){
     }
   }
   return out.sort((a, b) => a.time.localeCompare(b.time));
+}
+function nextDose(){
+  const tk = todayKey(), nm = nowMin();
+  for (let i = 0; i < 120; i++) {
+    const d = addDays(tk, i);
+    const x = dosesOn(d).find(o => !o.taken && (i > 0 || toMin(o.time) > nm));
+    if (x) return { k: d, ...x };
+  }
+  return null;
+}
+function nextDoseLine(){
+  const n = nextDose(); if (!n) return '';
+  const tk = todayKey(), dd = diffDays(tk, n.k);
+  const when = dd === 0 ? 'hôm nay' : dd === 1 ? 'ngày mai' : `${WD_LONG[parseKey(n.k).getDay()]} ${fmtShort(n.k).replace(/\/\d{4}$/, '')}${dd <= 30 ? ` (còn ${dd} ngày)` : ''}`;
+  return `<button class="row" data-act="goMeds"><span class="dot" style="background:${n.med.color}"></span><span class="main"><div class="s">💊 Lần uống tới</div><div class="t">${esc(n.med.name)} · ${n.time} ${when}</div></span><span style="color:var(--sub);font-size:20px">›</span></button>`;
+}
+function heartsAt(x, y){
+  if (!db.ui.hearts) return;
+  const em = ['💗','💖','💕','💞','🩷','✨'];
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('span'); s.className = 'heart-fx'; s.textContent = em[i % em.length];
+    s.style.left = (x - 10 + (Math.random() * 30 - 15)) + 'px'; s.style.top = (y - 10) + 'px';
+    s.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px'); s.style.animationDelay = (Math.random() * .15) + 's';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1400);
+  }
 }
 function toggleDose(k, id){
   const day = db.logs[k] || (db.logs[k] = {});
@@ -404,7 +474,7 @@ function syncEvents(){
       for (let i = -1, d = addDays(tk, -1); i < 90; i++, d = addDays(d, 1)) {
         if (!medOn(m, d)) continue;
         for (const t of m.times) ev.push({ uid: `med-${m.id}-${t.replace(':', '')}-${ymd(d)}@sotay`, date: ymd(d), time: t.replace(':', ''), dur: 10,
-          title: '💊 ' + m.name + (m.dose ? ' – ' + m.dose : ''), desc: m.note || '', alarms: ['PT0M'] });
+          title: '💊 ' + m.name + (m.dose ? ' – ' + m.dose : ''), desc: m.note || '', alarms: medAppPush() ? [] : ['PT0M'] });
       }
       continue;
     }
@@ -414,7 +484,7 @@ function syncEvents(){
       let rr = 'FREQ=' + (m.days && m.days.length ? 'WEEKLY;BYDAY=' + m.days.map(d => ICS_DAYS[d]).join(',') : 'DAILY');
       if (m.end) rr += ';UNTIL=' + ymd(m.end) + 'T235959';
       ev.push({ uid: `med-${m.id}-${t.replace(':', '')}@sotay`, date: ymd(keyOf(first)), time: t.replace(':', ''), dur: 10, rrule: rr,
-        title: '💊 ' + m.name + (m.dose ? ' – ' + m.dose : ''), desc: m.note || '', alarms: ['PT0M'] });
+        title: '💊 ' + m.name + (m.dose ? ' – ' + m.dose : ''), desc: m.note || '', alarms: medAppPush() ? [] : ['PT0M'] });
     }
   }
   // chu kỳ
@@ -445,9 +515,22 @@ function syncEvents(){
   }
   return ev;
 }
+const medAppPush = () => !!(sync.push && sync.subJson && sync.medPush !== false);
+function pushDoses(){
+  const out = [], tk = todayKey();
+  for (let i = 0; i < 30; i++) {
+    const d = addDays(tk, i);
+    const byTime = {};
+    for (const o of dosesOn(d).filter(o => !o.taken)) (byTime[o.time] = byTime[o.time] || []).push(o);
+    for (const [t, list] of Object.entries(byTime)) out.push({ at: `${d}T${t}`, time: t, meds: list.map(o => o.med.name + (o.med.dose ? ' – ' + o.med.dose : '')).join(', ') });
+  }
+  return out;
+}
 function syncPayload(){
   return {
     name: 'Sổ Tay', tzOffset: new Date().getTimezoneOffset(), events: syncEvents(), room: sync.room || undefined,
+    medPush: medAppPush() ? { sub: sync.subJson } : undefined,
+    doses: db.meds.length ? pushDoses() : [], device: ensureDevice(), me: sync.me || '',
     love: { enabled: db.love.enabled !== false, title: `${db.love.nameFrom} chúc ${db.love.nameTo}`, time: db.love.time || '08:00',
       from: db.love.from, to: db.love.to, fallback: (db.love.custom || []).concat(LOVE).map(fillLove) }
   };
@@ -510,26 +593,39 @@ async function syncRoom(){
 const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 function u8(s){ s = s.replace(/-/g, '+').replace(/_/g, '/'); s += '='.repeat((4 - s.length % 4) % 4); return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+async function notifyTaken(k, ids){
+  if (!syncBase() || !sync.room || k !== todayKey()) return;
+  const ds = dosesOn(k).filter(d => ids.includes(d.id));
+  if (!ds.length) return;
+  const n = new Date(), at = `${pad(n.getHours())}:${pad(n.getMinutes())}`;
+  try { await fetch(`${syncBase()}/notify/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: `✅ ${sync.me || 'Người ấy'} đã uống thuốc`, body: ds.map(d => `${d.med.name} (${d.time})`).join(', ') + ` · tick lúc ${at}` }) }); } catch(e){}
+}
+async function registerRoomPush(){
+  if (!sync.room || !sync.push || !sync.subJson) return;
+  try { await fetch(`${syncBase()}/push/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub: sync.subJson, name: sync.me || '' }) }); } catch(e){}
+}
 async function enablePush(){
   if (!pushSupported()) return toast(isStandalone() ? 'Máy này chưa hỗ trợ thông báo (cần iOS 16.4+)' : 'Mở app từ biểu tượng ngoài màn hình chính rồi bật lại');
   try {
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') return toast('Chưa cho phép thông báo');
     const reg = await navigator.serviceWorker.ready;
-    const { publicKey } = await (await fetch(`${syncBase()}/vapid`)).json();
     let sub = await reg.pushManager.getSubscription();
-    if (sub) { try { await sub.unsubscribe(); } catch(e){} }
-    sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(publicKey) });
-    const r = await fetch(`${syncBase()}/push/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sub: sub.toJSON(), name: sync.me || '', test: true }) });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    sync.push = true; saveSync(); render(); toast('Đã bật thông báo 🔔');
+    if (!sub) {
+      const { publicKey } = await (await fetch(`${syncBase()}/vapid`)).json();
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(publicKey) });
+    }
+    sync.subJson = sub.toJSON(); sync.push = true; if (sync.medPush === undefined) sync.medPush = true; saveSync();
+    await fetch(`${syncBase()}/test-push`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub: sync.subJson }) });
+    await registerRoomPush();
+    render(); syncNow(false); toast('Đã bật thông báo 🔔');
   } catch (e) { toast('Bật thông báo lỗi: ' + (e.message || e)); }
 }
 async function disablePush(){
   try { const reg = await navigator.serviceWorker.ready; const sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch(e){}
-  try { await fetch(`${syncBase()}/push/${sync.room}/${ensureDevice()}`, { method: 'DELETE' }); } catch(e){}
-  sync.push = false; saveSync(); render(); toast('Đã tắt thông báo');
+  if (sync.room) { try { await fetch(`${syncBase()}/push/${sync.room}/${ensureDevice()}`, { method: 'DELETE' }); } catch(e){} }
+  sync.push = false; sync.subJson = null; saveSync(); render(); syncNow(false); toast('Đã tắt thông báo');
 }
 function fmtTime(ms){ const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getDate()}/${d.getMonth() + 1}`; }
 
@@ -701,17 +797,26 @@ function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
   const done = ds.filter(d => d.taken).length;
-  let h = heroCard() + loveCard();
+  let h = heroCard();
+  const due = ds.filter(d => !d.taken && toMin(d.time) <= nowMin());
+  if (due.length) {
+    const late = nowMin() - toMin(due[0].time);
+    h += `<div class="due"><div class="t1">⏰ ${late >= 60 ? 'Quá giờ ' + Math.floor(late / 60) + ' tiếng rồi' : late > 15 ? 'Quá giờ ' + late + ' phút' : 'Đến giờ uống thuốc'}</div>
+      <div class="t2">${due.map(d => esc(d.med.name) + (d.med.dose ? ' · ' + esc(d.med.dose) : '') + ' (' + d.time + ')').join('<br>')}</div>
+      <button data-act="takeDue">💊 Đã uống</button></div>`;
+  }
+  h += loveCard();
   if (!db.meds.length) {
     h += `<div class="card empty">Chưa có thuốc nào trong danh sách.<div style="height:14px"></div><button class="btn" data-act="addMed">+ Thêm thuốc</button></div>`;
   } else if (!ds.length) {
-    h += `<div class="card empty">Hôm nay không có lịch uống thuốc 🎉</div>`;
+    h += `<div class="card"><div class="empty" style="padding:16px 16px 10px">Hôm nay không có lịch uống thuốc 🎉</div>${nextDoseLine()}</div>`;
   } else {
     const pct = Math.round(done / ds.length * 100);
     h += `<div class="card progress"><div class="s">${done === ds.length ? 'Xong hết rồi 👏' : 'Đã uống'}</div>
       <div class="big">${done}/${ds.length} <small>liều</small></div>
       <div class="bar"><i style="width:${pct}%"></i></div></div>`;
     h += `<div class="section-title"><span>Lịch uống</span></div><div class="card">${ds.map(d => doseRow(d, k)).join('')}</div>`;
+    if (done === ds.length) { const nl = nextDoseLine(); if (nl) h += `<div class="card">${nl}</div>`; }
   }
   return h + eventsBlock(k);
 }
@@ -794,7 +899,9 @@ function viewMeds(){
   <div class="section-title"><span>Báo nhắc trên iPhone</span></div>
   <div class="card">
     ${syncBase() && sync.last
-      ? `<div class="note">✅ Lịch uống thuốc đang <b>tự đồng bộ</b> sang app Lịch của iPhone. Thêm, sửa hay xóa thuốc ở đây là Lịch tự cập nhật.</div>`
+      ? (medAppPush()
+        ? `<div class="note">✅ Nhắc thuốc bằng <b>thông báo của app</b>: đến giờ sẽ báo, bấm vào là mở app để đánh dấu đã uống. Liều đã tick sẽ không báo nữa.</div>`
+        : `<div class="note">✅ Lịch uống thuốc đang <b>tự đồng bộ</b> sang app Lịch của iPhone. Muốn bấm vào thông báo là mở app, bật <b>Thông báo của app 🔔</b> ở tab Khác.</div>`)
       : `<div class="note">Để iPhone tự báo giờ uống thuốc, vào tab <b>Khác → Thông báo tự động</b> và bật đồng bộ (chỉ làm một lần).</div>
          <div class="pad"><button class="btn ghost" data-act="ics">Hoặc xuất thủ công sang Lịch (.ics)</button></div>`}
   </div>`;
@@ -814,6 +921,17 @@ function viewMore(){
     <label class="frow"><span class="lbl">Gửi lời chúc mỗi sáng</span><input type="checkbox" class="switch" id="lvOn" ${db.love.enabled !== false ? 'checked' : ''}></label>
   </div>
   <div class="card"><div class="note">Lời chúc lấy từ file <b>loichuc.txt</b> trên GitHub (mỗi dòng một câu, có thể dùng <b>{a}</b> cho người gửi, <b>{e}</b> cho người nhận). Sửa file đó là cả thẻ trong app lẫn thông báo 8h đều tự đổi, không cần đụng vào máy này.<br>Thông báo đi qua phần <b>Thông báo tự động</b> bên dưới.</div></div>` : ''}
+  <div class="section-title"><span>Giao diện 🎀</span></div>
+  <div class="card">
+    <div class="theme-grid" id="themeGrid">
+      ${[['pink','Hồng ngọt ngào',['#ff5c93','#ffd1e3','#fff0f6']],['peach','Đào pastel',['#ff8a65','#ffd9c9','#fff5ef']],['lavender','Tím mộng mơ',['#a06bff','#e3d6ff','#f6f1ff']],['default','Mặc định',['#007aff','#d1e6ff','#f2f2f7']]]
+        .map(([id, name, cs]) => `<button data-th="${id}" class="${(db.ui.theme || 'default') === id ? 'on' : ''}"><div class="sw2">${cs.map(c => `<i style="background:${c}"></i>`).join('')}</div><b style="font-size:14px">${name}</b></button>`).join('')}
+    </div>
+    <label class="frow"><span class="lbl">Phông chữ tròn dễ thương</span><input type="checkbox" class="switch" id="uiFont" ${db.ui.font === 'round' ? 'checked' : ''}></label>
+    <label class="frow"><span class="lbl">Bo góc mềm mại</span><input type="checkbox" class="switch" id="uiCute" ${db.ui.cute ? 'checked' : ''}></label>
+    <label class="frow"><span class="lbl">Tim bay khi tick thuốc 💗</span><input type="checkbox" class="switch" id="uiHearts" ${db.ui.hearts ? 'checked' : ''}></label>
+    <label class="frow"><span class="lbl">Nền họa tiết trái tim</span><input type="checkbox" class="switch" id="uiPattern" ${db.ui.pattern ? 'checked' : ''}></label>
+  </div>
   <div class="section-title"><span>Thông báo tự động</span></div>
   <div class="card">
     ${!syncBase() ? `
@@ -826,6 +944,13 @@ function viewMore(){
       <div class="pad"><button class="btn" data-act="syncSub">Đăng ký lịch trên iPhone</button><button class="btn ghost" data-act="syncNow">Đồng bộ ngay</button><button class="btn ghost" data-act="syncCopy">Sao chép link lịch</button></div>
       <div class="pad" style="text-align:center"><button class="linkbtn" data-act="syncReset" style="color:var(--sub);font-weight:500">Đổi máy chủ</button></div>`}
   </div>
+  ${syncBase() ? `<div class="section-title"><span>Thông báo của app 🔔</span></div>
+  <div class="card">
+    <div class="frow"><span class="lbl">Thông báo từ Sổ Tay${!isStandalone() ? '<div class="s">Mở app từ biểu tượng ngoài màn hình chính để bật</div>' : '<div class="s">Bấm vào thông báo là mở thẳng app</div>'}</span>
+      ${sync.push ? '<button class="linkbtn" data-act="pushOff" style="color:var(--sub)">Tắt</button>' : '<button class="linkbtn" data-act="pushOn">Bật</button>'}</div>
+    ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
+    <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
+  </div>` : ''}
   ${syncBase() ? `<div class="section-title"><span>Chia sẻ sự kiện với người ấy</span></div>
   <div class="card">
     ${sync.room ? `
@@ -833,8 +958,6 @@ function viewMore(){
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
       <div class="note">Sự kiện thêm trên máy nào cũng hiện ở cả hai máy và vào Lịch iPhone (nếu đã đăng ký lịch ở trên).</div>
-      <div class="frow"><span class="lbl">🔔 Báo khi người kia thêm/sửa/xóa sự kiện${!isStandalone() ? '<div class="s">Mở app từ biểu tượng ngoài màn hình chính để bật</div>' : ''}</span>
-        ${sync.push ? '<button class="linkbtn" data-act="pushOff" style="color:var(--sub)">Tắt</button>' : '<button class="linkbtn" data-act="pushOn">Bật</button>'}</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
       <div class="pad" style="text-align:center"><button class="linkbtn" data-act="roomLeave" style="color:var(--sub);font-weight:500">Hủy ghép đôi</button></div>`
     : `
@@ -850,7 +973,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 2.2</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 3.0</p>`;
 }
 
 function viewCycle(){
@@ -1220,12 +1343,24 @@ $('#nav').onclick = e => {
 };
 
 $('#main').addEventListener('click', async e => {
+  const th = e.target.closest('[data-th]');
+  if (th) { db.ui.theme = th.dataset.th; save(); applyUI(); render(); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const { act, k, id } = b.dataset;
   switch (act) {
-    case 'dose':
+    case 'dose': {
       if (k > todayKey()) return toast('Chưa đến ngày này');
-      toggleDose(k, id); render(); break;
+      const before = !!(db.logs[k] && db.logs[k][id]);
+      toggleDose(k, id); render();
+      if (!before) { heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); notifyTaken(k, [id]); }
+      break;
+    }
+    case 'takeDue': {
+      const tk = todayKey(), ids = dosesOn(tk).filter(d => !d.taken && toMin(d.time) <= nowMin()).map(d => d.id);
+      ids.forEach(i => { const day = db.logs[tk] || (db.logs[tk] = {}); day[i] = Date.now(); });
+      save(); render(); heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); notifyTaken(tk, ids); toast('Giỏi quá 💗');
+      break;
+    }
     case 'addMed': openMed(); break;
     case 'editMed': openMed(id); break;
     case 'addEvent': openEvent(k); break;
@@ -1275,15 +1410,16 @@ $('#main').addEventListener('click', async e => {
       sync.url = u; sync.err = ''; sync.sent = ''; saveSync(); render(); syncNow(true); break;
     }
     case 'syncNow': syncNow(true); break;
-    case 'roomNew': sync.room = genKey().slice(0, 12); sync.roomErr = ''; saveSync(); render(); await syncRoom(); syncNow(false); toast('Đã tạo mã, gửi mã này cho máy kia'); break;
+    case 'roomNew': sync.room = genKey().slice(0, 12); sync.roomErr = ''; saveSync(); render(); await syncRoom(); registerRoomPush(); syncNow(false); toast('Đã tạo mã, gửi mã này cho máy kia'); break;
     case 'roomJoin': {
       const c = ($('#roomIn').value || '').trim();
       if (!/^[A-Za-z0-9_-]{8,64}$/.test(c)) return toast('Mã không hợp lệ');
-      sync.room = c; sync.roomErr = ''; saveSync(); render(); await syncRoom(); syncNow(false); toast('Đã ghép đôi 💞'); break;
+      sync.room = c; sync.roomErr = ''; saveSync(); render(); await syncRoom(); registerRoomPush(); syncNow(false); toast('Đã ghép đôi 💞'); break;
     }
     case 'roomNow': await syncRoom(); toast('Đã cập nhật'); break;
     case 'pushOn': await enablePush(); break;
     case 'wxSet': openWeather(); break;
+    case 'goMeds': state.tab = 'meds'; window.scrollTo(0, 0); render(); break;
     case 'pushOff': await disablePush(); break;
     case 'roomCopy':
       try { await navigator.clipboard.writeText(sync.room); toast('Đã sao chép mã'); } catch (e) { prompt('Mã ghép đôi:', sync.room); }
@@ -1309,7 +1445,7 @@ $('#main').addEventListener('click', async e => {
       downloadFile('uong-thuoc.ics', buildICS(), 'text/calendar');
       break;
     case 'backup': {
-      const text = JSON.stringify({ app: 'sotay', version: 1, exportedAt: new Date().toISOString(), data: db }, null, 2);
+      const text = JSON.stringify({ app: 'sotay', version: 2, exportedAt: new Date().toISOString(), data: db, sync: Object.assign({}, sync, { sent: '' }) }, null, 2);
       const name = `sotay-backup-${todayKey()}.json`;
       if (!(await shareFile(name, text, 'application/json'))) downloadFile(name, text, 'application/json');
       break;
@@ -1317,7 +1453,7 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {} }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui }; save(); render(); toast('Đã xóa');
       break;
   }
 });
@@ -1327,6 +1463,11 @@ $('#main').addEventListener('change', e => {
   if (t.id === 'lvNameFrom' || t.id === 'lvNameTo') { const f = t.id === 'lvNameFrom' ? 'nameFrom' : 'nameTo'; db.love[f] = t.value.trim() || defLove()[f]; save(); toast('Đã lưu'); return; }
   if (t.id === 'lvFrom' || t.id === 'lvTo') { db.love[t.id === 'lvFrom' ? 'from' : 'to'] = t.value.trim() || (t.id === 'lvFrom' ? 'anh' : 'em'); save(); toast('Đã lưu'); return; }
   if (t.id === 'lvTime') { if (t.value) { db.love.time = t.value; save(); toast('Đã lưu'); } return; }
+  if (t.id === 'uiFont') { db.ui.font = t.checked ? 'round' : 'system'; save(); applyUI(); return; }
+  if (t.id === 'uiCute') { db.ui.cute = t.checked; save(); applyUI(); return; }
+  if (t.id === 'uiHearts') { db.ui.hearts = t.checked; save(); if (t.checked) { const r = t.getBoundingClientRect(); heartsAt(r.left + 20, r.top); } return; }
+  if (t.id === 'uiPattern') { db.ui.pattern = t.checked; save(); applyUI(); return; }
+  if (t.id === 'medPushSw') { sync.medPush = t.checked; saveSync(); syncNow(false); toast(t.checked ? 'Nhắc thuốc qua thông báo app' : 'Nhắc thuốc qua app Lịch'); return; }
   if (t.id === 'syMe') { sync.me = t.value.trim(); saveSync(); toast('Đã lưu'); return; }
   if (t.id === 'lvOn') { db.love.enabled = t.checked; save(); toast(t.checked ? 'Đã bật' : 'Đã tắt'); return; }
   if (t.id === 'cyAuto') { c.auto = t.checked; save(); render(); }
@@ -1341,8 +1482,9 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {} };
-    save(); render(); toast('Đã khôi phục');
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}) };
+    if (obj.sync && obj.sync.key) { sync = Object.assign({}, obj.sync, { sent: '', push: false, subJson: null }); saveSync(); }
+    save(); applyUI(); render(); scheduleSync(300); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
 };
 
@@ -1355,6 +1497,9 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 fetchLoveLines();
 scheduleSync(800);
 loadWeather(false);
+if (sync.push && pushSupported()) navigator.serviceWorker.ready.then(r => r.pushManager.getSubscription()).then(s => {
+  if (s && JSON.stringify(s.toJSON()) !== JSON.stringify(sync.subJson)) { sync.subJson = s.toJSON(); saveSync(); registerRoomPush(); scheduleSync(300); }
+}).catch(() => {});
 setInterval(() => { const c = document.getElementById('clock'); if (c) { const h = clockHTML(); if (c.innerHTML !== h) c.innerHTML = h; } }, 1000);
 setInterval(() => { if (!document.hidden) syncRoom(); }, 120000);
 </script>

@@ -202,7 +202,56 @@ async function notifyRoom(env, room, fromDevice, name, changes) {
   if (dirty) await env.SOTAY.put('push:' + room, JSON.stringify(reg));
 }
 
+async function updateMedIndex(env, key, on) {
+  const idx = JSON.parse((await env.SOTAY.get('mp-index')) || '[]');
+  const has = idx.includes(key);
+  if (on && !has) { idx.push(key); await env.SOTAY.put('mp-index', JSON.stringify(idx)); }
+  if (!on && has) await env.SOTAY.put('mp-index', JSON.stringify(idx.filter(k => k !== key)));
+}
+
+async function sendToRoom(env, room, exceptDevice, msg) {
+  if (!room) return;
+  const raw = await env.SOTAY.get('push:' + room);
+  if (!raw) return;
+  const reg = JSON.parse(raw), vapid = await getVapid(env);
+  let dirty = false;
+  for (const [id, d] of Object.entries(reg.devices || {})) {
+    if (id === exceptDevice || !d.sub) continue;
+    try { const r = await sendPush(d.sub, msg, vapid); if (r.status === 404 || r.status === 410) { delete reg.devices[id]; dirty = true; } } catch (err) {}
+  }
+  if (dirty) await env.SOTAY.put('push:' + room, JSON.stringify(reg));
+}
+
+async function runMedReminders(env, when) {
+  const idx = JSON.parse((await env.SOTAY.get('mp-index')) || '[]');
+  if (!idx.length) return;
+  const vapid = await getVapid(env);
+  for (const key of idx) {
+    const raw = await env.SOTAY.get('cal:' + key);
+    if (!raw) continue;
+    const data = JSON.parse(raw), sub = data.medPush && data.medPush.sub;
+    const off = typeof data.tzOffset === 'number' ? data.tzOffset : -420;
+    const stamp = mins => { const t = new Date(when - mins * 60000 - off * 60000);
+      return `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}`; };
+    const [s0, s15, s30, s60] = [0, 15, 30, 60].map(stamp);
+    const who = data.me || 'Người ấy';
+    for (const d of data.doses || []) {
+      const own = async msg => { if (!sub) return; try { const r = await sendPush(sub, msg, vapid); if (r.status === 404 || r.status === 410) { /* hết hạn */ } } catch (err) {} };
+      if (d.at === s0) await own({ title: '💊 Đến giờ uống thuốc', body: `${d.meds} · ${d.time} · bấm để đánh dấu đã uống` });
+      else if (d.at === s15 || d.at === s30) await own({ title: '⏰ Nhớ uống thuốc nha', body: `${d.meds} · từ ${d.time} · chưa đánh dấu đã uống` });
+      else if (d.at === s60) {
+        await own({ title: '⏰ Đã quá giờ uống thuốc 1 tiếng', body: `${d.meds} · ${d.time} · uống xong nhớ tick nha` });
+        await sendToRoom(env, data.room, data.device, { title: `⚠️ ${who} chưa uống thuốc`, body: `${d.meds} · ${d.time} · đã quá 1 tiếng chưa tick` });
+      }
+    }
+  }
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runMedReminders(env, event.scheduledTime || Date.now()));
+  },
+
   async fetch(req, env, ctx) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     const url = new URL(req.url);
@@ -210,6 +259,20 @@ export default {
     if (url.pathname === '/vapid') {
       if (!env.SOTAY) return new Response('Thiếu KV binding tên SOTAY', { status: 500, headers: CORS });
       return json({ publicKey: (await getVapid(env)).publicKey });
+    }
+    if (url.pathname === '/test-push' && req.method === 'PUT') {
+      let b; try { b = JSON.parse(await req.text()); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+      if (!b.sub || !b.sub.endpoint) return new Response('Thiếu sub', { status: 400, headers: CORS });
+      const r = await sendPush(b.sub, { title: 'Sổ Tay', body: 'Đã bật thông báo 🔔' }, await getVapid(env));
+      return json({ ok: r.ok, status: r.status });
+    }
+    const nm = url.pathname.match(/^\/notify\/([A-Za-z0-9_-]{8,64})\/([A-Za-z0-9_-]{8,64})$/);
+    if (nm && req.method === 'PUT') {
+      let b; try { b = JSON.parse(await req.text()); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+      const msg = { title: String(b.title || 'Sổ Tay').slice(0, 80), body: String(b.body || '').slice(0, 200) };
+      const p = sendToRoom(env, nm[1], nm[2], msg);
+      if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p;
+      return json({ ok: true });
     }
     const pm = url.pathname.match(/^\/push\/([A-Za-z0-9_-]{8,64})\/([A-Za-z0-9_-]{8,64})$/);
     if (pm) {
@@ -257,8 +320,9 @@ export default {
     if (req.method === 'PUT') {
       const body = await req.text();
       if (body.length > 300000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
-      try { JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+      let parsed; try { parsed = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
       await env.SOTAY.put(key, body);
+      await updateMedIndex(env, m[1], !!((parsed.medPush && parsed.medPush.sub) || parsed.room) && Array.isArray(parsed.doses) && parsed.doses.length > 0);
       return new Response('ok', { headers: CORS });
     }
 
