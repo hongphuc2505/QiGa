@@ -482,7 +482,7 @@ function viewMeds(){
 function viewMore(){
   const days = Object.keys(db.logs).length;
   return `<h1>Khác</h1><p class="subtitle">Dữ liệu chỉ lưu trên máy này</p>
-  <div class="section-title"><span>Lời chúc mỗi sáng</span></div>
+  ${state.loveAdmin ? `<div class="section-title"><span>Lời chúc mỗi sáng 🤫</span><button class="linkbtn" data-act="loveHide">Ẩn</button></div>
   <div class="card">
     <label class="f inline"><span>Tên người gửi</span><input id="lvNameFrom" value="${esc(db.love.nameFrom)}" autocomplete="off"></label>
     <label class="f inline"><span>Tên người nhận</span><input id="lvNameTo" value="${esc(db.love.nameTo)}" autocomplete="off"></label>
@@ -501,7 +501,7 @@ function viewMore(){
       Trong câu chúc, <b>{a}</b> là người gửi, <b>{e}</b> là người nhận.
     </div>
     <div class="pad"><button class="btn pink" data-act="loveIcs">Thêm lời chúc vào Lịch iPhone</button></div>
-  </div>
+  </div>` : ''}
   <div class="section-title"><span>Sao lưu</span></div>
   <div class="card">
     <div class="note">Dữ liệu nằm trong trình duyệt của iPhone. Nên sao lưu định kỳ (lưu vào app Tệp hoặc iCloud Drive), nhất là trước khi xóa app khỏi màn hình chính.<br>Hiện có ${db.meds.length} thuốc, ${days} ngày có ghi nhận, ${db.cycle.periods.length} kỳ kinh.</div>
@@ -509,7 +509,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px">Sổ Tay · bản 1.2</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 1.3</p>`;
 }
 
 function viewCycle(){
@@ -817,6 +817,7 @@ function toast(msg){
 $('#nav').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
   state.tab = b.dataset.tab;
+  state.loveAdmin = false;
   if (state.tab === 'cal') { /* giữ ngày đang chọn */ }
   window.scrollTo(0, 0); render();
 };
@@ -862,6 +863,14 @@ $('#main').addEventListener('click', async e => {
     case 'cPrev': state.cmonth = new Date(state.cmonth.getFullYear(), state.cmonth.getMonth() - 1, 1); render(); break;
     case 'cNext': state.cmonth = new Date(state.cmonth.getFullYear(), state.cmonth.getMonth() + 1, 1); render(); break;
     case 'cToday': { const d = new Date(); state.cmonth = new Date(d.getFullYear(), d.getMonth(), 1); render(); break; }
+    case 'secret': {
+      const now = Date.now();
+      state.taps = (now - (state.tapAt || 0) < 1500) ? (state.taps || 0) + 1 : 1;
+      state.tapAt = now;
+      if (state.taps >= 5) { state.taps = 0; state.loveAdmin = true; render(); window.scrollTo(0, 0); }
+      break;
+    }
+    case 'loveHide': state.loveAdmin = false; render(); break;
     case 'loveIcs':
       downloadFile('loi-chuc.ics', buildLoveICS(90), 'text/calendar');
       break;
