@@ -14,8 +14,8 @@
 <link rel="icon" href="icon-180.png">
 <title>Sổ Tay</title>
 <style>
-:root{--bg:#f2f2f7;--card:#fff;--text:#1c1c1e;--sub:#8e8e93;--line:#e5e5ea;--accent:#007aff;--accent-soft:rgba(0,122,255,.12);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--shadow:0 1px 2px rgba(0,0,0,.04)}
-@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--sub:#8e8e93;--line:#2c2c2e;--accent:#0a84ff;--accent-soft:rgba(10,132,255,.18);--green:#30d158;--orange:#ff9f0a;--red:#ff453a;--shadow:none}}
+:root{--bg:#f2f2f7;--card:#fff;--text:#1c1c1e;--sub:#8e8e93;--line:#e5e5ea;--accent:#007aff;--accent-soft:rgba(0,122,255,.12);--green:#34c759;--orange:#ff9500;--red:#ff3b30;--pink:#ff2d55;--shadow:0 1px 2px rgba(0,0,0,.04)}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--sub:#8e8e93;--line:#2c2c2e;--accent:#0a84ff;--accent-soft:rgba(10,132,255,.18);--green:#30d158;--orange:#ff9f0a;--red:#ff453a;--pink:#ff375f;--shadow:none}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
 body{padding-top:env(safe-area-inset-top)}
@@ -99,6 +99,31 @@ textarea{resize:none;min-height:64px}
 .note ol{margin:6px 0 0;padding-left:20px}
 .note b{color:var(--text)}
 .pad{padding:0 14px 14px}
+.btn.pink{background:var(--pink)}
+.status{padding:16px}
+.status .big{margin:2px 0 6px}
+.cday{display:flex;flex-direction:column;align-items:center;padding:4px 0 6px;gap:3px;font-variant-numeric:tabular-nums}
+.cday.out{opacity:.3}
+.cday .n{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font-size:16px}
+.cday.p .n{background:var(--pink);color:#fff;font-weight:700}
+.cday.pp .n{box-shadow:inset 0 0 0 2px var(--pink);color:var(--pink);font-weight:600}
+.cday.f .n{background:rgba(255,149,0,.2);color:var(--orange);font-weight:600}
+.cday.o .n{background:var(--orange);color:#fff;font-weight:700}
+.cday.sf .n{color:var(--green)}
+.cday .td{width:5px;height:5px;border-radius:50%}
+.cday.today .td{background:var(--text)}
+.legend i.ring{background:none;box-shadow:inset 0 0 0 1.5px var(--pink)}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:.5px solid var(--line)}
+.frow:last-child{border-bottom:0}
+.frow .lbl{flex:1}
+.frow input[type=number]{width:64px;text-align:center;background:var(--bg);border-radius:8px;padding:6px}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:600}
+.switch{-webkit-appearance:none;appearance:none;width:51px;height:31px;border-radius:99px;background:var(--line);position:relative;transition:.2s;flex:none;padding:0;cursor:pointer}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.switch:checked{background:var(--green)}
+.switch:checked::after{left:22px}
+.frow input:disabled{opacity:.4}
 </style>
 </head>
 <body>
@@ -107,6 +132,7 @@ textarea{resize:none;min-height:64px}
 <nav id="nav">
   <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></svg>Hôm nay</button>
   <button data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Lịch</button>
+  <button data-tab="cycle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.6 4.4 6.2 8 6.2 11.1a6.2 6.2 0 0 1-12.4 0c0-3.1 2.6-6.7 6.2-11.1z"/></svg>Chu kỳ</button>
   <button data-tab="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="8.2" width="18.4" height="7.6" rx="3.8" transform="rotate(-45 12 12)"/><path d="m8.8 8.8 6.4 6.4"/></svg>Thuốc</button>
   <button data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg>Khác</button>
 </nav>
@@ -131,7 +157,9 @@ const ICS_DAYS = ['SU','MO','TU','WE','TH','FR','SA'];
 /* ---------- dữ liệu ---------- */
 function load(){ try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){ return null; } }
 let db = load() || { meds: [], logs: {}, events: {} };
+const defCycle = () => ({ periods: [], cycleLen: 28, periodLen: 5, auto: true });
 db.meds = db.meds || []; db.logs = db.logs || {}; db.events = db.events || {};
+db.cycle = Object.assign(defCycle(), db.cycle || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } }
 
 /* ---------- tiện ích ngày ---------- */
@@ -170,9 +198,69 @@ function toggleDose(k, id){
   save();
 }
 
+/* ---------- chu kỳ ---------- */
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const diffDays = (a, b) => Math.round((parseKey(b) - parseKey(a)) / 864e5); // b - a
+const periodsAsc = () => db.cycle.periods.slice().sort((a, b) => a.start.localeCompare(b.start));
+const periodEnd = p => addDays(p.start, (p.len || db.cycle.periodLen || 5) - 1);
+const loggedAt = k => db.cycle.periods.find(p => p.start <= k && k <= periodEnd(p));
+function gaps(){
+  const ps = periodsAsc(), g = [];
+  for (let i = 1; i < ps.length; i++) g.push(diffDays(ps[i-1].start, ps[i].start));
+  return g;
+}
+function avgCycle(){
+  const c = db.cycle;
+  if (c.auto) {
+    const g = gaps().filter(x => x >= 20 && x <= 45).slice(-6);
+    if (g.length) return Math.round(g.reduce((a, b) => a + b, 0) / g.length);
+  }
+  return Math.min(45, Math.max(20, +c.cycleLen || 28));
+}
+function cycleStarts(){
+  const ps = periodsAsc();
+  if (!ps.length) return [];
+  const cl = avgCycle(), pl = db.cycle.periodLen || 5;
+  const out = ps.map(p => ({ start: p.start, len: p.len || pl, pred: false, id: p.id }));
+  let s = ps[ps.length - 1].start;
+  for (let i = 0; i < 24; i++) { s = addDays(s, cl); out.push({ start: s, len: pl, pred: true }); }
+  return out;
+}
+function cycleInfo(k, S, cl){
+  let i = -1;
+  for (let j = 0; j < S.length; j++) { if (S[j].start <= k) i = j; else break; }
+  if (i < 0) return null;
+  const s = S[i], day = diffDays(s.start, k) + 1;
+  let next = S[i + 1] ? S[i + 1].start : addDays(s.start, cl);
+  if (diffDays(s.start, next) > 45) next = addDays(s.start, cl);
+  if (k >= next) return { type: 'unknown', day };
+  if (day <= s.len) return { type: s.pred ? 'predPeriod' : 'period', day };
+  const ov = addDays(next, -14);
+  if (k === ov) return { type: 'ovulation', day };
+  if (k >= addDays(ov, -5) && k <= addDays(ov, 1)) return { type: 'fertile', day };
+  return { type: 'safe', day };
+}
+const CY = {
+  period: ['Đang tới tháng', 'var(--pink)', 'p'],
+  predPeriod: ['Dự kiến tới tháng', 'var(--pink)', 'pp'],
+  fertile: ['Ngày nguy hiểm', 'var(--orange)', 'f'],
+  ovulation: ['Rụng trứng · Nguy hiểm', 'var(--orange)', 'o'],
+  safe: ['Ngày an toàn', 'var(--green)', 'sf'],
+  unknown: ['Chưa rõ', 'var(--sub)', '']
+};
+function savePeriod(rec){
+  // bỏ các kỳ khác bị chồng lấn với kỳ này
+  const end = addDays(rec.start, rec.len - 1);
+  db.cycle.periods = db.cycle.periods.filter(p => p.id === rec.id || periodEnd(p) < rec.start || p.start > end);
+  const i = db.cycle.periods.findIndex(p => p.id === rec.id);
+  if (i >= 0) db.cycle.periods[i] = rec; else db.cycle.periods.push(rec);
+  save();
+}
+
 /* ---------- state ---------- */
-const state = { tab: 'today', month: null, sel: todayKey() };
+const state = { tab: 'today', month: null, cmonth: null, sel: todayKey() };
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
+state.cmonth = new Date(state.month);
 
 /* ---------- views ---------- */
 function doseRow(d, k){
@@ -231,6 +319,7 @@ function dayMarks(k, tk){
     else c = k < tk ? 'var(--red)' : 'var(--line)';
     m += `<i style="background:${c}"></i>`;
   }
+  if (loggedAt(k)) m += `<i style="background:var(--pink)"></i>`;
   if ((db.events[k] || []).length) m += `<i style="background:var(--accent)"></i>`;
   return m;
 }
@@ -259,7 +348,7 @@ function viewCal(){
     </div>
     <div class="wk">${[1,2,3,4,5,6,0].map(d => `<div>${WD_SHORT[d]}</div>`).join('')}</div>
     <div class="grid">${grid}</div>
-    <div class="legend"><span><i style="background:var(--green)"></i>Đủ</span><span><i style="background:var(--orange)"></i>Thiếu</span><span><i style="background:var(--red)"></i>Bỏ lỡ</span><span><i style="background:var(--accent)"></i>Sự kiện</span></div>
+    <div class="legend"><span><i style="background:var(--green)"></i>Đủ</span><span><i style="background:var(--orange)"></i>Thiếu</span><span><i style="background:var(--red)"></i>Bỏ lỡ</span><span><i style="background:var(--accent)"></i>Sự kiện</span><span><i style="background:var(--pink)"></i>Kinh nguyệt</span></div>
   </div>
   <div class="section-title"><span>${fmtLong(sel)}${sel === tk ? ' · Hôm nay' : ''}</span>${sel !== tk ? '<button class="linkbtn" data-act="goToday">Về hôm nay</button>' : ''}</div>
   <div class="card">${ds.length ? ds.map(d => doseRow(d, sel)).join('') : '<div class="empty" style="padding:16px">Không có lịch uống thuốc</div>'}</div>`;
@@ -303,17 +392,88 @@ function viewMore(){
   return `<h1>Khác</h1><p class="subtitle">Dữ liệu chỉ lưu trên máy này</p>
   <div class="section-title"><span>Sao lưu</span></div>
   <div class="card">
-    <div class="note">Dữ liệu nằm trong trình duyệt của iPhone. Nên sao lưu định kỳ (lưu vào app Tệp hoặc iCloud Drive), nhất là trước khi xóa app khỏi màn hình chính.<br>Hiện có ${db.meds.length} thuốc, ${days} ngày có ghi nhận.</div>
+    <div class="note">Dữ liệu nằm trong trình duyệt của iPhone. Nên sao lưu định kỳ (lưu vào app Tệp hoặc iCloud Drive), nhất là trước khi xóa app khỏi màn hình chính.<br>Hiện có ${db.meds.length} thuốc, ${days} ngày có ghi nhận, ${db.cycle.periods.length} kỳ kinh.</div>
     <div class="pad"><button class="btn ghost" data-act="backup">Xuất file sao lưu</button><button class="btn ghost" data-act="restore">Khôi phục từ file</button></div>
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px">Sổ Tay · bản 1.0</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px">Sổ Tay · bản 1.1</p>`;
+}
+
+function viewCycle(){
+  const tk = todayKey(), c = db.cycle;
+  const S = cycleStarts(), cl = avgCycle();
+  const info = S.length ? cycleInfo(tk, S, cl) : null;
+  let h = `<h1>Chu kỳ</h1><p class="subtitle">${fmtLong(tk)}</p>`;
+  if (!info) {
+    h += `<div class="card empty">Chưa có dữ liệu.<br>Bấm nút bên dưới vào ngày bắt đầu tới tháng, hoặc chạm một ngày trên lịch để nhập các kỳ trước.</div>`;
+  } else {
+    const [lab, col] = CY[info.type];
+    const nextP = S.find(x => x.start > tk);
+    h += `<div class="card status">
+      <div class="s">Ngày thứ ${info.day} của chu kỳ</div>
+      <div class="big" style="color:${col}">${lab}</div>
+      ${nextP ? `<div class="s">Kỳ tới dự kiến: <b style="color:var(--text)">${fmtShort(nextP.start)}</b> · còn ${diffDays(tk, nextP.start)} ngày</div>` : ''}
+      <div class="s">Chu kỳ ${c.auto && gaps().length ? 'trung bình' : ''} ${cl} ngày</div>
+    </div>`;
+  }
+  const cur = db.cycle.periods.find(p => p.start <= tk && diffDays(p.start, tk) < 12 && (diffDays(p.start, tk) < (p.len || 5) + 3));
+  if (cur) h += `<button class="btn ghost" data-act="cyEnd" data-id="${cur.id}">Hết kinh hôm nay (ngày thứ ${diffDays(cur.start, tk) + 1})</button>`;
+  else h += `<button class="btn pink" data-act="cyToday">Hôm nay tới tháng</button>`;
+
+  // lịch
+  const y = state.cmonth.getFullYear(), mo = state.cmonth.getMonth();
+  const offset = (new Date(y, mo, 1).getDay() + 6) % 7;
+  const cells = Math.ceil((offset + new Date(y, mo + 1, 0).getDate()) / 7) * 7;
+  let grid = '';
+  for (let i = 0; i < cells; i++) {
+    const d = new Date(y, mo, 1 - offset + i), k = keyOf(d);
+    const inf = S.length ? cycleInfo(k, S, cl) : null;
+    const cls = ['cday', d.getMonth() !== mo ? 'out' : '', k === tk ? 'today' : '', inf ? CY[inf.type][2] : ''].join(' ');
+    grid += `<button class="${cls}" data-act="cyPick" data-k="${k}"><span class="n">${d.getDate()}</span><span class="td"></span></button>`;
+  }
+  h += `<div class="card" style="margin-top:16px">
+    <div class="cal-head">
+      <button class="navbtn" data-act="cPrev" aria-label="Tháng trước">‹</button>
+      <button class="m" data-act="cToday">Tháng ${mo + 1}, ${y}</button>
+      <button class="navbtn" data-act="cNext" aria-label="Tháng sau">›</button>
+    </div>
+    <div class="wk">${[1,2,3,4,5,6,0].map(d => `<div>${WD_SHORT[d]}</div>`).join('')}</div>
+    <div class="grid">${grid}</div>
+    <div class="legend">
+      <span><i style="background:var(--pink)"></i>Kỳ kinh</span><span><i class="ring"></i>Dự kiến</span>
+      <span><i style="background:var(--orange)"></i>Rụng trứng</span><span><i style="background:rgba(255,149,0,.35)"></i>Nguy hiểm</span>
+      <span><i style="background:var(--green)"></i>An toàn</span>
+    </div>
+  </div>`;
+
+  // lịch sử
+  const ps = periodsAsc().reverse();
+  h += `<div class="section-title"><span>Lịch sử</span><button class="linkbtn" data-act="cyAdd">+ Thêm kỳ</button></div><div class="card">`;
+  h += ps.length ? ps.map((p, i) => {
+    const newer = ps[i - 1];
+    const len = newer ? diffDays(p.start, newer.start) : null;
+    return `<button class="row" data-act="cyEdit" data-id="${p.id}">
+      <span class="dot" style="background:var(--pink)"></span>
+      <span class="main"><div class="t">${fmtShort(p.start)} → ${fmtShort(periodEnd(p))}</div>
+      <div class="s">${p.len} ngày hành kinh${len ? ` · chu kỳ ${len} ngày` : ' · kỳ gần nhất'}</div></span>
+      <span style="color:var(--sub);font-size:20px">›</span></button>`;
+  }).join('') : '<div class="empty" style="padding:16px">Chưa có kỳ nào</div>';
+  h += `</div>`;
+
+  // cài đặt
+  h += `<div class="section-title"><span>Cài đặt</span></div><div class="card">
+    <label class="frow"><span class="lbl">Tự tính độ dài chu kỳ theo lịch sử</span><input type="checkbox" class="switch" id="cyAuto" ${c.auto ? 'checked' : ''}></label>
+    <label class="frow"><span class="lbl">Độ dài chu kỳ (ngày)${c.auto ? '<div class="s">Dùng khi chưa đủ 2 kỳ</div>' : ''}</span><input type="number" inputmode="numeric" id="cyLen" min="20" max="45" value="${c.cycleLen}"></label>
+    <label class="frow"><span class="lbl">Số ngày hành kinh mặc định</span><input type="number" inputmode="numeric" id="cyPLen" min="1" max="15" value="${c.periodLen}"></label>
+  </div>
+  <div class="card"><div class="note">Ngày rụng trứng được ước tính khoảng 14 ngày trước kỳ kế tiếp. Ngày nguy hiểm = 5 ngày trước đến 1 ngày sau rụng trứng. Đây chỉ là ước tính theo cách tính lịch; chu kỳ không đều thì sai lệch nhiều, nên <b>đừng dùng làm cách tránh thai duy nhất</b>.</div></div>`;
+  return h;
 }
 
 function render(){
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
-  $('#main').innerHTML = ({ today: viewToday, cal: viewCal, meds: viewMeds, more: viewMore })[state.tab]();
+  $('#main').innerHTML = ({ today: viewToday, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore })[state.tab]();
 }
 
 /* ---------- sheet ---------- */
@@ -421,6 +581,64 @@ function openEvent(k, id){
   });
 }
 
+function openPeriod(id, startK){
+  const ex = db.cycle.periods.find(p => p.id === id);
+  const p = ex || { id: uid(), start: startK || todayKey(), len: db.cycle.periodLen || 5 };
+  const body = `
+  <div class="card">
+    <label class="f"><span>Ngày bắt đầu</span><input type="date" id="pStart" value="${p.start}" max="${todayKey()}"></label>
+    <div class="frow"><span class="lbl">Số ngày kéo dài</span>
+      <span class="stepper"><button type="button" id="pMinus">−</button><input type="number" inputmode="numeric" id="pLen" min="1" max="15" value="${p.len}"><button type="button" id="pPlus">+</button></span>
+    </div>
+  </div>
+  <button class="btn pink" id="pSave">Lưu</button>
+  ${ex ? '<button class="btn danger" id="pDel">Xóa kỳ này</button>' : ''}`;
+  openSheet(ex ? 'Sửa kỳ kinh' : 'Thêm kỳ kinh', body, () => {
+    const L = $('#pLen');
+    $('#pMinus').onclick = () => { L.value = Math.max(1, (+L.value || 1) - 1); };
+    $('#pPlus').onclick = () => { L.value = Math.min(15, (+L.value || 0) + 1); };
+    $('#pSave').onclick = () => {
+      const start = $('#pStart').value;
+      const len = Math.round(+L.value);
+      if (!start) return toast('Chọn ngày bắt đầu');
+      if (start > todayKey()) return toast('Chưa đến ngày này');
+      if (!(len >= 1 && len <= 15)) return toast('Số ngày từ 1 đến 15');
+      savePeriod({ id: p.id, start, len });
+      closeSheet(); render(); toast('Đã lưu');
+    };
+    if (ex) $('#pDel').onclick = () => {
+      if (!confirm('Xóa kỳ kinh này?')) return;
+      db.cycle.periods = db.cycle.periods.filter(x => x.id !== ex.id);
+      save(); closeSheet(); render();
+    };
+  });
+}
+
+function openCyDay(k){
+  const S = cycleStarts();
+  const inf = S.length ? cycleInfo(k, S, avgCycle()) : null;
+  const p = loggedAt(k);
+  const future = k > todayKey();
+  let body = `<div class="card status">
+    ${inf ? `<div class="s">Ngày thứ ${inf.day} của chu kỳ</div><div class="big" style="color:${CY[inf.type][1]}">${CY[inf.type][0]}</div>` : '<div class="s">Chưa có dữ liệu cho ngày này</div>'}
+  </div>`;
+  if (p) body += `<button class="btn ghost" id="dEdit">Sửa kỳ kinh này</button><button class="btn danger" id="dDel">Xóa kỳ kinh này</button>`;
+  else if (!future) body += `<button class="btn pink" id="dStart">Bắt đầu tới tháng từ ngày này</button>`;
+  else body += `<p class="subtitle" style="text-align:center">Ngày trong tương lai chỉ hiển thị dự đoán.</p>`;
+  openSheet(fmtLong(k), body, () => {
+    if (p) {
+      $('#dEdit').onclick = () => openPeriod(p.id);
+      $('#dDel').onclick = () => {
+        if (!confirm('Xóa kỳ kinh này?')) return;
+        db.cycle.periods = db.cycle.periods.filter(x => x.id !== p.id);
+        save(); closeSheet(); render();
+      };
+    } else if (!future) {
+      $('#dStart').onclick = () => openPeriod(null, k);
+    }
+  });
+}
+
 /* ---------- xuất lịch (.ics) ---------- */
 function icsEsc(s){ return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
 function fold(line){
@@ -515,6 +733,23 @@ $('#main').addEventListener('click', async e => {
       const d = new Date(); state.month = new Date(d.getFullYear(), d.getMonth(), 1);
       render(); break;
     }
+    case 'cyToday': {
+      const tk = todayKey();
+      if (loggedAt(tk)) return toast('Hôm nay đã nằm trong một kỳ');
+      savePeriod({ id: uid(), start: tk, len: db.cycle.periodLen || 5 });
+      render(); toast('Đã ghi: tới tháng hôm nay'); break;
+    }
+    case 'cyEnd': {
+      const p = db.cycle.periods.find(x => x.id === id); if (!p) return;
+      p.len = Math.min(15, diffDays(p.start, todayKey()) + 1);
+      save(); render(); toast(`Kỳ này kéo dài ${p.len} ngày`); break;
+    }
+    case 'cyPick': openCyDay(k); break;
+    case 'cyAdd': openPeriod(); break;
+    case 'cyEdit': openPeriod(id); break;
+    case 'cPrev': state.cmonth = new Date(state.cmonth.getFullYear(), state.cmonth.getMonth() - 1, 1); render(); break;
+    case 'cNext': state.cmonth = new Date(state.cmonth.getFullYear(), state.cmonth.getMonth() + 1, 1); render(); break;
+    case 'cToday': { const d = new Date(); state.cmonth = new Date(d.getFullYear(), d.getMonth(), 1); render(); break; }
     case 'ics':
       if (!db.meds.length) return toast('Chưa có thuốc nào để xuất');
       downloadFile('uong-thuoc.ics', buildICS(), 'text/calendar');
@@ -527,10 +762,17 @@ $('#main').addEventListener('click', async e => {
     }
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
-      if (!confirm('Xóa toàn bộ thuốc, lịch sử uống và sự kiện? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {} }; save(); render(); toast('Đã xóa');
+      if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle() }; save(); render(); toast('Đã xóa');
       break;
   }
+});
+
+$('#main').addEventListener('change', e => {
+  const t = e.target, c = db.cycle;
+  if (t.id === 'cyAuto') { c.auto = t.checked; save(); render(); }
+  else if (t.id === 'cyLen') { const v = Math.round(+t.value); if (v >= 20 && v <= 45) { c.cycleLen = v; save(); render(); } else { toast('Chu kỳ từ 20 đến 45 ngày'); t.value = c.cycleLen; } }
+  else if (t.id === 'cyPLen') { const v = Math.round(+t.value); if (v >= 1 && v <= 15) { c.periodLen = v; save(); render(); } else { toast('Từ 1 đến 15 ngày'); t.value = c.periodLen; } }
 });
 
 $('#fileIn').onchange = async () => {
@@ -540,7 +782,7 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {} };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}) };
     save(); render(); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
 };
