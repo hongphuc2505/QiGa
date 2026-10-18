@@ -434,7 +434,7 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .vbar button{color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:6px 12px;font-weight:700}
 .av.img{padding:0;overflow:hidden;border-style:solid}
 .av.img img{width:100%;height:100%;object-fit:cover;display:block}
-.av.mini{width:18px;height:18px;font-size:10px;border-width:1px;display:inline-grid;vertical-align:-4px;margin-right:4px}
+.av.mini,:root[data-theme=paper] .av.mini{width:18px;height:18px;font-size:10px;line-height:1;border-width:1px;display:inline-grid;vertical-align:-4px;margin-right:4px}
 .av.big{width:56px;height:56px;font-size:24px}
 .avrow{gap:12px}
 .hact small{display:block;font-size:10px;opacity:.8}
@@ -489,7 +489,9 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .locbtns button[disabled]{opacity:.55}
 .duo .pairhint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font-size:14px;color:var(--sub)}
 .backbtn{color:var(--accent);font-weight:700;font-size:16px;padding:8px 14px 8px 0;min-height:44px}
-.subbar{position:sticky;top:-8px;z-index:30;margin:-8px -16px 0;padding:8px 16px 0;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.subbar .sbt{position:absolute;left:50%;top:50%;transform:translate(-50%,-30%);font-weight:700;font-size:16px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+:root[data-theme=paper] .subbar .sbt{font-family:var(--hand);font-weight:400;font-size:22px}
+.subbar{position:sticky;top:-8px;z-index:30;margin:-8px -16px 0;padding:8px 16px 0;background:var(--bg);box-shadow:0 6px 8px -6px rgba(125,35,65,.18)}
 .apps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 4px;margin:16px 0 4px}
 .app{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--text)}
 .app .ic{position:relative;width:56px;height:56px;border-radius:18px;display:grid;place-items:center;box-shadow:0 2px 0 rgba(125,35,65,.08)}
@@ -1461,9 +1463,9 @@ function duoCard(){
     h += `<div class="peer"><span class="av q">?</span><div><div class="t">Chưa có tin từ máy kia</div><div class="s">Máy kia mở app bản mới là thấy</div></div></div>`;
   } else {
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
-    const lastMsg = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch') && !isMineH(x)).sort((a, b) => b.at - a.at)[0];
-    const showMsg = lastMsg && Date.now() - lastMsg.at < 48 * 3600e3 && (!fresh || !p.mood.note || lastMsg.at > p.mood.at);
-    const line = showMsg ? `“${esc(lastMsg.kind === 'touch' ? lastMsg.text : lastMsg.note)}” · ${ago(lastMsg.at)}` : fresh && p.mood.note ? `“${esc(p.mood.note)}” · ${ago(p.mood.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
+    const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood') && !isMineH(x)).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
+    const lcText = x => { if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
+    const line = lc ? `${lcText(lc)} · ${ago(lc.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
     const un = unreadChat();
     h += `<button class="peer peerbtn" data-act="goHist">${avSpan(av, pn)}<span class="pm"><span class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} <i class="mf">${m.svg}</i>` : `${esc(pn)}`}</span><span class="s">${line}</span></span><span class="chatpill">Chat${un ? ` <b>${un}</b>` : ''} ›</span></button>`;
     const ls = locState(p);
@@ -1578,7 +1580,9 @@ const meKey = () => sync.me || 'Mình';
 const photoUrl = id => `${syncBase()}/photo/${sync.room}/${id}`;
 const wdUp = k => WD_LONG[parseKey(k).getDay()].toUpperCase();
 function relDay(ms){ const k = keyOf(new Date(ms)), d = diffDays(k, todayKey()); return d === 0 ? 'hôm nay' : d === 1 ? 'hôm qua' : fmtDM(k); }
-const subBack = () => `<div class="subbar"><button class="backbtn" data-act="usp" data-s="">‹ Hai đứa</button></div>`;
+const TABNAME = { today: 'Hôm nay', health: 'Sức khỏe', us: 'Hai đứa', more: 'Khác' };
+const subBack = title => `<div class="subbar"><button class="backbtn" data-act="goBack">‹ ${TABNAME[state.back] || 'Hai đứa'}</button>${title ? `<span class="sbt">${title}</span>` : ''}</div>`;
+function goBack(){ if (state.back && state.back !== 'us') state.tab = state.back; state.back = null; state.usp = ''; state.chatPanel = false; $('#main').scrollTop = 0; render(); }
 
 /* --- hẹn hò --- */
 const IDEAS = ['Đi ăn lẩu rồi xem phim', 'Picnic công viên, mang đồ ăn tự làm', 'Nấu một bữa tối cùng nhau', 'Đi cà phê sách, mỗi đứa chọn cuốn cho đứa kia',
@@ -1965,7 +1969,7 @@ function histItem(x, mine){
   if (!m) return '';
   return `<div class="hb ${mine ? 'me' : ''}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
 }
-function openChat(){ state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
+function openChat(){ if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
 function chatToEnd(){ const m = $('#main'); if (m) m.scrollTop = m.scrollHeight; }
 const isMineH = x => x.dev === ensureDevice() || (sync.me && norm(x.name) === norm(sync.me));
 function unreadChat(){ const seen = db.chatSeen || 0; return db.moods.filter(x => x.at > seen && !isMineH(x)).length; }
@@ -2005,7 +2009,7 @@ function viewHistory(){
   const isMine = isMineH;
   const list = db.moods.slice().sort((a, b) => a.at - b.at);
   db.chatSeen = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
-  let h = subBack() + `<h1>Chat hai đứa</h1><p class="subtitle" style="margin-top:-4px">tin nhắn, cảm xúc và mọi việc hai đứa làm trong app</p>`;
+  let h = subBack(`${avSpan(norm(peerName(peerMain())) === norm(db.love.nameFrom) ? 'h' : 'q', peerName(peerMain()), 'mini')}${esc(peerName(peerMain()))}`);
   // 7 ngày qua: mặt cuối cùng mỗi ngày của từng người
   const tk = todayKey(), days = Array.from({ length: 7 }, (_, i) => addDays(tk, i - 6));
   const lastOn = (k, mine) => { const xs = list.filter(x => x.kind === 'mood' && keyOf(new Date(x.at)) === k && isMine(x) === mine); return xs.length ? moodOf(xs[xs.length - 1].v) : null; };
@@ -2474,7 +2478,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.5</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.6</p>`;
 }
 
 function viewCycle(){
@@ -3281,6 +3285,7 @@ function toast(msg){
 
 /* ---------- sự kiện ---------- */
 $('#nav').onclick = e => {
+  state.back = null;
   const b = e.target.closest('button'); if (!b) return;
   state.tab = b.dataset.tab; state.usp = "";
   state.loveAdmin = false;
@@ -3292,6 +3297,17 @@ $('#main').addEventListener('pointerdown', e => { const b = e.target.closest('[d
 ['pointerup', 'pointerleave'].forEach(ev => $('#main').addEventListener(ev, e => { if (holdEl && (ev === 'pointerup' || e.target === holdEl)) holdEnd(ev !== 'pointerup'); }));
 $('#main').addEventListener('pointercancel', () => holdEnd(true));
 $('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-touch]')) e.preventDefault(); });
+(() => { // vuốt từ mép trái sang phải để quay lại
+  const m = $('#main'); let sx = 0, sy = 0, on = false, dx = 0;
+  const canBack = () => state.tab === 'us' && !!state.usp && !sheetOpen();
+  m.addEventListener('touchstart', e => { const t = e.touches[0]; on = canBack() && t.clientX < 34; sx = t.clientX; sy = t.clientY; dx = 0; if (on) m.style.transition = 'none'; }, { passive: true });
+  m.addEventListener('touchmove', e => { if (!on) return; const t = e.touches[0]; dx = t.clientX - sx; const dy = Math.abs(t.clientY - sy);
+    if (dy > 40 && dx < 30) { on = false; m.style.transform = ''; return; } if (dx > 0) { m.style.transform = `translateX(${dx}px)`; m.style.opacity = String(1 - Math.min(.5, dx / 600)); } }, { passive: true });
+  const end = () => { if (!on) return; on = false; m.style.transition = 'transform .18s ease-out, opacity .18s';
+    if (dx > 80) { m.style.transform = 'translateX(100%)'; setTimeout(() => { m.style.transition = 'none'; m.style.transform = ''; m.style.opacity = ''; goBack(); }, 170); }
+    else { m.style.transform = ''; m.style.opacity = ''; } };
+  m.addEventListener('touchend', end); m.addEventListener('touchcancel', end);
+})();
 $('#main').addEventListener('toggle', e => { const g = e.target.dataset && e.target.dataset.g; if (g) state.grp[g] = e.target.open; }, true);
 $('#main').addEventListener('keydown', e => { if (e.key !== 'Enter' || e.isComposing) return; if (e.target.id === 'chatIn') { e.preventDefault(); sendChat(); } else if (e.target.id === 'qmIn') { e.preventDefault(); const b = document.querySelector('[data-act=qmSend]'); if (b) b.click(); } else if (e.target.id === 'jarIn') { e.preventDefault(); const b = document.querySelector('[data-act=jarAdd]'); if (b) b.click(); } });
 $('#main').addEventListener('click', async e => {
@@ -3374,7 +3390,7 @@ $('#main').addEventListener('click', async e => {
     case 'goMeds': state.tab = 'health'; state.hseg = 'meds'; ($('#main').scrollTop = 0); render(); break;
     case 'goTab': state.tab = b.dataset.t; state.usp = ''; ($('#main').scrollTop = 0); render(); break;
     case 'histAll': state.histAll = true; render(); break;
-    case 'goLoc': state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
+    case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
     case 'qmSend': { const qi = $('#qmIn'), t = (qi && qi.value || '').trim(); if (!t) { if (qi) qi.focus(); return; } qi.value = ''; await sendQuick(t.slice(0, 300)); break; }
     case 'moodPick': openMoodPick(); break;
@@ -3402,7 +3418,8 @@ $('#main').addEventListener('click', async e => {
     case 'foodAdd': state.chatPanel = false; pickPhoto(fs => openFood(null, fs)); break;
     case 'foodView': openFood(id); break;
     case 'goHist': openChat(); break;
-    case 'usp': if (b.dataset.s === 'moods') { openChat(); break; } state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
+    case 'goBack': goBack(); break;
+    case 'usp': if (b.dataset.s === 'moods') { openChat(); break; } if (!b.dataset.s) { goBack(); break; } state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
     case 'dateNew': state.chatPanel = false; openDate(); break;
     case 'dateEdit': openDate(id); break;
     case 'dateIdea': openIdea(); break;
