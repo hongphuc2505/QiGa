@@ -96,7 +96,7 @@ function cleanPerson(p) {
   if (p.place && p.place.at) o.place = isFinite(p.place.lat) && isFinite(p.place.lng) ? { lat: +(+p.place.lat).toFixed(5), lng: +(+p.place.lng).toFixed(5), at: +p.place.at } : { at: +p.place.at };
   return o;
 }
-const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar', 'moods'];
+const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar', 'moods', 'foods'];
 function mergeRoom(cur, inc) {
   inc = inc || {};
   const out = { meta: lww(cur.meta, inc.meta) };
@@ -117,7 +117,7 @@ function mergeRoom(cur, inc) {
   const ids = Object.keys(people).sort((a, b) => (people[b].at || 0) - (people[a].at || 0));
   for (const id of ids.slice(6)) delete people[id]; // giữ tối đa 6 máy
   const mk = Object.keys(out.moods || {});
-  if (mk.length > 150) { mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0)); for (const id of mk.slice(150)) delete out.moods[id]; } // lịch sử giữ 150 mục mới nhất
+  if (mk.length > 300) { mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0)); for (const id of mk.slice(300)) delete out.moods[id]; } // chat giữ 300 mục mới nhất
   out.people = people;
   return out;
 }
@@ -266,6 +266,10 @@ function describeColls(cur, inc) {
     if (e.done && !o.done) return { icon: '🎁', text: `đã thực hiện điều trong hũ: ${clip(e.text)}` };
     return null;
   });
+  walk('foods', (e, o) => {
+    if (e.deleted || o) return null;
+    return { icon: '🍜', text: `vừa đăng món: ${clip(e.name)}${e.place ? ' · ' + clip(e.place, 30) : ''} ${'❤️'.repeat(Math.min(5, +e.rate || 0))}` };
+  });
   return out;
 }
 const R = 6371;
@@ -357,7 +361,12 @@ async function runMedReminders(env, when) {
       else if (d.at === s15 || d.at === s30) await own({ title: '⏰ Nhớ uống thuốc nha', body: `${d.meds} · từ ${d.time} · chưa đánh dấu đã uống` });
       else if (d.at === s60) {
         await own({ title: '⏰ Đã quá giờ uống thuốc 1 tiếng', body: `${d.meds} · ${d.time} · uống xong nhớ tick nha` });
-        await sendToRoom(env, data.room, data.device, { title: `⚠️ ${who} chưa uống thuốc`, body: `${d.meds} · ${d.time} · đã quá 1 tiếng chưa tick` });
+        await sendToRoom(env, data.room, data.device, { title: `⚠️ ${who} chưa uống thuốc`, body: `${d.meds} · ${d.time} · đã quá 1 tiếng chưa tick`, tab: 'us', usp: 'moods' });
+        if (data.room && /^[A-Za-z0-9_-]{8,64}$/.test(data.room)) { // ghi vào chat chung
+          const rk = 'room:' + data.room, room = JSON.parse((await env.SOTAY.get(rk)) || '{"events":{}}'), id = 'late-' + key.slice(0, 8) + d.at.replace(/[^0-9]/g, '');
+          room.moods = room.moods || {};
+          if (!room.moods[id]) { room.moods[id] = { id, kind: 'act', icon: '⚠️', text: `chưa tick thuốc ${d.meds} (${d.time}) sau 1 tiếng`, dev: data.device || '', name: who, at: when, updated: when }; await env.SOTAY.put(rk, JSON.stringify(room)); }
+        }
       }
     }
   }
@@ -444,6 +453,10 @@ export default {
           ? { title: `${collLines[0].icon} ${who || 'Người ấy'} ${collLines[0].text}`, body: 'Mở tab Hai đứa xem nha' }
           : { title: `${collLines[0].icon} ${who || 'Người ấy'} vừa cập nhật ${collLines.length} mục`, body: collLines.slice(0, 4).map(l => l.icon + ' ' + l.text).join('\n') }));
         for (const m of pplMsgs) jobs.push(sendToRoom(env, r[1], dev, m));
+        const recentT = Date.now() - 10 * 60000;
+        const chats = Object.values(inc.moods || {}).filter(x => x && x.kind === 'msg' && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && !(cur.moods || {})[x.id]).sort((a, b) => a.at - b.at).slice(-3);
+        for (const x of chats) jobs.push(sendToRoom(env, r[1], dev, { title: `💬 ${who || 'Người ấy'}`, body: clip(x.note, 160), tab: 'us', usp: 'moods',
+          hist: [{ id: cleanStr(x.id, 40), kind: 'msg', dev, name: who, note: cleanStr(x.note, 300), at: +x.at, updated: +x.updated || +x.at }] }));
         if (jobs.length) { const p = Promise.all(jobs); if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p; }
         return new Response(JSON.stringify(merged), { headers: { ...CORS, 'Content-Type': 'application/json' } });
       }
