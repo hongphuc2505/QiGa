@@ -122,6 +122,92 @@ textarea{resize:none;min-height:64px}
 :root[data-font=round] .hero .clock{letter-spacing:-1px}
 :root[data-pattern] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M28 38s-9-5.6-9-11.2A5 5 0 0 1 28 24a5 5 0 0 1 9 2.8C37 32.4 28 38 28 38z' fill='%23ff5c93' fill-opacity='.07'/%3E%3C/svg%3E");}
 :root[data-theme] .switch:checked{background:var(--accent)}
+:root[data-theme=paper]{--bg:#fbf1ec;--card:#fff;--text:#3b2530;--sub:#7d5b68;--line:#f3d6e0;--accent:#b5385f;--accent-soft:rgba(181,56,95,.12);--pink:#c2386a;--green:#3d9a5b;--shadow:0 2px 0 #f0d3dc;--dot:#ecd0d9;--note:#ffe0ea;--note-text:#4a1f30;--hand:'Patrick Hand',cursive}
+@media (prefers-color-scheme:dark){:root[data-theme=paper]{--bg:#1d1418;--card:#2a1c22;--text:#fbe9ef;--sub:#c49aab;--line:#46303a;--accent:#ff7aa8;--accent-soft:rgba(255,122,168,.16);--pink:#ff6f9b;--shadow:none;--dot:#33232a;--note:#3a2430;--note-text:#fbe9ef}}
+:root[data-theme=paper] body{font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,sans-serif;background-image:radial-gradient(var(--dot) 1px,transparent 1.3px);background-size:18px 18px}
+:root[data-theme=paper] input,:root[data-theme=paper] textarea,:root[data-theme=paper] button{font-family:inherit}
+:root[data-theme=paper] h1{font-family:var(--hand);font-weight:400;font-size:38px;letter-spacing:0;margin-top:14px}
+:root[data-theme=paper] .section-title{font-family:var(--hand);font-size:22px;text-transform:none;letter-spacing:0;color:var(--accent);margin:18px 2px 6px}
+:root[data-theme=paper] .linkbtn{font-family:var(--hand);font-size:19px;font-weight:400}
+:root[data-theme=paper] .btn{font-family:var(--hand);font-size:21px;font-weight:400;border-radius:14px;padding:11px}
+:root[data-theme=paper] .card{border-radius:18px}
+:root[data-theme=paper] .big{font-family:var(--hand);font-weight:400}
+:root[data-theme=paper] .time{font-family:var(--hand);font-weight:400;font-size:19px}
+:root[data-theme=paper] nav{border-top:2px dashed var(--line)}
+:root[data-theme=paper] nav button{font-family:var(--hand);font-size:16px}
+:root[data-theme=paper] .love{background:var(--note);color:var(--note-text);border-radius:6px;transform:rotate(-1.2deg);overflow:visible;margin:22px 4px 18px;box-shadow:0 6px 14px rgba(125,35,65,.10)}
+:root[data-theme=paper] .love::before{content:"";position:absolute;top:-10px;left:50%;margin-left:-42px;width:84px;height:20px;background:rgba(217,129,159,.45);transform:rotate(3deg)}
+:root[data-theme=paper] .love::after{display:none}
+:root[data-theme=paper] .love .k{color:var(--accent);opacity:1}
+:root[data-theme=paper] .love .msg{font-family:var(--hand);font-weight:400;font-size:23px;line-height:1.25}
+:root[data-theme=paper] .love .from{font-family:var(--hand);font-size:19px;color:var(--accent);text-align:right;opacity:1}
+:root[data-theme=paper] .love.locked{background:var(--card);color:var(--sub)}
+:root[data-theme=paper] .due{background:var(--card);color:var(--text);border-left:6px solid var(--accent);box-shadow:0 4px 12px rgba(125,35,65,.10)}
+:root[data-theme=paper] .due .t1{color:var(--accent);opacity:1}
+:root[data-theme=paper] .due .t2{font-family:var(--hand);font-weight:400;font-size:24px;line-height:1.15}
+:root[data-theme=paper] .due button{background:var(--accent);color:#fff;font-family:var(--hand);font-weight:400;font-size:21px}
+:root[data-theme=paper] .cday.p .n{background:var(--pink)}
+:root[data-theme=paper] .cday.o .n{background:#b85410}
+:root[data-theme=paper] .cday.f .n{background:#ffe2cc;color:#8a3f0c}
+@media (prefers-color-scheme:dark){:root[data-theme=paper] .cday.f .n{background:#4a2a1a;color:#ffb27a}}
+@media (prefers-color-scheme:dark){:root[data-theme=paper] .seg button.on,:root[data-theme=paper] .cyhero .circ,:root[data-theme=paper] .btn:not(.ghost):not(.danger),:root[data-theme=paper] .due button,:root[data-theme=paper] .cday.p .n{color:#3a0f22}}
+.th{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:14px 0}
+.th .hd{font-size:32px;font-weight:700;line-height:1.05;letter-spacing:-.5px}
+:root[data-theme=paper] .th .hd{font-family:var(--hand);font-weight:400;letter-spacing:0;font-size:36px}
+.th .sub{font-size:13px;color:var(--sub);margin-top:4px;line-height:1.4}
+.th .sub button{color:var(--accent);font-weight:600;font-size:13px}
+.lovechip{display:flex;align-items:center;gap:4px;background:var(--card);border:2px dashed var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;color:var(--accent);font-weight:700;flex:none}
+:root[data-theme=paper] .lovechip{font-family:var(--hand);font-weight:400;font-size:19px;border-color:#d9819f}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--card);border-radius:14px;padding:4px;margin-bottom:14px;box-shadow:var(--shadow)}
+.seg button{height:40px;border-radius:10px;color:var(--sub);font-weight:600;font-size:15px}
+:root[data-theme=paper] .seg button{font-family:var(--hand);font-size:19px;font-weight:400}
+.seg button.on{background:var(--accent);color:#fff}
+.cyhero{position:relative;background:var(--note,var(--accent-soft));border-radius:22px;padding:18px 18px 16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(125,35,65,.10)}
+.cyhero .row1{display:flex;align-items:center;gap:16px}
+.cyhero .circ{width:100px;height:100px;border-radius:50%;background:var(--accent);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;flex:none;box-shadow:0 0 0 6px var(--card)}
+.cyhero .circ small{font-size:12px;font-weight:700;letter-spacing:.5px}
+.cyhero .circ b{font-size:52px;font-weight:700}
+:root[data-theme=paper] .cyhero .circ b{font-family:var(--hand);font-weight:400;font-size:60px}
+.cyhero .k{font-size:13px;font-weight:700;color:var(--accent)}
+.cyhero .tt{font-size:26px;font-weight:700;line-height:1.1}
+:root[data-theme=paper] .cyhero .tt{font-family:var(--hand);font-weight:400;font-size:32px}
+.cyhero .ss{font-size:13px;color:var(--sub);margin-top:4px;line-height:1.45}
+.cyhero .bars{display:flex;gap:6px;margin-top:14px}
+.cyhero .bars i{flex:1;height:8px;border-radius:99px;background:var(--card)}
+.cyhero .bars i.on{background:var(--accent)}
+.cyhero .tip{font-size:12px;color:var(--sub);margin-top:6px}
+.cyhero .act{width:100%;height:50px;margin-top:12px;border-radius:14px;background:var(--card);color:var(--accent);font-weight:700;font-size:17px}
+:root[data-theme=paper] .cyhero .act{font-family:var(--hand);font-weight:400;font-size:22px}
+.cday .dt{width:5px;height:5px;border-radius:50%}
+.cday .dt.e{background:#6b4fb3}.cday .dt.g{background:var(--green)}.cday .dt.w{background:var(--orange)}.cday .dt.m{background:var(--red)}
+.cday.today .n{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--text);font-weight:800}
+.taped{position:relative}
+:root[data-theme=paper] .taped::before{content:"";position:absolute;top:-10px;left:50%;margin-left:-44px;width:88px;height:20px;background:rgba(217,129,159,.45);transform:rotate(-3deg)}
+.uscount{background:var(--card);border-radius:12px;padding:22px 16px 16px;box-shadow:0 6px 16px rgba(125,35,65,.12);margin:16px 2px 16px;transform:rotate(.6deg);display:block;width:calc(100% - 4px);text-align:left}
+.uscount .pair{display:flex;align-items:center;gap:14px}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:700;border:2px dashed;flex:none}
+:root[data-theme=paper] .av{font-family:var(--hand);font-weight:400;font-size:24px}
+.av.q{background:#fbe3eb;border-color:#d9819f;color:#7d2341}.av.h{background:#efe7fb;border-color:#a58bd0;color:#4d2f8f}
+.uscount .num{font-size:40px;font-weight:700;color:var(--accent);line-height:1}
+:root[data-theme=paper] .uscount .num{font-family:var(--hand);font-weight:400;font-size:46px}
+.uscount .q1{font-size:22px;font-weight:700;margin:14px 0 8px}
+:root[data-theme=paper] .uscount .q1{font-family:var(--hand);font-weight:400;font-size:26px}
+.uscount input[type=date]{background:var(--bg);border-radius:12px;padding:8px 12px;margin-bottom:10px}
+.prog{height:16px;border-radius:99px;border:2px dashed var(--line);padding:3px;margin-top:10px;box-sizing:border-box}
+.prog i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.tile{background:var(--card);border-radius:18px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:118px;text-align:left}
+.tile .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center}
+.tile .tt{font-weight:700;font-size:16px;line-height:1.15}
+:root[data-theme=paper] .tile .tt{font-family:var(--hand);font-weight:400;font-size:21px}
+.tile.soon{background:transparent;border:2px dashed var(--line);box-shadow:none}
+.soonbadge{align-self:flex-start;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:99px}
+.dbox{width:46px;text-align:center;border-right:2px dashed var(--line);padding-right:10px;line-height:1.05;flex:none}
+.dbox b{font-size:21px;font-weight:700;display:block}
+:root[data-theme=paper] .dbox b{font-family:var(--hand);font-weight:400;font-size:25px}
+.dbox small{font-size:10px;font-weight:700;color:var(--sub)}
+.left{font-weight:700;color:var(--accent);white-space:nowrap}
+:root[data-theme=paper] .left{font-family:var(--hand);font-weight:400;font-size:19px}
 .heart-fx{position:fixed;pointer-events:none;z-index:30;font-size:20px;animation:heartUp 1.1s ease-out forwards}
 @keyframes heartUp{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),-140px) scale(1.25);opacity:0}}
 .theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px 14px}
@@ -188,10 +274,9 @@ textarea{resize:none;min-height:64px}
 <main id="main"></main>
 
 <nav id="nav">
-  <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></svg>Hôm nay</button>
-  <button data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Lịch</button>
-  <button data-tab="cycle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.6 4.4 6.2 8 6.2 11.1a6.2 6.2 0 0 1-12.4 0c0-3.1 2.6-6.7 6.2-11.1z"/></svg>Chu kỳ</button>
-  <button data-tab="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="8.2" width="18.4" height="7.6" rx="3.8" transform="rotate(-45 12 12)"/><path d="m8.8 8.8 6.4 6.4"/></svg>Thuốc</button>
+  <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Hôm nay</button>
+  <button data-tab="health"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.6 4.4 6.2 8 6.2 11.1a6.2 6.2 0 0 1-12.4 0c0-3.1 2.6-6.7 6.2-11.1z"/><path d="M12 11v6M9 14h6"/></svg>Sức khỏe</button>
+  <button data-tab="us"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 20a5.5 5.5 0 0 1 9.5-3.8A5.5 5.5 0 0 1 21.5 20"/></svg>Hai đứa</button>
   <button data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg>Khác</button>
 </nav>
 
@@ -219,13 +304,15 @@ const defCycle = () => ({ periods: [], cycleLen: 28, periodLen: 5, auto: true })
 db.meds = db.meds || []; db.logs = db.logs || {}; db.events = db.events || {};
 db.cycle = Object.assign(defCycle(), db.cycle || {});
 db.deletedEvents = db.deletedEvents || {};
-db.ui = Object.assign({ theme: 'pink', font: 'round', hearts: true, pattern: false, cute: true }, db.ui || {});
+db.ui = Object.assign({ theme: 'paper', font: 'round', hearts: true, pattern: false, cute: true }, db.ui || {});
+if (!db.ui.v4) { db.ui.theme = 'paper'; db.ui.v4 = true; }
 function applyUI(){
   const r = document.documentElement, u = db.ui;
   if (u.theme && u.theme !== 'default') r.dataset.theme = u.theme; else delete r.dataset.theme;
   if (u.font === 'round') { r.dataset.font = 'round';
     if (!document.getElementById('fontRound')) { const l = document.createElement('link'); l.id = 'fontRound'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap'; document.head.appendChild(l); }
   } else delete r.dataset.font;
+  if (u.theme === 'paper' && !document.getElementById('fontPaper')) { const l = document.createElement('link'); l.id = 'fontPaper'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap'; document.head.appendChild(l); }
   if (u.pattern) r.dataset.pattern = '1'; else delete r.dataset.pattern;
   if (u.cute) r.dataset.cute = '1'; else delete r.dataset.cute;
   const bg = getComputedStyle(r).getPropertyValue('--bg').trim();
@@ -234,6 +321,8 @@ function applyUI(){
 applyUI();
 const defLove = () => ({ nameFrom: 'HoPu', nameTo: 'QiGa', from: 'anh', to: 'em', time: '08:00', custom: [] });
 db.love = Object.assign(defLove(), db.love || {});
+const defUs = () => ({ start: '', specials: [] });
+db.us = Object.assign(defUs(), db.us || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } if (typeof scheduleSync === 'function') scheduleSync(); }
 
 /* ---------- tiện ích ngày ---------- */
@@ -764,7 +853,7 @@ function openWeather(){
 }
 
 /* ---------- state ---------- */
-const state = { tab: 'today', month: null, cmonth: null, sel: todayKey() };
+const state = { tab: 'today', hseg: 'overview', month: null, cmonth: null, sel: todayKey() };
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
 state.cmonth = new Date(state.month);
 
@@ -794,7 +883,213 @@ function eventsBlock(k){
     </button>`).join('') : '<div class="empty" style="padding:16px">Chưa có gì</div>'}</div>`;
 }
 
+const fmtDM = k => { const d = parseKey(k); return `${d.getDate()}/${d.getMonth() + 1}`; };
+function lunarShort(d){ const [ld, lm] = solar2lunar(d.getDate(), d.getMonth() + 1, d.getFullYear()); return `${ld === 15 ? 'Rằm' : ld <= 10 ? 'Mùng ' + ld : ld}/${lm} âm lịch`; }
+function usDays(){ return db.us.start ? diffDays(db.us.start, todayKey()) + 1 : 0; }
+function todayHeader(){
+  const n = new Date(), tk = todayKey(), bits = [lunarShort(n)];
+  const c = wxCache();
+  if (db.weather && c && c.lat === db.weather.lat) bits.push(`<button data-act="wxSet">${Math.round(c.d.current.temperature_2m)}° ${WX(c.d.current.weather_code)[1].toLowerCase()}</button>`);
+  else if (!db.weather) bits.push('<button data-act="wxSet">+ thời tiết</button>');
+  const S = cycleStarts();
+  if (S.length) {
+    const inf = cycleInfo(tk, S, avgCycle()), nextP = S.find(x => x.start > tk);
+    if (inf && inf.type === 'period') bits.push(`ngày ${inf.day} kỳ kinh`);
+    else if (nextP && diffDays(tk, nextP.start) <= 5) bits.push(`còn ${diffDays(tk, nextP.start)} ngày tới tháng`);
+  }
+  return `<div class="th"><div style="min-width:0"><div class="hd">${WD_LONG[n.getDay()]}, ${n.getDate()}/${n.getMonth() + 1}</div><div class="sub">${bits.join(' · ')}</div></div>
+    ${db.us.start ? `<button class="lovechip" data-act="goTab" data-t="us"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>${usDays()} ngày</button>` : ''}</div>`;
+}
 function viewToday(){
+  const k = todayKey();
+  const ds = dosesOn(k);
+  const done = ds.filter(d => d.taken).length;
+  let h = todayHeader();
+  const due = ds.filter(d => !d.taken && toMin(d.time) <= nowMin());
+  if (due.length) {
+    const late = nowMin() - toMin(due[0].time);
+    h += `<div class="due"><div class="t1">${late >= 60 ? 'Quá giờ ' + Math.floor(late / 60) + ' tiếng rồi' : late > 15 ? 'Quá giờ ' + late + ' phút' : 'Đến giờ uống thuốc'}</div>
+      <div class="t2">${due.map(d => esc(d.med.name) + (d.med.dose ? ' · ' + esc(d.med.dose) : '') + ' · ' + d.time).join('<br>')}</div>
+      <button data-act="takeDue">Đã uống</button></div>`;
+  }
+  h += loveCard();
+  if (!db.meds.length) {
+    h += `<div class="card"><button class="row" data-act="addMed"><span class="main"><div class="t">Chưa có thuốc nào</div><div class="s">Bấm để thêm thuốc và giờ uống</div></span><span class="linkbtn">+ Thêm</span></button></div>`;
+  } else if (!ds.length) {
+    h += `<div class="section-title"><span>Thuốc hôm nay</span></div><div class="card"><div class="empty" style="padding:14px 16px 8px">Hôm nay không có lịch uống thuốc</div>${nextDoseLine()}</div>`;
+  } else {
+    h += `<div class="section-title"><span>Thuốc hôm nay · ${done}/${ds.length}</span></div><div class="card">${ds.map(d => doseRow(d, k)).join('')}</div>`;
+    if (done === ds.length) { const nl = nextDoseLine(); if (nl) h += `<div class="card">${nl}</div>`; }
+  }
+  h += eventsBlock(k);
+  const up = specialList().filter(x => x.left <= 14);
+  if (up.length) h += `<div class="section-title"><span>Sắp tới</span></div><div class="card">${up.slice(0, 3).map(specialRow).join('')}</div>`;
+  return h;
+}
+
+/* ---------- tab Sức khỏe ---------- */
+function viewHealth(){
+  const seg = state.hseg || 'overview';
+  let h = `<h1>Sức khỏe</h1><div class="seg">${[['overview', 'Tổng quan'], ['cycle', 'Lịch sử kỳ'], ['meds', 'Thuốc']]
+    .map(([id, l]) => `<button data-act="hseg" data-s="${id}" class="${seg === id ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  if (seg === 'meds') return h + viewMeds().replace(/^<h1>[\s\S]*?<\/p>/, '');
+  if (seg === 'cycle') return h + cycleHistory();
+  return h + cycleHero() + healthCal();
+}
+function cycleHero(){
+  const tk = todayKey(), S = cycleStarts(), cl = avgCycle(), d = new Date();
+  const lbl = `HÔM NAY · ${WD_SHORT[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+  if (!S.length) return `<div class="cyhero"><div class="k">${lbl}</div><div class="tt">Chưa có dữ liệu kỳ kinh</div>
+    <div class="ss">Bấm nút dưới vào ngày bắt đầu tới tháng, hoặc nhập các kỳ trước ở mục <b>Lịch sử kỳ</b>.</div>
+    <button class="act" data-act="cyToday">Hôm nay tới tháng</button></div>`;
+  const inf = cycleInfo(tk, S, cl), nextP = S.find(x => x.start > tk), left = nextP ? diffDays(tk, nextP.start) : null;
+  const cur = loggedAt(tk);
+  const nextTxt = nextP ? `kỳ tới <b>${fmtDM(nextP.start)}</b> · còn ${left} ngày` : '';
+  if (cur) {
+    const len = cur.len || db.cycle.periodLen || 5, n = diffDays(cur.start, tk) + 1;
+    return `<div class="cyhero"><div class="row1"><div class="circ"><small>NGÀY</small><b>${n}</b></div>
+      <div style="flex:1;min-width:0"><div class="k">${lbl}</div><div class="tt">Đang tới tháng</div><div class="ss">dự kiến hết <b>${fmtDM(periodEnd(cur))}</b>${nextTxt ? '<br>' + nextTxt : ''}</div></div></div>
+      <div class="bars">${Array.from({ length: Math.max(len, n) }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="tip">ngày ${n} trên ${len} ngày · uống nước ấm, nghỉ ngơi nhiều nha</div>
+      <button class="act" data-act="cyEnd" data-id="${cur.id}">Hết kinh hôm nay</button></div>`;
+  }
+  const recent = db.cycle.periods.find(p => p.start <= tk && diffDays(p.start, tk) < 12);
+  const day = inf ? inf.day : '–', title = inf ? CY[inf.type][0] : 'Chưa rõ';
+  return `<div class="cyhero"><div class="row1"><div class="circ"><small>NGÀY</small><b>${day}</b></div>
+    <div style="flex:1;min-width:0"><div class="k">${lbl}</div><div class="tt">${title}</div><div class="ss">ngày ${day} của chu kỳ ~${cl} ngày${nextTxt ? '<br>' + nextTxt : ''}</div></div></div>
+    ${recent ? `<button class="act" data-act="cyEnd" data-id="${recent.id}">Vẫn còn kinh · hết hôm nay</button>` : `<button class="act" data-act="cyToday">Hôm nay tới tháng</button>`}</div>`;
+}
+function healthCal(){
+  const S = cycleStarts(), cl = avgCycle(), tk = todayKey();
+  const y = state.cmonth.getFullYear(), mo = state.cmonth.getMonth();
+  const offset = (new Date(y, mo, 1).getDay() + 6) % 7;
+  const cells = Math.ceil((offset + new Date(y, mo + 1, 0).getDate()) / 7) * 7;
+  let grid = '';
+  for (let i = 0; i < cells; i++) {
+    const d = new Date(y, mo, 1 - offset + i), k = keyOf(d);
+    const inf = S.length ? cycleInfo(k, S, cl) : null;
+    const ds = dosesOn(k), ev = (db.events[k] || []).length;
+    let dot = '';
+    if (ev) dot = 'e';
+    else if (ds.length && k <= tk) { const dn = ds.filter(x => x.taken).length; dot = dn === ds.length ? 'g' : dn ? 'w' : (k < tk ? 'm' : ''); }
+    const cls = ['cday', d.getMonth() !== mo ? 'out' : '', k === tk ? 'today' : '', inf ? CY[inf.type][2] : ''].join(' ');
+    grid += `<button class="${cls}" data-act="hPick" data-k="${k}"><span class="n">${d.getDate()}</span><span class="dt ${dot}"></span></button>`;
+  }
+  return `<div class="card">
+    <div class="cal-head"><button class="navbtn" data-act="cPrev" aria-label="Tháng trước">‹</button><button class="m" data-act="cToday">Tháng ${mo + 1}, ${y}</button><button class="navbtn" data-act="cNext" aria-label="Tháng sau">›</button></div>
+    <div class="wk">${[1,2,3,4,5,6,0].map(d => `<div>${WD_SHORT[d]}</div>`).join('')}</div>
+    <div class="grid">${grid}</div>
+    <div class="legend"><span><i style="background:var(--pink)"></i>Kỳ kinh</span><span><i class="ring"></i>Dự kiến</span><span><i style="background:#ffe2cc;box-shadow:inset 0 0 0 1px #b85410"></i>Nguy hiểm</span><span><i style="background:#b85410"></i>Rụng trứng</span><span><i style="background:var(--green)"></i>Uống đủ</span><span><i style="background:#6b4fb3"></i>Sự kiện</span></div>
+  </div><p class="subtitle" style="text-align:center;font-size:13px">Chạm vào một ngày để xem thuốc, sự kiện và kỳ kinh</p>`;
+}
+function openDaySheet(k){
+  const tk = todayKey(), future = k > tk;
+  const draw = () => {
+    const S = cycleStarts(), inf = S.length ? cycleInfo(k, S, avgCycle()) : null, p = loggedAt(k);
+    const ds = dosesOn(k), ev = (db.events[k] || []).slice().sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+    return `${inf ? `<div class="card" style="padding:14px 16px"><div class="s">Ngày ${inf.day} của chu kỳ</div><div class="t" style="font-size:20px;color:${CY[inf.type][1]}">${CY[inf.type][0]}</div></div>` : ''}
+    ${ds.length ? `<div class="section-title"><span>Thuốc</span></div><div class="card">${ds.map(d => `<button class="row" data-dk="${esc(d.id)}"><span class="time">${d.time}</span><span class="dot" style="background:${d.med.color}"></span><span class="main"><div class="t">${esc(d.med.name)}</div>${d.med.dose ? `<div class="s">${esc(d.med.dose)}</div>` : ''}</span><span class="check ${d.taken ? 'on' : ''} ${future ? 'off' : ''}"></span></button>`).join('')}</div>` : ''}
+    <div class="section-title"><span>Sự kiện</span><button class="linkbtn" id="dAddEv">+ Thêm</button></div>
+    <div class="card">${ev.length ? ev.map(e => `<button class="row" data-ev="${e.id}"><span class="time">${e.time || '—'}</span><span class="main"><div class="t">${esc(e.title)}</div>${e.note ? `<div class="s">${esc(e.note)}</div>` : ''}</span></button>`).join('') : '<div class="empty" style="padding:14px">Chưa có gì</div>'}</div>
+    ${p ? '<button class="btn ghost" id="dEditP">Sửa kỳ kinh này</button>' : !future ? '<button class="btn ghost" id="dStartP">Bắt đầu tới tháng từ ngày này</button>' : ''}`;
+  };
+  const mount = () => {
+    $('#sheetBody').onclick = e => {
+      const dk = e.target.closest('[data-dk]'), evb = e.target.closest('[data-ev]');
+      if (dk) { if (future) return toast('Chưa đến ngày này'); const was = !!(db.logs[k] && db.logs[k][dk.dataset.dk]); toggleDose(k, dk.dataset.dk); if (!was) { heartsAt(e.clientX, e.clientY); notifyTaken(k, [dk.dataset.dk]); } $('#sheetBody').innerHTML = draw(); render(); return; }
+      if (evb) return openEvent(k, evb.dataset.ev);
+      if (e.target.closest('#dAddEv')) return openEvent(k);
+      if (e.target.closest('#dEditP')) return openPeriod(loggedAt(k).id);
+      if (e.target.closest('#dStartP')) return openPeriod(null, k);
+    };
+  };
+  openSheet(fmtLong(k), draw(), mount);
+}
+
+/* ---------- tab Hai đứa ---------- */
+const MILES = [100, 200, 300, 365, 500, 700, 1000, 1500, 2000, 2500, 3000, 3650, 4000, 5000, 7300, 10000];
+function ymdSpan(a, b){
+  const A = parseKey(a), B = parseKey(b);
+  let y = B.getFullYear() - A.getFullYear(), m = B.getMonth() - A.getMonth(), d = B.getDate() - A.getDate();
+  if (d < 0) { m--; d += new Date(B.getFullYear(), B.getMonth(), 0).getDate(); }
+  if (m < 0) { y--; m += 12; }
+  return [y ? y + ' năm' : '', m ? m + ' tháng' : '', d ? d + ' ngày' : ''].filter(Boolean).join(' ') || 'hôm nay';
+}
+function nextOcc(date, yearly){
+  const tk = todayKey();
+  if (!yearly) return date >= tk ? date : null;
+  const yr = new Date().getFullYear(), md = date.slice(5);
+  let c = `${yr}-${md}`; if (c < tk) c = `${yr + 1}-${md}`;
+  return c;
+}
+function specialList(){
+  const tk = todayKey(), out = [];
+  for (const s of db.us.specials || []) { const d = nextOcc(s.date, s.yearly !== false); if (d) out.push({ id: s.id, name: s.name, date: d, left: diffDays(tk, d), sub: s.yearly !== false ? 'hằng năm' : '' }); }
+  if (db.us.start) {
+    const n = usDays(), next = MILES.find(m => m > n);
+    if (next) { const d = addDays(db.us.start, next - 1); out.push({ name: `${next} ngày yêu nhau`, date: d, left: diffDays(tk, d), auto: true, sub: 'tự tính' }); }
+    const ann = nextOcc(db.us.start, true);
+    if (ann && ann !== db.us.start) { const yrs = parseKey(ann).getFullYear() - parseKey(db.us.start).getFullYear(); if (yrs > 0) out.push({ name: `Kỷ niệm ${yrs} năm`, date: ann, left: diffDays(tk, ann), auto: true, sub: 'tự tính' }); }
+  }
+  return out.sort((a, b) => a.left - b.left);
+}
+function specialRow(s){
+  const d = parseKey(s.date);
+  return `<button class="row" ${s.auto ? '' : `data-act="spEdit" data-id="${s.id}"`}><span class="dbox"><b>${d.getDate()}</b><small>TH${d.getMonth() + 1}</small></span>
+    <span class="main"><div class="t">${esc(s.name)}</div>${s.sub ? `<div class="s">${s.sub}</div>` : ''}</span><span class="left">${s.left === 0 ? 'Hôm nay!' : 'còn ' + s.left + ' ngày'}</span></button>`;
+}
+function viewUs(){
+  const tk = todayKey();
+  const qa = esc((db.love.nameTo || 'Q')[0].toUpperCase()), ha = esc((db.love.nameFrom || 'H')[0].toUpperCase());
+  const pair = `<span class="av q">${qa}</span><svg width="22" height="22" viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="av h">${ha}</span>`;
+  let h = `<h1>Hai đứa mình</h1>`;
+  if (!db.us.start) {
+    h += `<div class="uscount taped"><div class="pair" style="justify-content:center">${pair}</div><div class="q1" style="text-align:center">Mình bắt đầu yêu nhau từ ngày nào?</div>
+      <input type="date" id="usStart" max="${tk}"><button class="btn" data-act="usStartSave">Bắt đầu đếm</button></div>`;
+  } else {
+    const n = usDays(), next = MILES.find(m => m > n), prev = [0, ...MILES].filter(m => m <= n).pop();
+    const pct = next ? Math.round((n - prev) / (next - prev) * 100) : 100;
+    h += `<button class="uscount taped" data-act="usEditStart"><div class="pair">${pair}<div style="min-width:0"><div class="num">${n} ngày</div><div class="s">${ymdSpan(db.us.start, tk)} · từ ${fmtShort(db.us.start)}</div></div></div>
+      ${next ? `<div class="prog"><i style="width:${pct}%"></i></div><div class="s" style="margin-top:6px">còn ${next - n} ngày tới mốc ${next} ngày</div>` : ''}</button>`;
+  }
+  const list = specialList();
+  h += `<div class="section-title"><span>Ngày đặc biệt</span><button class="linkbtn" data-act="spAdd">+ Thêm</button></div>
+    <div class="card">${list.length ? list.slice(0, 6).map(specialRow).join('') : '<div class="empty" style="padding:16px">Thêm sinh nhật, ngày kỷ niệm… app sẽ đếm ngược giúp</div>'}</div>`;
+  const tile = (ic, bg, fg, t, s) => `<div class="tile soon"><span class="ic" style="background:${bg}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg></span><div class="tt">${t}</div><div class="s">${s}</div><span class="soonbadge">Sắp có</span></div>`;
+  h += `<div class="tiles">
+    ${tile('<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', 'buổi hẹn, ảnh, nhật ký')}
+    ${tile('<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', 'thích gì bỏ vào hũ')}
+    ${tile('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/>', '#e4effa', '#2f5f8f', 'Đang ở đâu', 'gửi vị trí, báo về nhà')}
+    ${tile('<circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01M9 15c1.6 1.4 4.4 1.4 6 0"/>', '#efe7fb', '#6b4fb3', 'Tâm trạng', 'gửi cảm xúc cho nhau')}
+  </div>`;
+  return h;
+}
+function openSpecial(id){
+  const ex = (db.us.specials || []).find(s => s.id === id);
+  const s = ex || { id: uid(), name: '', date: todayKey(), yearly: true };
+  openSheet(ex ? 'Sửa ngày đặc biệt' : 'Thêm ngày đặc biệt', `
+    <div class="card"><label class="f"><span>Tên</span><input id="spName" value="${esc(s.name)}" placeholder="VD: Sinh nhật QiGa" autocomplete="off"></label>
+    <label class="f"><span>Ngày</span><input type="date" id="spDate" value="${s.date}"></label>
+    <label class="frow"><span class="lbl">Lặp lại hằng năm</span><input type="checkbox" class="switch" id="spYearly" ${s.yearly !== false ? 'checked' : ''}></label></div>
+    <button class="btn" id="spSave">Lưu</button>${ex ? '<button class="btn danger" id="spDel">Xóa</button>' : ''}`, () => {
+    $('#spSave').onclick = () => {
+      const name = $('#spName').value.trim(), date = $('#spDate').value;
+      if (!name) return toast('Nhập tên ngày đặc biệt'); if (!date) return toast('Chọn ngày');
+      const rec = { id: s.id, name, date, yearly: $('#spYearly').checked };
+      db.us.specials = (db.us.specials || []).filter(x => x.id !== s.id).concat([rec]); save(); closeSheet(); render(); toast('Đã lưu');
+    };
+    if (ex) $('#spDel').onclick = () => { if (!confirm(`Xóa "${ex.name}"?`)) return; db.us.specials = db.us.specials.filter(x => x.id !== ex.id); save(); closeSheet(); render(); };
+  });
+}
+function openUsStart(){
+  openSheet('Ngày bắt đầu yêu', `<div class="card"><label class="f"><span>Mình bắt đầu từ</span><input type="date" id="usStart2" value="${db.us.start}" max="${todayKey()}"></label></div>
+    <button class="btn" id="usSave2">Lưu</button><button class="btn danger" id="usDel2">Xóa ngày bắt đầu</button>`, () => {
+    $('#usSave2').onclick = () => { const v = $('#usStart2').value; if (!v) return toast('Chọn ngày'); db.us.start = v; save(); closeSheet(); render(); };
+    $('#usDel2').onclick = () => { if (!confirm('Xóa ngày bắt đầu yêu?')) return; db.us.start = ''; save(); closeSheet(); render(); };
+  });
+}
+
+function viewToday_old(){
   const k = todayKey();
   const ds = dosesOn(k);
   const done = ds.filter(d => d.taken).length;
@@ -925,7 +1220,7 @@ function viewMore(){
   <div class="section-title"><span>Giao diện 🎀</span></div>
   <div class="card">
     <div class="theme-grid" id="themeGrid">
-      ${[['pink','Hồng ngọt ngào',['#ff5c93','#ffd1e3','#fff0f6']],['peach','Đào pastel',['#ff8a65','#ffd9c9','#fff5ef']],['lavender','Tím mộng mơ',['#a06bff','#e3d6ff','#f6f1ff']],['default','Mặc định',['#007aff','#d1e6ff','#f2f2f7']]]
+      ${[['paper','Sổ tay giấy',['#b5385f','#ffe0ea','#fbf1ec']],['pink','Hồng ngọt ngào',['#ff5c93','#ffd1e3','#fff0f6']],['peach','Đào pastel',['#ff8a65','#ffd9c9','#fff5ef']],['lavender','Tím mộng mơ',['#a06bff','#e3d6ff','#f6f1ff']],['default','Mặc định',['#007aff','#d1e6ff','#f2f2f7']]]
         .map(([id, name, cs]) => `<button data-th="${id}" class="${(db.ui.theme || 'default') === id ? 'on' : ''}"><div class="sw2">${cs.map(c => `<i style="background:${c}"></i>`).join('')}</div><b style="font-size:14px">${name}</b></button>`).join('')}
     </div>
     <label class="frow"><span class="lbl">Phông chữ tròn dễ thương</span><input type="checkbox" class="switch" id="uiFont" ${db.ui.font === 'round' ? 'checked' : ''}></label>
@@ -974,7 +1269,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 3.1</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.0</p>`;
 }
 
 function viewCycle(){
@@ -1048,9 +1343,36 @@ function viewCycle(){
   return h;
 }
 
+function cycleHistory(){
+  const c = db.cycle;
+  let h = '';
+  // lịch sử
+  const ps = periodsAsc().reverse();
+  h += `<div class="section-title"><span>Lịch sử</span><button class="linkbtn" data-act="cyAdd">+ Thêm kỳ</button></div><div class="card">`;
+  h += ps.length ? ps.map((p, i) => {
+    const newer = ps[i - 1];
+    const len = newer ? diffDays(p.start, newer.start) : null;
+    return `<button class="row" data-act="cyEdit" data-id="${p.id}">
+      <span class="dot" style="background:var(--pink)"></span>
+      <span class="main"><div class="t">${fmtShort(p.start)} → ${fmtShort(periodEnd(p))}</div>
+      <div class="s">${p.len} ngày hành kinh${len ? ` · chu kỳ ${len} ngày` : ' · kỳ gần nhất'}</div></span>
+      <span style="color:var(--sub);font-size:20px">›</span></button>`;
+  }).join('') : '<div class="empty" style="padding:16px">Chưa có kỳ nào</div>';
+  h += `</div>`;
+
+  // cài đặt
+  h += `<div class="section-title"><span>Cài đặt</span></div><div class="card">
+    <label class="frow"><span class="lbl">Tự tính độ dài chu kỳ theo lịch sử</span><input type="checkbox" class="switch" id="cyAuto" ${c.auto ? 'checked' : ''}></label>
+    <label class="frow"><span class="lbl">Độ dài chu kỳ (ngày)${c.auto ? '<div class="s">Dùng khi chưa đủ 2 kỳ</div>' : ''}</span><input type="number" inputmode="numeric" id="cyLen" min="20" max="45" value="${c.cycleLen}"></label>
+    <label class="frow"><span class="lbl">Số ngày hành kinh mặc định</span><input type="number" inputmode="numeric" id="cyPLen" min="1" max="15" value="${c.periodLen}"></label>
+  </div>
+  <div class="card"><div class="note">Ngày rụng trứng được ước tính khoảng 14 ngày trước kỳ kế tiếp. Ngày nguy hiểm = 5 ngày trước đến 1 ngày sau rụng trứng. Đây chỉ là ước tính theo cách tính lịch; chu kỳ không đều thì sai lệch nhiều, nên <b>đừng dùng làm cách tránh thai duy nhất</b>.</div></div>`;
+  return h;
+}
+
 function render(){
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
-  $('#main').innerHTML = ({ today: viewToday, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore })[state.tab]();
+  $('#main').innerHTML = ({ today: viewToday, health: viewHealth, us: viewUs, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore }[state.tab] || viewToday)();
 }
 
 /* ---------- sheet ---------- */
@@ -1420,7 +1742,14 @@ $('#main').addEventListener('click', async e => {
     case 'roomNow': await syncRoom(); toast('Đã cập nhật'); break;
     case 'pushOn': await enablePush(); break;
     case 'wxSet': openWeather(); break;
-    case 'goMeds': state.tab = 'meds'; ($('#main').scrollTop = 0); render(); break;
+    case 'goMeds': state.tab = 'health'; state.hseg = 'meds'; ($('#main').scrollTop = 0); render(); break;
+    case 'goTab': state.tab = b.dataset.t; ($('#main').scrollTop = 0); render(); break;
+    case 'hseg': state.hseg = b.dataset.s; render(); break;
+    case 'hPick': openDaySheet(k); break;
+    case 'usStartSave': { const v = ($('#usStart') || {}).value; if (!v) return toast('Chọn ngày bắt đầu nha'); db.us.start = v; save(); render(); heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break; }
+    case 'usEditStart': openUsStart(); break;
+    case 'spAdd': openSpecial(); break;
+    case 'spEdit': openSpecial(id); break;
     case 'pushOff': await disablePush(); break;
     case 'roomCopy':
       try { await navigator.clipboard.writeText(sync.room); toast('Đã sao chép mã'); } catch (e) { prompt('Mã ghép đôi:', sync.room); }
@@ -1454,7 +1783,7 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love, deletedEvents: {}, ui: db.ui, us: defUs() }; save(); render(); toast('Đã xóa');
       break;
   }
 });
@@ -1483,7 +1812,7 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}) };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}), deletedEvents: data.deletedEvents || {}, ui: Object.assign({}, db.ui, data.ui || {}), us: Object.assign(defUs(), data.us || {}) };
     if (obj.sync && obj.sync.key) { sync = Object.assign({}, obj.sync, { sent: '', push: false, subJson: null }); saveSync(); }
     save(); applyUI(); render(); scheduleSync(300); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
