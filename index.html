@@ -250,6 +250,47 @@ textarea{resize:none;min-height:64px}
 .bub.touch{background:var(--accent-soft);padding:8px 14px;gap:8px}
 .bub .tbig{font-size:28px;animation:tbeat 1.2s ease-in-out 2}
 @keyframes tbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}}
+.duo.a{padding:12px;display:flex;flex-direction:column;gap:10px}
+.duo.a .pl{margin-top:0}
+.peerbtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;color:var(--text)}
+.peerbtn .pm{flex:1;min-width:0;display:flex;flex-direction:column}
+.peerbtn .t{font-weight:700;font-size:16px;line-height:1.2;display:flex;align-items:center;gap:6px}
+:root[data-theme=paper] .peerbtn .t{font-family:var(--hand);font-weight:400;font-size:22px}
+.peerbtn .mf svg{width:24px;height:24px;display:block}
+.peerbtn .s{font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chatpill{flex:none;background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:5px 10px;font-weight:700;font-size:13px}
+.chatpill b{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:99px;background:var(--accent);color:#fff;font-size:11px;padding:0 5px;margin-left:2px}
+.duo.a .minimap{margin-top:0}
+.duo.a .mapslot.mini{height:150px}
+.minimap .distpill{left:8px;top:8px;font-size:13px;padding:2px 10px}
+:root[data-theme=paper] .minimap .distpill{font-size:18px}
+.qmbox{background:var(--bg);border-radius:16px;padding:8px}
+.qmrow{display:flex;gap:8px;align-items:center}
+.qmrow input{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:9px 14px;font-size:16px;color:var(--text)}
+.qmsend{width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
+.qmchips{display:flex;gap:6px;margin:8px -8px 0;padding:0 8px 2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.qmchips::-webkit-scrollbar{display:none}
+.qc{flex:none;white-space:nowrap;height:38px;display:inline-flex;align-items:center;line-height:1;background:var(--card);color:var(--text);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;box-shadow:0 1px 0 var(--line)}
+:root[data-theme=paper] .qc{font-family:var(--hand);font-weight:400;font-size:18px;padding:4px 12px}
+.qc.face{padding:3px 6px;background:#fff6d9}
+.qc.face svg{width:24px;height:24px;display:block}
+.qc.heart{--hold:0;background:var(--accent);color:#fff;padding:4px 12px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;transform:scale(calc(1 + var(--hold) * .25));transition:transform .1s}
+.qc.heart .th{font-size:18px}
+.qc.heart.holding .th{display:inline-block;animation:tbeat .6s infinite}
+.qc.edit{background:transparent;box-shadow:none;color:var(--sub);border:2px dashed var(--line)}
+.qmhint{font-size:11px;color:var(--sub);margin:6px 4px 0}
+.loveribbon{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:4px 0 12px;background:var(--note,#ffe0ea);color:var(--note-text,#4a1f30);border-radius:12px;padding:10px 12px;transform:rotate(-.5deg)}
+.loveribbon .lt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+:root[data-theme=paper] .loveribbon .lt{font-family:var(--hand);font-weight:400;font-size:19px}
+.loveribbon .chev{color:var(--accent);font-size:20px}
+.moods.big{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:6px 0 10px}
+.moods.big button{padding:14px 0 10px;font-size:16px}
+.moods.big svg{width:46px;height:46px}
+.qerow{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.qerow:last-child{border-bottom:0}
+.qerow span{flex:1;min-width:0}
+.qerow button{width:34px;height:34px;border-radius:10px;background:var(--bg);color:var(--text);font-size:16px;font-weight:700}
+.qerow button[disabled]{opacity:.3}
 .lastmsg{display:flex;align-items:center;gap:8px;width:100%;text-align:left;margin-top:8px;background:var(--accent-soft);border-radius:12px;padding:8px 12px;color:var(--text)}
 .lastmsg .lm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 :root[data-theme=paper] .lastmsg .lm{font-family:var(--hand);font-weight:400;font-size:19px}
@@ -1413,35 +1454,61 @@ let locBusy = false;
 function duoCard(){
   const p = peerMain(), pn = peerName(p);
   const av = p && norm(p.name) === norm(db.love.nameFrom) ? 'h' : 'q';
-  let h = `<div class="section-title"><span>Hai đứa lúc này</span><button class="linkbtn" data-act="goHist">Chat${unreadChat() ? ` <span class="badge">${unreadChat()}</span>` : ''} ›</button></div><div class="card duo">`;
+  let h = `<div class="card duo a">`;
   if (!syncBase() || !sync.room) {
-    h += `<button class="pairhint" data-act="goTab" data-t="more"><span>Ghép đôi hai máy ở tab Khác để gửi tâm trạng, vị trí cho nhau</span><span class="linkbtn">Ghép →</span></button>`;
+    h += `<button class="pairhint" data-act="goTab" data-t="more"><span>Ghép đôi hai máy ở tab Khác để nhắn tin, gửi cảm xúc, xem vị trí của nhau</span><span class="linkbtn">Ghép →</span></button>`;
   } else if (!p) {
     h += `<div class="peer"><span class="av q">?</span><div><div class="t">Chưa có tin từ máy kia</div><div class="s">Máy kia mở app bản mới là thấy</div></div></div>`;
   } else {
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
-    h += `<div class="peer">${avSpan(av, pn)}<div style="min-width:0">
-      <div class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} ${m.emo}` : `${esc(pn)} chưa gửi tâm trạng`}</div>
-      ${fresh && p.mood.note ? `<div class="mnote">“${esc(p.mood.note)}”</div>` : ''}
-      <div class="s">${fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now())}</div></div></div>`;
+    const lastMsg = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch') && !isMineH(x)).sort((a, b) => b.at - a.at)[0];
+    const showMsg = lastMsg && Date.now() - lastMsg.at < 48 * 3600e3 && (!fresh || !p.mood.note || lastMsg.at > p.mood.at);
+    const line = showMsg ? `“${esc(lastMsg.kind === 'touch' ? lastMsg.text : lastMsg.note)}” · ${ago(lastMsg.at)}` : fresh && p.mood.note ? `“${esc(p.mood.note)}” · ${ago(p.mood.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
+    const un = unreadChat();
+    h += `<button class="peer peerbtn" data-act="goHist">${avSpan(av, pn)}<span class="pm"><span class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} <i class="mf">${m.svg}</i>` : `${esc(pn)}`}</span><span class="s">${line}</span></span><span class="chatpill">Chat${un ? ` <b>${un}</b>` : ''} ›</span></button>`;
     const ls = locState(p);
     if (ls.k === 'hidden' || ls.k === 'off') h += `<div class="pl">📍 ${esc(pn)} ${ls.k === 'off' ? 'đã tắt chia sẻ vị trí' : 'đang tạm ẩn vị trí tới ' + hm(ls.until)}</div>`;
-    if (ls.k === 'shown') {
-      const d = peerDistance(p);
-      h += `<div class="pl">📍 ${d != null ? 'Cách nhau ' + fmtKm(d) : esc(pn) + ' gửi vị trí'} · ${ago(p.loc.at)} <a href="${mapLink(p.loc, pn)}" target="_blank" rel="noopener">Bản đồ ›</a></div>`;
-    }
     if (p.home && isToday(p.home.at)) h += `<div class="pl">🏠 Về tới nhà lúc ${hm(p.home.at)}</div>`;
     h += letterBanner();
-    const lastMsg = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch') && !isMineH(x)).sort((a, b) => b.at - a.at)[0];
-    if (lastMsg && Date.now() - lastMsg.at < 48 * 3600e3) h += `<button class="lastmsg" data-act="goHist"><span>💬</span><span class="lm">${esc(lastMsg.kind === 'touch' ? lastMsg.text : lastMsg.note)}</span><small>${ago(lastMsg.at)} ›</small></button>`;
-    if (locState(p).k === 'shown' || myLoc()) h += `<div class="minimap"><div id="mapSlot" class="mapslot mini" data-kind="mini"></div><button class="mapcover" data-act="goLoc" aria-label="Mở bản đồ"></button></div>`;
+    if (ls.k === 'shown' || myLoc()) {
+      const d = peerDistance(p);
+      h += `<div class="minimap"><div id="mapSlot" class="mapslot mini" data-kind="mini"></div>${d != null ? `<span class="distpill">cách ${fmtKm(d)}</span>` : ''}<button class="mapcover" data-act="goLoc" aria-label="Mở bản đồ"></button></div>`;
+    }
   }
-  const mm = db.mine.mood && isToday(db.mine.mood.at) ? db.mine.mood.v : '';
-  h += `<div class="mlab">Mình đang thấy${mm ? ' · gửi lúc ' + hm(db.mine.mood.at) : ''}</div>
-    <div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" class="${mm === m.v ? 'on' : ''}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
-    <div class="touchrow">${touchBtn()}<button class="spinbtn" data-act="spin">🎲<span>Ăn gì?</span></button></div>
+  h += `<div class="qmbox"><div class="qmrow"><input id="qmIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button class="qmsend" data-act="qmSend" aria-label="Gửi"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div>
+    <div class="qmchips"><button class="qc face" data-act="moodPick" aria-label="Gửi cảm xúc">${MOODS[0].svg}</button><button class="qc heart" data-touch="1" aria-label="Chạm: gửi tim · Giữ: ôm"><span class="th">💗</span></button><button class="qc" data-act="spin" aria-label="Ăn gì hôm nay">🎲</button>${quickPhrases().map((t, i) => `<button class="qc" data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}<button class="qc edit" data-act="quickEdit">✏️ Sửa</button></div>
+    <div class="qmhint">chạm 💗 gửi tim · giữ để ôm</div></div>
   </div>`;
   return h;
+}
+function loveRibbon(){
+  const locked = nowMin() < toMin(db.love.time || '08:00');
+  if (state.loveOpen) return `<div data-act="loveToggle">${loveCard()}</div>`;
+  return `<button class="loveribbon" data-act="loveToggle"><span>💌</span><span class="lt">${locked ? `Lời chúc hôm nay mở lúc ${db.love.time} 🔒` : esc(loveFor(todayKey()))}</span><span class="chev">›</span></button>`;
+}
+function openMoodPick(){
+  const mm = db.mine.mood && isToday(db.mine.mood.at) ? db.mine.mood.v : '';
+  openSheet('Mình đang thấy…', `<div class="moods big" id="mpGrid">${MOODS.map(m => `<button data-mp="${m.v}" class="${mm === m.v ? 'on' : ''}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
+    ${mm ? `<p class="subtitle" style="text-align:center">Đã gửi “${moodOf(mm).l}” lúc ${hm(db.mine.mood.at)}</p>` : ''}`, () => {
+    $('#mpGrid').onclick = e => { const b = e.target.closest('[data-mp]'); if (!b) return; closeSheet(); setTimeout(() => openMood(b.dataset.mp), 260); };
+  });
+}
+function openQuickEdit(){
+  let list = quickPhrases().slice();
+  const commit = () => { db.quickList = list.slice(); save(); pendingRender = true; draw(); };
+  const draw = () => { $('#qeList').innerHTML = list.length ? list.map((t, i) => `<div class="qerow"><span>${esc(t)}</span><button type="button" data-up="${i}" aria-label="Đưa lên" ${i ? '' : 'disabled'}>↑</button><button type="button" data-del="${i}" aria-label="Xóa">×</button></div>`).join('') : '<div class="empty" style="padding:14px">Chưa có câu nào</div>'; };
+  openSheet('Câu nhắn nhanh ✏️', `<p class="subtitle" style="margin-top:0">Bấm là gửi liền. Câu nào đứng đầu sẽ hiện trước ở tab Hôm nay.</p><div class="card" id="qeList"></div>
+    <div class="card"><label class="f"><span>Thêm câu mới</span><input id="qeIn" maxlength="60" placeholder="VD: Tối nay ăn gì nè?" autocomplete="off" enterkeyhint="done"></label></div>
+    <button class="btn" id="qeAdd">Thêm câu</button><button class="btn ghost" id="qeReset">Khôi phục câu mặc định</button>`, () => {
+    draw();
+    $('#qeList').onclick = e => { const up = e.target.closest('[data-up]'), del = e.target.closest('[data-del]');
+      if (up && +up.dataset.up > 0) { const i = +up.dataset.up; [list[i - 1], list[i]] = [list[i], list[i - 1]]; commit(); }
+      if (del) { list.splice(+del.dataset.del, 1); commit(); } };
+    const add = () => { const t = $('#qeIn').value.trim(); if (!t) return toast('Nhập câu muốn thêm'); if (list.length >= 20) return toast('Tối đa 20 câu'); list.push(t); $('#qeIn').value = ''; commit(); $('#qeIn').focus(); };
+    $('#qeAdd').onclick = add;
+    $('#qeIn').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); add(); } };
+    $('#qeReset').onclick = () => { if (!confirm('Khôi phục danh sách câu mặc định?')) return; delete db.quickList; list = quickPhrases().slice(); save(); pendingRender = true; draw(); };
+  });
 }
 const sentTo = () => sync.room ? `Đã gửi cho ${peerName(peerMain())}` : 'Đã lưu · ghép đôi để gửi cho người ấy';
 function replyBox(){
@@ -1903,13 +1970,14 @@ function chatToEnd(){ const m = $('#main'); if (m) m.scrollTop = m.scrollHeight;
 const isMineH = x => x.dev === ensureDevice() || (sync.me && norm(x.name) === norm(sync.me));
 function unreadChat(){ const seen = db.chatSeen || 0; return db.moods.filter(x => x.at > seen && !isMineH(x)).length; }
 function quickPhrases(){
+  if (Array.isArray(db.quickList)) return db.quickList;
   const p = partnerPron() || 'nhau';
   return [`Nhớ ${p} quá 🥺`, 'Ăn cơm chưa?', 'Đang làm gì đó?', 'Về tới nơi nhắn nha', 'Đi đường cẩn thận nha', `Yêu ${p} 💕`, 'Ngủ ngon nha 🌙', 'Gọi xíu được không?'];
 }
 async function sendQuick(t){
   logHistory('msg', { note: t }); db.chatSeen = Date.now(); state.histAtEnd = true; state.chatPanel = false; save(); render();
   if (!sync.room) return toast('Đã lưu · ghép đôi để gửi cho người ấy');
-  const ok = await syncRoom(); if (!ok) toast('Chưa gửi được, sẽ tự thử lại');
+  const ok = await syncRoom(); toast(ok ? sentTo() + ' 💌' : 'Chưa gửi được, sẽ tự thử lại');
 }
 function openJarQuick(){
   let cat = 'food';
@@ -1948,7 +2016,7 @@ function viewHistory(){
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
-    <div class="qlab">Nhắn nhanh</div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
+    <div class="qlab">Nhắn nhanh <button class="linkbtn" data-act="quickEdit" style="font-size:12px;float:right">✏️ Sửa</button></div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
   const composer = `<div class="chatdock">${panel}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
   if (!list.length) return h + `<div class="card"><div class="empty" style="padding:16px">Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
   const shown = state.histAll ? list : list.slice(-60);
@@ -1977,7 +2045,7 @@ function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
   const done = ds.filter(d => d.taken).length;
-  let h = todayHeader();
+  let h = todayHeader() + loveRibbon();
   const due = ds.filter(d => !d.taken && toMin(d.time) <= nowMin());
   if (due.length) {
     const late = nowMin() - toMin(due[0].time);
@@ -1985,14 +2053,13 @@ function viewToday(){
       <div class="t2">${due.map(d => esc(d.med.name) + (d.med.dose ? ' · ' + esc(d.med.dose) : '') + ' · ' + d.time).join('<br>')}</div>
       <button data-act="takeDue">Đã uống</button></div>`;
   }
-  h += loveCard();
   h += duoCard();
   if (!db.meds.length) {
     h += `<div class="card"><button class="row" data-act="addMed"><span class="main"><div class="t">Chưa có thuốc nào</div><div class="s">Bấm để thêm thuốc và giờ uống</div></span><span class="linkbtn">+ Thêm</span></button></div>`;
   } else if (!ds.length) {
     h += `<div class="section-title"><span>Thuốc hôm nay</span></div><div class="card"><div class="empty" style="padding:14px 16px 8px">Hôm nay không có lịch uống thuốc</div>${nextDoseLine()}</div>`;
   } else {
-    h += `<div class="section-title"><span>Thuốc hôm nay · ${done}/${ds.length}</span></div><div class="card">${ds.map(d => doseRow(d, k)).join('')}</div>`;
+    h += `<div class="section-title"><span>Việc hôm nay · thuốc ${done}/${ds.length}</span></div><div class="card">${ds.map(d => doseRow(d, k)).join('')}</div>`;
     if (done === ds.length) { const nl = nextDoseLine(); if (nl) h += `<div class="card">${nl}</div>`; }
   }
   h += eventsBlock(k);
@@ -2407,7 +2474,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.4</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.5</p>`;
 }
 
 function viewCycle(){
@@ -2999,7 +3066,7 @@ function streakInfo(){
 function streakChip(){
   const s = streakInfo();
   if (!s.cur && !s.meToday && !s.peerToday) return '';
-  return `<button class="streakchip ${s.todayDone ? 'on' : ''}" data-act="streakInfo">🔥 ${s.cur}</button>`;
+  return `<button class="streakchip ${s.todayDone ? 'on' : ''}" data-act="streakInfo">🔥${s.cur ? ' ' + s.cur : ''}</button>`;
 }
 function openStreak(){
   const s = streakInfo(), pn = peerName(peerMain());
@@ -3226,7 +3293,7 @@ $('#main').addEventListener('pointerdown', e => { const b = e.target.closest('[d
 $('#main').addEventListener('pointercancel', () => holdEnd(true));
 $('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-touch]')) e.preventDefault(); });
 $('#main').addEventListener('toggle', e => { const g = e.target.dataset && e.target.dataset.g; if (g) state.grp[g] = e.target.open; }, true);
-$('#main').addEventListener('keydown', e => { if (e.key !== 'Enter' || e.isComposing) return; if (e.target.id === 'chatIn') { e.preventDefault(); sendChat(); } else if (e.target.id === 'jarIn') { e.preventDefault(); const b = document.querySelector('[data-act=jarAdd]'); if (b) b.click(); } });
+$('#main').addEventListener('keydown', e => { if (e.key !== 'Enter' || e.isComposing) return; if (e.target.id === 'chatIn') { e.preventDefault(); sendChat(); } else if (e.target.id === 'qmIn') { e.preventDefault(); const b = document.querySelector('[data-act=qmSend]'); if (b) b.click(); } else if (e.target.id === 'jarIn') { e.preventDefault(); const b = document.querySelector('[data-act=jarAdd]'); if (b) b.click(); } });
 $('#main').addEventListener('click', async e => {
   const th = e.target.closest('[data-th]');
   if (th) { db.ui.theme = th.dataset.th; save(); applyUI(); render(); return; }
@@ -3309,6 +3376,10 @@ $('#main').addEventListener('click', async e => {
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
+    case 'qmSend': { const qi = $('#qmIn'), t = (qi && qi.value || '').trim(); if (!t) { if (qi) qi.focus(); return; } qi.value = ''; await sendQuick(t.slice(0, 300)); break; }
+    case 'moodPick': openMoodPick(); break;
+    case 'quickEdit': state.chatPanel = false; openQuickEdit(); break;
+    case 'loveToggle': state.loveOpen = !state.loveOpen; render(); break;
     case 'avatarSet': setAvatar(); break;
     case 'avatarDel': if (db.mine.avatar) fetch(photoUrl(db.mine.avatar), { method: 'DELETE' }).catch(() => {}); db.mine.avatar = ''; db.mine.avatarAt = Date.now(); save(); render(); syncRoom(); break;
     case 'chatRef': { const [c, rid] = id.split(':'); const has = (db[c] || []).some(q => q.id === rid);
