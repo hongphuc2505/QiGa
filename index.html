@@ -250,7 +250,20 @@ textarea{resize:none;min-height:64px}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--accent);color:#fff}
 :root[data-theme=paper] .hb.me .bub.msg{color:#fff}
-.chatbar{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 0 12px;background:linear-gradient(to bottom, transparent, var(--bg) 30%)}
+.chatdock{position:sticky;bottom:0;padding:10px 0 12px;background:linear-gradient(to bottom, transparent, var(--bg) 24px)}
+.chatbar{display:flex;gap:8px;align-items:center}
+.chatbar .plus{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:24px;font-weight:700;flex:none;display:grid;place-items:center;transition:transform .2s}
+.chatbar .plus.on{transform:rotate(45deg)}
+.qpanel{background:var(--card);border-radius:20px;padding:10px 12px 12px;margin-bottom:10px;box-shadow:0 6px 18px rgba(125,35,65,.14)}
+.qlab{font-size:12px;font-weight:700;color:var(--sub);margin:6px 2px 6px;text-transform:uppercase;letter-spacing:.3px}
+.qgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.qgrid button{background:var(--accent-soft);color:var(--text);border-radius:14px;padding:9px 4px;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}
+:root[data-theme=paper] .qgrid button{font-family:var(--hand);font-weight:400;font-size:17px}
+.qgrid button span{font-size:22px}
+.qph{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -12px;padding:0 12px 2px}
+.qph::-webkit-scrollbar{display:none}
+.qph button{background:var(--bg);white-space:nowrap;flex:none}
+.qgrid button{padding:7px 4px}
 .chatbar input{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:22px;padding:11px 16px;font-size:16px;color:var(--text)}
 .chatbar button{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
 .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;padding:0 6px;font-family:inherit;vertical-align:1px}
@@ -1633,6 +1646,26 @@ function histItem(x, mine){
 }
 const isMineH = x => x.dev === ensureDevice() || (sync.me && norm(x.name) === norm(sync.me));
 function unreadChat(){ const seen = db.chatSeen || 0; return db.moods.filter(x => x.at > seen && !isMineH(x)).length; }
+function quickPhrases(){
+  const p = partnerPron() || 'nhau';
+  return [`Nhớ ${p} quá 🥺`, 'Ăn cơm chưa?', 'Đang làm gì đó?', 'Về tới nơi nhắn nha', 'Đi đường cẩn thận nha', `Yêu ${p} 💕`, 'Ngủ ngon nha 🌙', 'Gọi xíu được không?'];
+}
+async function sendQuick(t){
+  logHistory('msg', { note: t }); db.chatSeen = Date.now(); state.histAtEnd = true; state.chatPanel = false; save(); render();
+  if (!sync.room) return toast('Đã lưu · ghép đôi để gửi cho người ấy');
+  const ok = await syncRoom(); if (!ok) toast('Chưa gửi được, sẽ tự thử lại');
+}
+function openJarQuick(){
+  let cat = 'food';
+  openSheet('Bỏ vào hũ 🫙', `<div class="card jaradd"><input id="jqIn" maxlength="80" placeholder="Hôm nay em thích…" autocomplete="off">
+    <div class="chips" id="jqCat">${JCATS.map(c => `<button type="button" data-c="${c[0]}" class="${c[0] === cat ? 'on' : ''}">${c[1]}</button>`).join('')}</div></div>
+    <button class="btn" id="jqSave">Bỏ vào hũ</button>`, () => {
+    $('#jqCat').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; $('#jqCat').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+    $('#jqSave').onclick = () => { const t = $('#jqIn').value.trim(); if (!t) return toast('Ghi điều em thích vào nha');
+      act('🫙', `bỏ vào hũ: ${t}`); upsert('jar', { id: uid(), text: t, cat, by: sync.me || '', at: Date.now(), done: false }); closeSheet(); render(); toast('Đã bỏ vào hũ 🫙'); };
+    setTimeout(() => $('#jqIn').focus(), 300);
+  });
+}
 async function sendChat(){
   const inp = $('#chatIn'), t = (inp && inp.value || '').trim(); if (!t) return;
   inp.value = ''; logHistory('msg', { note: t.slice(0, 300) }); db.chatSeen = Date.now(); state.histAtEnd = true; save(); render();
@@ -1652,7 +1685,12 @@ function viewHistory(){
   const pn = peerName(peerMain());
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const composer = `<div class="chatbar"><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div>`;
+  const pr = partnerPron(), QA = [['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ']];
+  const panel = state.chatPanel ? `<div class="qpanel">
+    <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
+    <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
+    <div class="qlab">Nhắn nhanh</div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
+  const composer = `<div class="chatdock">${panel}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
   if (!list.length) return h + `<div class="card"><div class="empty" style="padding:16px">Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
   const shown = state.histAll ? list : list.slice(-60);
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
@@ -2080,7 +2118,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.5</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.6</p>`;
 }
 
 function viewCycle(){
@@ -2566,11 +2604,14 @@ $('#main').addEventListener('click', async e => {
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
-    case 'foodAdd': pickPhoto(f => openFood(null, f)); break;
+    case 'chatPlus': state.chatPanel = !state.chatPanel; state.histAtEnd = true; render(); break;
+    case 'chatQuick': await sendQuick(quickPhrases()[+id]); break;
+    case 'jarQuick': state.chatPanel = false; openJarQuick(); break;
+    case 'foodAdd': state.chatPanel = false; pickPhoto(f => openFood(null, f)); break;
     case 'foodView': openFood(id); break;
     case 'goHist': state.tab = 'us'; state.usp = 'moods'; ($('#main').scrollTop = 0); render(); break;
     case 'usp': state.usp = b.dataset.s; state.memMore = state.jarMore = false; ($('#main').scrollTop = 0); render(); break;
-    case 'dateNew': openDate(); break;
+    case 'dateNew': state.chatPanel = false; openDate(); break;
     case 'dateEdit': openDate(id); break;
     case 'dateIdea': openIdea(); break;
     case 'memo': openMemo(id); break;
@@ -2585,7 +2626,7 @@ $('#main').addEventListener('click', async e => {
     case 'jarDone': { const x = db.jar.find(q => q.id === id); toggleJar(id); render(); if (x && !x.done) heartsAt(e.clientX, e.clientY); break; }
     case 'jarEdit': openJarSlip(id, false); break;
     case 'jarDraw': drawJar(); break;
-    case 'askLoc': await askLoc(); break;
+    case 'askLoc': state.chatPanel = false; await askLoc(); break;
     case 'locHide': hideLoc(3600e3); toast('Đã ẩn vị trí 1 tiếng'); break;
     case 'locUnhide': db.mine.loc = null; save(); render(); syncRoom(); toast('Đã hết ẩn. Bấm Gửi vị trí khi muốn chia sẻ'); break;
     case 'placeSet': setPlace(); break;
@@ -2595,9 +2636,9 @@ $('#main').addEventListener('click', async e => {
     case 'hPick': openDaySheet(k); break;
     case 'usStartSave': { const v = ($('#usStart') || {}).value; if (!v) return toast('Chọn ngày bắt đầu nha'); db.us.start = v; db.us.startAt = Date.now(); act('💞', `đặt ngày bắt đầu yêu: ${fmtShort(v)}`); save(); render(); heartsAt(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break; }
     case 'usEditStart': openUsStart(); break;
-    case 'mood': openMood(id); break;
-    case 'sendLoc': if (!locBusy) sendLoc(); break;
-    case 'sendHome': await sendHome(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break;
+    case 'mood': state.chatPanel = false; openMood(id); break;
+    case 'sendLoc': state.chatPanel = false; if (!locBusy) sendLoc(); break;
+    case 'sendHome': state.chatPanel = false; await sendHome(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2); break;
     case 'spAdd': openSpecial(); break;
     case 'spEdit': openSpecial(id); break;
     case 'pushOff': await disablePush(); break;
