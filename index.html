@@ -100,6 +100,16 @@ textarea{resize:none;min-height:64px}
 .note b{color:var(--text)}
 .pad{padding:0 14px 14px}
 .btn.pink{background:var(--pink)}
+.love{position:relative;padding:18px 16px;background:linear-gradient(135deg,#ff6b8b,#ff9a76);color:#fff;border-radius:16px;margin-bottom:16px;overflow:hidden}
+.love .k{font-size:13px;font-weight:600;opacity:.9;letter-spacing:.3px;text-transform:uppercase}
+.love .msg{font-size:19px;font-weight:600;line-height:1.4;margin-top:8px}
+.love .from{font-size:13px;opacity:.85;margin-top:10px}
+.love.locked{background:linear-gradient(135deg,#c7c7cc,#aeaeb2)}
+@media (prefers-color-scheme:dark){.love.locked{background:linear-gradient(135deg,#3a3a3c,#2c2c2e)}}
+.love::after{content:"♥";position:absolute;right:-6px;bottom:-26px;font-size:110px;opacity:.12;line-height:1}
+.f.inline{display:flex;align-items:center;gap:12px}
+.f.inline span{margin:0;flex:1}
+.f.inline input{width:110px;text-align:right}
 .status{padding:16px}
 .status .big{margin:2px 0 6px}
 .cday{display:flex;flex-direction:column;align-items:center;padding:4px 0 6px;gap:3px;font-variant-numeric:tabular-nums}
@@ -160,6 +170,8 @@ let db = load() || { meds: [], logs: {}, events: {} };
 const defCycle = () => ({ periods: [], cycleLen: 28, periodLen: 5, auto: true });
 db.meds = db.meds || []; db.logs = db.logs || {}; db.events = db.events || {};
 db.cycle = Object.assign(defCycle(), db.cycle || {});
+const defLove = () => ({ nameFrom: 'HoPu', nameTo: 'QiGa', from: 'anh', to: 'em', time: '08:00', custom: [] });
+db.love = Object.assign(defLove(), db.love || {});
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('Không lưu được dữ liệu'); } }
 
 /* ---------- tiện ích ngày ---------- */
@@ -257,6 +269,86 @@ function savePeriod(rec){
   save();
 }
 
+/* ---------- lời chúc ---------- */
+const LOVE = [
+  'Chào buổi sáng {e}! Ăn sáng đầy đủ rồi mới đi làm nha 🥰',
+  'Dậy chưa {e} ơi? {A} nhớ {e} từ lúc mở mắt rồi đó ☀️',
+  'Chúc {e} một ngày thật nhẹ nhàng. Có gì mệt cứ kể {a} nghe nha 💛',
+  'Uống một ly nước, rồi cười một cái. Vậy là ngày mới đẹp rồi đó {e} 😊',
+  'Hôm nay {e} chỉ cần cố gắng hết sức thôi, phần còn lại có {a} lo 💪',
+  'Sáng nay trời đẹp, nhưng vẫn không đẹp bằng {e} 🌸',
+  '{A} thương {e} nhiều lắm. Nói lại cho {e} nhớ thôi 💕',
+  'Một ngày mới là thêm một ngày {a} được thương {e} 😘',
+  'Nhớ uống thuốc đúng giờ nha {e}, {a} kiểm tra đó 👀',
+  'Chúc {e} hôm nay gặp toàn chuyện vui, gặp ai cũng dễ thương như {e} 🍀',
+  'Đừng quên rằng có một người đang nghĩ về {e} ngay lúc này 💭',
+  '{E} là điều tuyệt nhất trong ngày của {a}, ngày nào cũng vậy ✨',
+  'Hôm nay có mệt thì tối về {a} ôm cho hết mệt nha 🤗',
+  'Chào buổi sáng người {a} thương nhất 🌞',
+  'Chúc {e} làm gì cũng suôn sẻ, ăn gì cũng ngon, cười thật nhiều 😋',
+  'Ngủ ngon không {e}? Nếu chưa thì tối nay {a} kể chuyện ru ngủ nha 🌙',
+  '{A} không giỏi nói lời hay, nhưng {a} thương {e} thật lòng 💗',
+  'Hôm nay nhớ mặc ấm, đi đường cẩn thận nha {e} 🛵',
+  'Gửi {e} một cái ôm buổi sáng, ấm hơn cả ly cà phê ☕',
+  'Bất kể hôm nay thế nào, {a} vẫn luôn đứng về phía {e} 🫶',
+  'Ước gì sáng nào cũng được thấy {e} đầu tiên khi thức dậy 🥺',
+  'Chúc {e} một ngày năng lượng đầy pin 🔋💯',
+  '{E} cười lên đi, vì {a} thích nụ cười đó nhất 😍',
+  'Hôm nay {e} giỏi lắm rồi, kể cả khi {e} chưa làm gì 😆',
+  'Thêm một ngày được làm người yêu của {e}, {a} thấy mình may mắn ghê 🍀',
+  'Nhớ ăn trưa đúng bữa nha, đừng để bụng đói {a} xót 🍱',
+  'Có chuyện gì buồn thì nhắn {a} liền, {a} luôn ở đây 📱',
+  'Chào ngày mới! Chúc người thương của {a} vui vẻ cả ngày 🌷',
+  '{E} là lý do mỗi sáng {a} thấy hào hứng hơn ☀️',
+  'Hôm nay thương {e} nhiều hơn hôm qua một chút, mai sẽ nhiều hơn nữa 📈',
+  'Chúc {e} gặp đèn xanh suốt đường đi 🚦😄',
+  'Ngày mới vui vẻ nha {e}. Tối nay mình ăn gì ngon ngon đi 🍜',
+  'Dù bận cỡ nào cũng nhớ nghỉ ngơi một chút nha {e} 🌿',
+  '{A} tự hào về {e} lắm đó, biết không 🏆',
+  'Một tin nhắn nhỏ để {e} biết là {a} đang nhớ {e} 💌',
+  'Chúc {e} hôm nay bình yên, vậy là {a} vui rồi 🕊️',
+  'Thức dậy thôi người đẹp, thế giới đang chờ {e} tỏa sáng ✨',
+  'Hôm nay có bao nhiêu việc cũng không sao, {e} làm được hết 💪',
+  '{A} thương {e}. Hết. Không cần lý do 💕',
+  'Chào buổi sáng! Hôm nay nhớ thương {a} một chút nha 🥰'
+];
+const dayNum = k => Math.round(parseKey(k) / 864e5);
+function fillLove(t){
+  const L = db.love, cap = x => x ? x[0].toUpperCase() + x.slice(1) : x;
+  let out = t.replace(/\{a\}/g, L.from).replace(/\{A\}/g, cap(L.from)).replace(/\{e\}/g, L.to).replace(/\{E\}/g, cap(L.to));
+  return cap(out);
+}
+function lovePool(){ return (db.love.custom || []).concat(LOVE); }
+function loveFor(k){
+  const pool = lovePool();
+  // xáo theo số ngày để không lặp theo thứ tự cố định
+  const n = dayNum(k);
+  return fillLove(pool[((n * 7919) % pool.length + pool.length) % pool.length]);
+}
+const loveTitle = () => `${db.love.nameFrom} chúc ${db.love.nameTo}`;
+function loveCard(){
+  const tk = todayKey();
+  if (nowMin() < toMin(db.love.time || '08:00')) {
+    return `<div class="love locked"><div class="k">💌 ${esc(loveTitle())}</div><div class="msg">Mở lúc ${db.love.time} nha 🔒</div><div class="from">Hôm qua: “${esc(loveFor(addDays(tk, -1)))}”</div></div>`;
+  }
+  return `<div class="love"><div class="k">💌 ${esc(loveTitle())}</div><div class="msg">${esc(loveFor(tk))}</div><div class="from">— ${esc(db.love.nameFrom)}</div></div>`;
+}
+function buildLoveICS(days){
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const hm = (db.love.time || '08:00').replace(':', '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SoTay//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Lời chúc'];
+  let k = todayKey();
+  if (nowMin() >= toMin(db.love.time || '08:00')) k = addDays(k, 1);
+  for (let i = 0; i < days; i++, k = addDays(k, 1)) {
+    const msg = loveFor(k), d = k.replace(/-/g, '');
+    L.push('BEGIN:VEVENT', `UID:love-${d}@sotay`, 'DTSTAMP:' + stamp, `DTSTART:${d}T${hm}00`, 'DURATION:PT5M',
+      'SUMMARY:' + icsEsc('💌 ' + loveTitle() + ': ' + msg), 'TRANSP:TRANSPARENT',
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc(msg), 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
+  }
+  L.push('END:VCALENDAR');
+  return L.map(fold).join('\r\n') + '\r\n';
+}
+
 /* ---------- state ---------- */
 const state = { tab: 'today', month: null, cmonth: null, sel: todayKey() };
 state.month = (d => new Date(d.getFullYear(), d.getMonth(), 1))(new Date());
@@ -292,7 +384,7 @@ function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
   const done = ds.filter(d => d.taken).length;
-  let h = `<h1>Hôm nay</h1><p class="subtitle">${fmtLong(k)}</p>`;
+  let h = `<h1>Hôm nay</h1><p class="subtitle">${fmtLong(k)}</p>` + loveCard();
   if (!db.meds.length) {
     h += `<div class="card empty">Chưa có thuốc nào trong danh sách.<div style="height:14px"></div><button class="btn" data-act="addMed">+ Thêm thuốc</button></div>`;
   } else if (!ds.length) {
@@ -390,6 +482,26 @@ function viewMeds(){
 function viewMore(){
   const days = Object.keys(db.logs).length;
   return `<h1>Khác</h1><p class="subtitle">Dữ liệu chỉ lưu trên máy này</p>
+  <div class="section-title"><span>Lời chúc mỗi sáng</span></div>
+  <div class="card">
+    <label class="f inline"><span>Tên người gửi</span><input id="lvNameFrom" value="${esc(db.love.nameFrom)}" autocomplete="off"></label>
+    <label class="f inline"><span>Tên người nhận</span><input id="lvNameTo" value="${esc(db.love.nameTo)}" autocomplete="off"></label>
+    <label class="f inline"><span>Người gửi xưng là</span><input id="lvFrom" value="${esc(db.love.from)}" placeholder="anh" autocomplete="off"></label>
+    <label class="f inline"><span>Gọi người nhận là</span><input id="lvTo" value="${esc(db.love.to)}" placeholder="em" autocomplete="off"></label>
+    <label class="f inline"><span>Giờ chúc</span><input type="time" id="lvTime" value="${db.love.time}"></label>
+    <label class="f"><span>Lời chúc riêng (mỗi dòng một câu, dùng chung với ${LOVE.length} câu có sẵn)</span><textarea id="lvCustom" rows="4" placeholder="VD: Chúc mừng 1 năm yêu nhau nha {e} 💕">${esc((db.love.custom || []).join('\n'))}</textarea></label>
+  </div>
+  <div class="card">
+    <div class="note">Để iPhone báo lời chúc đúng giờ mỗi sáng (không cần mạng):
+      <ol>
+        <li>Trong app Lịch, tạo một lịch mới tên <b>"Lời chúc"</b>.</li>
+        <li>Bấm nút bên dưới, mở file → <b>Thêm tất cả</b> → chọn lịch "Lời chúc".</li>
+        <li>Mỗi lần xuất có lời chúc cho 90 ngày. Hết thì xóa lịch "Lời chúc", tạo lại và xuất tiếp.</li>
+      </ol>
+      Trong câu chúc, <b>{a}</b> là người gửi, <b>{e}</b> là người nhận.
+    </div>
+    <div class="pad"><button class="btn pink" data-act="loveIcs">Thêm lời chúc vào Lịch iPhone</button></div>
+  </div>
   <div class="section-title"><span>Sao lưu</span></div>
   <div class="card">
     <div class="note">Dữ liệu nằm trong trình duyệt của iPhone. Nên sao lưu định kỳ (lưu vào app Tệp hoặc iCloud Drive), nhất là trước khi xóa app khỏi màn hình chính.<br>Hiện có ${db.meds.length} thuốc, ${days} ngày có ghi nhận, ${db.cycle.periods.length} kỳ kinh.</div>
@@ -397,7 +509,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px">Sổ Tay · bản 1.1</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px">Sổ Tay · bản 1.2</p>`;
 }
 
 function viewCycle(){
@@ -750,6 +862,9 @@ $('#main').addEventListener('click', async e => {
     case 'cPrev': state.cmonth = new Date(state.cmonth.getFullYear(), state.cmonth.getMonth() - 1, 1); render(); break;
     case 'cNext': state.cmonth = new Date(state.cmonth.getFullYear(), state.cmonth.getMonth() + 1, 1); render(); break;
     case 'cToday': { const d = new Date(); state.cmonth = new Date(d.getFullYear(), d.getMonth(), 1); render(); break; }
+    case 'loveIcs':
+      downloadFile('loi-chuc.ics', buildLoveICS(90), 'text/calendar');
+      break;
     case 'ics':
       if (!db.meds.length) return toast('Chưa có thuốc nào để xuất');
       downloadFile('uong-thuoc.ics', buildICS(), 'text/calendar');
@@ -763,13 +878,17 @@ $('#main').addEventListener('click', async e => {
     case 'restore': $('#fileIn').value = ''; $('#fileIn').click(); break;
     case 'wipe':
       if (!confirm('Xóa toàn bộ thuốc, lịch sử uống, sự kiện và dữ liệu chu kỳ? Không thể hoàn tác.')) return;
-      db = { meds: [], logs: {}, events: {}, cycle: defCycle() }; save(); render(); toast('Đã xóa');
+      db = { meds: [], logs: {}, events: {}, cycle: defCycle(), love: db.love }; save(); render(); toast('Đã xóa');
       break;
   }
 });
 
 $('#main').addEventListener('change', e => {
   const t = e.target, c = db.cycle;
+  if (t.id === 'lvNameFrom' || t.id === 'lvNameTo') { const f = t.id === 'lvNameFrom' ? 'nameFrom' : 'nameTo'; db.love[f] = t.value.trim() || defLove()[f]; save(); toast('Đã lưu'); return; }
+  if (t.id === 'lvFrom' || t.id === 'lvTo') { db.love[t.id === 'lvFrom' ? 'from' : 'to'] = t.value.trim() || (t.id === 'lvFrom' ? 'anh' : 'em'); save(); toast('Đã lưu'); return; }
+  if (t.id === 'lvTime') { if (t.value) { db.love.time = t.value; save(); toast('Đã lưu'); } return; }
+  if (t.id === 'lvCustom') { db.love.custom = t.value.split('\n').map(x => x.trim()).filter(Boolean); save(); toast('Đã lưu'); return; }
   if (t.id === 'cyAuto') { c.auto = t.checked; save(); render(); }
   else if (t.id === 'cyLen') { const v = Math.round(+t.value); if (v >= 20 && v <= 45) { c.cycleLen = v; save(); render(); } else { toast('Chu kỳ từ 20 đến 45 ngày'); t.value = c.cycleLen; } }
   else if (t.id === 'cyPLen') { const v = Math.round(+t.value); if (v >= 1 && v <= 15) { c.periodLen = v; save(); render(); } else { toast('Từ 1 đến 15 ngày'); t.value = c.periodLen; } }
@@ -782,7 +901,7 @@ $('#fileIn').onchange = async () => {
     const data = obj.data || obj;
     if (!Array.isArray(data.meds)) throw new Error('bad');
     if (!confirm('Thay dữ liệu hiện tại bằng file sao lưu này?')) return;
-    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}) };
+    db = { meds: data.meds, logs: data.logs || {}, events: data.events || {}, cycle: Object.assign(defCycle(), data.cycle || {}), love: Object.assign(defLove(), data.love || {}) };
     save(); render(); toast('Đã khôi phục');
   } catch (e) { toast('File không hợp lệ'); }
 };
