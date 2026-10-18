@@ -75,15 +75,39 @@ function roomEvents(room, data) {
   return out;
 }
 
-function mergeRoom(cur, inc) {
-  const ev = Object.assign({}, cur.events || {});
-  for (const [id, e] of Object.entries((inc && inc.events) || {})) {
+const lww = (a, b) => { // gộp từng mục theo thời gian sửa, mục mới nhất thắng
+  const out = Object.assign({}, a || {});
+  for (const [id, e] of Object.entries(b || {})) {
     if (!e || typeof e !== 'object') continue;
-    if (!ev[id] || (+e.updated || 0) > (+ev[id].updated || 0)) ev[id] = e;
+    if (!out[id] || (+e.updated || 0) > (+out[id].updated || 0)) out[id] = e;
   }
+  return out;
+};
+const newer = (a, b) => (b && typeof b === 'object' && (+b.at || 0) > ((a && +a.at) || 0)) ? b : a;
+const cleanStr = (v, n) => String(v == null ? '' : v).slice(0, n);
+function cleanPerson(p) {
+  const o = { name: cleanStr(p.name, 40), at: +p.at || 0 };
+  if (p.mood && p.mood.v) o.mood = { v: cleanStr(p.mood.v, 12), emo: cleanStr(p.mood.emo, 8), label: cleanStr(p.mood.label, 40), tip: cleanStr(p.mood.tip, 80), at: +p.mood.at || 0 };
+  if (p.loc && isFinite(p.loc.lat) && isFinite(p.loc.lng)) o.loc = { lat: +(+p.loc.lat).toFixed(5), lng: +(+p.loc.lng).toFixed(5), acc: Math.round(+p.loc.acc || 0), at: +p.loc.at || 0 };
+  if (p.home && p.home.at) o.home = { at: +p.home.at };
+  return o;
+}
+function mergeRoom(cur, inc) {
+  inc = inc || {};
+  const ev = lww(cur.events, inc.events), sp = lww(cur.specials, inc.specials), meta = lww(cur.meta, inc.meta);
   const cutoff = Date.now() - 60 * 864e5; // dọn các mục đã xóa quá 60 ngày
-  for (const [id, e] of Object.entries(ev)) if (e.deleted && (+e.updated || 0) < cutoff) delete ev[id];
-  return { events: ev };
+  for (const m of [ev, sp]) for (const [id, e] of Object.entries(m)) if (e.deleted && (+e.updated || 0) < cutoff) delete m[id];
+  const people = Object.assign({}, cur.people || {});
+  for (const [dev, p] of Object.entries(inc.people || {})) {
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(dev) || !p || typeof p !== 'object') continue;
+    const c = cleanPerson(p), o = people[dev] || {};
+    const m = { name: c.name || o.name || '', at: c.at - (o.at || 0) > 15 * 60000 ? c.at : (o.at || c.at) }; // chỉ ghi lại giờ mở app mỗi 15 phút cho đỡ tốn lượt ghi
+    for (const f of ['mood', 'loc', 'home']) { const v = newer(o[f], c[f]); if (v) m[f] = v; }
+    people[dev] = m;
+  }
+  const ids = Object.keys(people).sort((a, b) => (people[b].at || 0) - (people[a].at || 0));
+  for (const id of ids.slice(6)) delete people[id]; // giữ tối đa 6 máy
+  return { events: ev, specials: sp, meta, people };
 }
 
 async function buildCalendar(data, env) {
@@ -179,6 +203,43 @@ function describeChanges(cur, inc) {
     if (e.deleted) { if (old && !old.deleted) out.push({ verb: 'đã xóa', e: old }); }
     else out.push({ verb: old && !old.deleted ? 'đã sửa' : 'vừa thêm', e });
   }
+  return out;
+}
+const fmtD = d => { if (!d) return ''; const [y, m, dd] = String(d).split('-'); return `${+dd}/${+m}/${y}`; };
+function describeUs(cur, inc) {
+  const recent = Date.now() - 10 * 60000, out = [];
+  for (const [id, e] of Object.entries((inc && inc.specials) || {})) {
+    if (!e || (+e.updated || 0) < recent) continue;
+    const old = (cur.specials || {})[id];
+    if (old && (+e.updated || 0) <= (+old.updated || 0)) continue;
+    if (e.deleted) { if (old && !old.deleted) out.push(`đã xóa ngày đặc biệt: ${old.name}`); }
+    else out.push(`${old && !old.deleted ? 'đã sửa' : 'vừa thêm'} ngày đặc biệt: ${e.name} · ${fmtD(e.date)}`);
+  }
+  const st = inc && inc.meta && inc.meta.start, ost = cur.meta && cur.meta.start;
+  if (st && (+st.updated || 0) >= recent && (!ost || (+st.updated || 0) > (+ost.updated || 0)) && (!ost || ost.v !== st.v))
+    out.push(st.v ? `đã đặt ngày bắt đầu yêu: ${fmtD(st.v)}` : 'đã xóa ngày bắt đầu yêu');
+  return out;
+}
+const R = 6371;
+function distKm(a, b) {
+  const t = x => x * Math.PI / 180, dLa = t(b.lat - a.lat), dLo = t(b.lng - a.lng);
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const fmtKm = d => d < 1 ? `${Math.round(d * 1000 / 10) * 10} m` : `${d < 10 ? d.toFixed(1).replace('.', ',') : Math.round(d)} km`;
+function describePeople(cur, merged, dev, name) {
+  const recent = Date.now() - 10 * 60000, out = [];
+  const before = (cur.people || {})[dev] || {}, now = (merged.people || {})[dev] || {};
+  const who = name || now.name || 'Người ấy';
+  if (now.mood && now.mood.at >= recent && (!before.mood || now.mood.at > before.mood.at))
+    out.push({ title: `${now.mood.emo || '💗'} ${who} ${now.mood.label || 'vừa gửi tâm trạng'}`, body: now.mood.tip || 'Mở Sổ Tay xem nha' });
+  if (now.loc && now.loc.at >= recent && (!before.loc || now.loc.at > before.loc.at)) {
+    const others = Object.entries(merged.people || {}).filter(([id, p]) => id !== dev && p.loc).map(([, p]) => p.loc);
+    const d = others.length ? distKm(now.loc, others.sort((a, b) => b.at - a.at)[0]) : null;
+    out.push({ title: `📍 ${who} vừa gửi vị trí`, body: d != null ? `Đang cách nhau khoảng ${fmtKm(d)} · bấm để xem` : 'Bấm để xem trên bản đồ' });
+  }
+  if (now.home && now.home.at >= recent && (!before.home || now.home.at > before.home.at))
+    out.push({ title: `🏠 ${who} về tới nhà rồi`, body: 'Yên tâm nha 💕' });
   return out;
 }
 const fmtEv = e => { if (!e || !e.date) return ''; const [y, m, d] = e.date.split('-'); return `${e.title} · ${+d}/${+m}${e.time ? ' ' + e.time : ''}`; };
@@ -301,13 +362,16 @@ export default {
         const body = await req.text();
         if (body.length > 300000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
         let inc; try { inc = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
-        const changes = describeChanges(cur, inc);
+        const dev = String(inc.device || ''), who = String(inc.name || '').slice(0, 40);
+        const changes = describeChanges(cur, inc), usLines = describeUs(cur, inc);
         const merged = mergeRoom(cur, inc);
+        const pplMsgs = describePeople(cur, merged, dev, who);
         if (JSON.stringify(merged) !== JSON.stringify(cur)) await env.SOTAY.put(rkey, JSON.stringify(merged));
-        if (changes.length) {
-          const p = notifyRoom(env, r[1], String(inc.device || ''), String(inc.name || '').slice(0, 40), changes);
-          if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p;
-        }
+        const jobs = [];
+        if (changes.length) jobs.push(notifyRoom(env, r[1], dev, who, changes));
+        if (usLines.length) jobs.push(sendToRoom(env, r[1], dev, { title: `💞 ${who || 'Người ấy'} ${usLines[0]}`, body: usLines.length > 1 ? usLines.slice(1, 4).join('\n') : 'Mở tab Hai đứa xem nha' }));
+        for (const m of pplMsgs) jobs.push(sendToRoom(env, r[1], dev, m));
+        if (jobs.length) { const p = Promise.all(jobs); if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p; }
         return new Response(JSON.stringify(merged), { headers: { ...CORS, 'Content-Type': 'application/json' } });
       }
       return new Response(JSON.stringify(cur), { headers: { ...CORS, 'Content-Type': 'application/json' } });
