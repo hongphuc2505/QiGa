@@ -79,9 +79,10 @@ nav svg{width:26px;height:26px}
 .sheet.open{transform:none;visibility:visible;transition:transform .25s ease}
 .sheet-head{position:sticky;top:0;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:14px 0 6px;z-index:1}
 .sheet-head b{font-size:17px}
-label.f{display:block;padding:10px 14px;border-bottom:.5px solid var(--line)}
-label.f:last-child{border-bottom:0}
-label.f span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+label.f,div.f{display:block;padding:10px 14px;border-bottom:.5px solid var(--line)}
+label.f:last-child,div.f:last-child{border-bottom:0}
+label.f span,div.f>span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+.rate button span,.rate span{display:inline;font-size:inherit;margin:0}
 input,textarea{font:inherit;font-size:16px;color:var(--text);background:transparent;border:0;outline:0;width:100%;padding:4px 0}
 input[type=time],input[type=date]{-webkit-appearance:none;appearance:none;min-height:32px;text-align:left}
 textarea{resize:none;min-height:64px}
@@ -912,6 +913,7 @@ async function syncRoom(){
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
     if (applyRoom(merged)) { if (!sheetOpen()) render(); else pendingRender = true; }
     else if (state.tab === 'more' && !sheetOpen()) render();
+    setTimeout(syncPhotos, 1500);
     return true;
   } catch (e) { sync.roomErr = String(e.message || e); saveSync(); return false; }
   finally { roomBusy = false; }
@@ -1376,7 +1378,8 @@ function openMemo(id){
     <button class="btn ghost" id="memPhBtn">${d.photo ? 'Đổi ảnh' : '📸 Thêm ảnh'}</button>
     <div class="card"><label class="f"><span>${esc(meKey())} viết</span><input id="memNote" maxlength="120" value="${esc(mine)}" placeholder="Một dòng về hôm đó…" autocomplete="off"></label>
     ${others.map(([k, v]) => `<div class="frow"><span class="lbl">${esc(k)} viết<div class="s">${esc(v)}</div></span></div>`).join('')}</div>
-    <button class="btn" id="memSave">Lưu</button><button class="btn ghost" id="memEdit">Sửa tên, ngày</button>`, () => {
+    <button class="btn" id="memSave">Lưu</button>${d.photo ? '<button class="btn ghost" id="memDl">⬇️ Lưu ảnh vào Thư viện ảnh</button>' : ''}<button class="btn ghost" id="memEdit">Sửa tên, ngày</button>`, () => {
+    if ($('#memDl')) $('#memDl').onclick = () => savePhotos([{ id: d.photo, name: d.title }]);
     $('#memSave').onclick = () => { const nt = $('#memNote').value.trim(), notes = Object.assign({}, d.notes || {}, { [meKey()]: nt }); if (nt && nt !== mine) act('📝', `viết về "${d.title}": ${nt}`); upsert('dates', Object.assign({}, d, { notes })); closeSheet(); render(); toast('Đã lưu kỷ niệm'); };
     $('#memEdit').onclick = () => { closeSheet(); setTimeout(() => openDate(d.id), 250); };
     $('#memPhBtn').onclick = () => {
@@ -1519,7 +1522,8 @@ function openFood(id, file){
     <div class="f"><span>Chấm điểm</span><div class="rate" id="fRate">${[1, 2, 3, 4, 5].map(i => `<button type="button" data-r="${i}">${i <= rate ? '❤️' : '🤍'}</button>`).join('')}</div></div>
     <label class="f"><span>Ghi chú</span><input id="fNote" value="${esc(f.note || '')}" placeholder="VD: nước dùng ngon, hơi cay" autocomplete="off"></label>
     <label class="frow"><span class="lbl">Muốn ăn lại</span><input type="checkbox" class="switch" id="fAgain" ${f.again ? 'checked' : ''}></label></div>
-    <button class="btn" id="fSave">Lưu</button>${ex ? '<button class="btn danger" id="fDel">Xóa món</button>' : ''}`, () => {
+    <button class="btn" id="fSave">Lưu</button>${ex && f.photo ? '<button class="btn ghost" id="fDl">⬇️ Lưu ảnh vào Thư viện ảnh</button>' : ''}${ex ? '<button class="btn danger" id="fDel">Xóa món</button>' : ''}`, () => {
+    if ($('#fDl')) $('#fDl').onclick = () => savePhotos([{ id: f.photo, name: f.name }]);
     $('#fRate').onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; rate = +b.dataset.r; $('#fRate').querySelectorAll('button').forEach(x => { x.textContent = +x.dataset.r <= rate ? '❤️' : '🤍'; }); };
     $('#fPhBtn').onclick = () => pickPhoto(file2 => { newFile = file2; $('#fPh').innerHTML = `<img src="${URL.createObjectURL(file2)}" alt="">`; $('#fPhBtn').textContent = 'Đổi ảnh'; });
     $('#fSave').onclick = async () => {
@@ -1705,6 +1709,7 @@ function viewHistory(){
   return h;
 }
 function afterRender(){
+  if (state.tab === 'more' && $('#phStat')) photoStats().then(st => { const e = $('#phStat'); if (e) e.textContent = !st ? 'Cần ghép đôi để lưu ảnh' : st.total ? `Đã có ${st.have}/${st.total} ảnh${st.have < st.total ? ' · đang tải tiếp' : ' ✓'}` : 'Chưa có ảnh nào'; if (st && st.have < st.total) syncPhotos(); });
   if (state.tab === 'today') mountMap();
   if (state.tab === 'us' && state.usp === 'moods') { const mn = $('#main'), e = $('#histEnd'); if (e && (!state.histScrolled || state.histAtEnd)) e.scrollIntoView({ block: 'end' }); state.histScrolled = true; }
   if (state.usp !== 'moods') state.histScrolled = false; if (state.tab === 'us' && state.usp === 'loc') mountMap(); }
@@ -1834,6 +1839,11 @@ function monthOcc(date, from){ // lần tới (từ ngày `from`) rơi vào cùn
   }
   return null;
 }
+const monthName = n => { // 6 → nửa năm, 18 → 1 năm rưỡi, 14 → 1 năm 2 tháng
+  const y = Math.floor(n / 12), m = n % 12;
+  if (!y) return m === 6 ? 'nửa năm' : `${m} tháng`;
+  return m === 6 ? `${y} năm rưỡi` : m ? `${y} năm ${m} tháng` : `${y} năm`;
+};
 const monthsBetween = (a, b) => { const x = parseKey(a), y = parseKey(b); return (y.getFullYear() - x.getFullYear()) * 12 + y.getMonth() - x.getMonth(); };
 function nextOcc(date, yearly){
   const tk = todayKey();
@@ -1853,7 +1863,7 @@ function specialList(){
     if (ann && ann !== db.us.start) { const yrs = parseKey(ann).getFullYear() - parseKey(db.us.start).getFullYear(); if (yrs > 0) out.push({ name: `Kỷ niệm ${yrs} năm`, date: ann, left: diffDays(tk, ann), auto: true, sub: 'tự tính' }); }
     if (db.us.monthly !== false) { // kỷ niệm hằng tháng
       const mo = monthOcc(db.us.start, tk > db.us.start ? tk : addDays(db.us.start, 1)), n = mo ? monthsBetween(db.us.start, mo) : 0;
-      if (mo && n > 0 && n % 12) out.push({ name: `Kỷ niệm ${n} tháng`, date: mo, left: diffDays(tk, mo), auto: true, sub: 'hằng tháng · tự tính' });
+      if (mo && n > 0 && n % 12) out.push({ name: `Kỷ niệm ${monthName(n)}`, date: mo, left: diffDays(tk, mo), auto: true, sub: 'hằng tháng · tự tính' });
     }
   }
   return out.sort((a, b) => a.left - b.left);
@@ -2110,6 +2120,9 @@ function viewMore(){
     <label class="frow"><span class="lbl">Bo góc mềm mại</span><input type="checkbox" class="switch" id="uiCute" ${db.ui.cute ? 'checked' : ''}></label>
     <label class="frow"><span class="lbl">Nền họa tiết trái tim</span><input type="checkbox" class="switch" id="uiPattern" ${db.ui.pattern ? 'checked' : ''}></label>
   </div>
+  <div class="subgrp">Ảnh</div>
+  <div class="card"><div class="frow"><span class="lbl">Ảnh trên máy này<div class="s" id="phStat">Đang kiểm tra…</div></span><button class="linkbtn" data-act="photoSaveAll">Lưu hết vào Thư viện</button></div>
+    <div class="note">Ảnh hai đứa đăng (món ngon, kỷ niệm) được tự tải về máy để mất mạng vẫn xem được, và vẫn còn trên máy chủ. Muốn giữ hẳn trong app Ảnh của iPhone thì bấm "Lưu hết vào Thư viện" → chọn <b>Lưu hình ảnh</b>.</div></div>
   <div class="subgrp">Sao lưu</div>
   <div class="card">
     <div class="note">Dữ liệu nằm trong trình duyệt của iPhone. Nên sao lưu định kỳ (lưu vào app Tệp hoặc iCloud Drive), nhất là trước khi xóa app khỏi màn hình chính.<br>Hiện có ${db.meds.length} thuốc, ${days} ngày có ghi nhận, ${db.cycle.periods.length} kỳ kinh.</div>
@@ -2118,7 +2131,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.6</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 4.7</p>`;
 }
 
 function viewCycle(){
@@ -2504,6 +2517,59 @@ async function shareFile(name, text, type){
   return false;
 }
 
+/* ---------- ảnh: luôn có sẵn trên máy ---------- */
+const PHOTO_CACHE = 'sotay-photos';
+function allPhotos(){
+  const out = [];
+  for (const d of db.dates) if (d.photo) out.push({ id: d.photo, name: d.title, at: parseKey(d.date).getTime() });
+  for (const f of db.foods) if (f.photo) out.push({ id: f.photo, name: f.name, at: f.at || 0 });
+  const seen = new Set(); return out.filter(x => !seen.has(x.id) && seen.add(x.id)).sort((a, b) => b.at - a.at);
+}
+let photoSyncing = false;
+async function syncPhotos(){ // tải sẵn mọi ảnh (của cả hai) vào máy, mất mạng vẫn xem được
+  if (photoSyncing || !syncBase() || !sync.room || !('caches' in window)) return;
+  photoSyncing = true;
+  try {
+    const c = await caches.open(PHOTO_CACHE); let n = 0;
+    for (const x of allPhotos()) {
+      const url = photoUrl(x.id);
+      if (await c.match(url)) continue;
+      try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) { await c.put(url, r); n++; } } catch (e) { break; } // mất mạng thì để lần sau
+    }
+    if (n && state.tab === 'more' && !sheetOpen()) render();
+  } finally { photoSyncing = false; }
+}
+async function photoStats(){
+  if (!('caches' in window) || !sync.room) return null;
+  const c = await caches.open(PHOTO_CACHE), all = allPhotos(); let have = 0;
+  for (const x of all) if (await c.match(photoUrl(x.id))) have++;
+  return { have, total: all.length };
+}
+async function photoFile(x){
+  const url = photoUrl(x.id), c = 'caches' in window ? await caches.open(PHOTO_CACHE) : null;
+  let r = c && await c.match(url);
+  if (!r) { r = await fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status); if (c) await c.put(url, r.clone()); }
+  const safe = String(x.name || 'anh').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^A-Za-z0-9]+/g, '-').slice(0, 40) || 'anh';
+  return new File([await r.blob()], `sotay-${safe}-${x.id.slice(0, 6)}.jpg`, { type: 'image/jpeg' });
+}
+async function savePhotos(list){ // mở bảng chia sẻ của iPhone → "Lưu hình ảnh" vào Thư viện ảnh
+  if (!list.length) return toast('Chưa có ảnh nào');
+  toast('Đang chuẩn bị ảnh…');
+  try {
+    const files = [];
+    for (const x of list) files.push(await photoFile(x));
+    for (let i = 0; i < files.length; i += 20) {
+      const part = files.slice(i, i + 20);
+      if (!(navigator.canShare && navigator.canShare({ files: part }))) {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(part[0]); a.download = part[0].name; a.click();
+        return toast('Máy này không mở được bảng chia sẻ, đã tải ảnh đầu tiên');
+      }
+      if (i > 0 && !confirm(`Lưu tiếp ${Math.min(20, files.length - i)} ảnh nữa?`)) break;
+      await navigator.share({ files: part });
+    }
+  } catch (e) { if (e.name !== 'AbortError') toast('Chưa lưu được, thử lại khi có mạng nha'); }
+}
+
 /* ---------- toast ---------- */
 let toastT;
 function toast(msg){
@@ -2665,6 +2731,7 @@ $('#main').addEventListener('click', async e => {
       if (!db.meds.length) return toast('Chưa có thuốc nào để xuất');
       downloadFile('uong-thuoc.ics', buildICS(), 'text/calendar');
       break;
+    case 'photoSaveAll': await savePhotos(allPhotos()); break;
     case 'backup': {
       const text = JSON.stringify({ app: 'sotay', version: 2, exportedAt: new Date().toISOString(), data: db, sync: Object.assign({}, sync, { sent: '' }) }, null, 2);
       const name = `sotay-backup-${todayKey()}.json`;
@@ -2716,6 +2783,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { if
 
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {} // xin iPhone giữ dữ liệu, không tự dọn
 fetchLoveLines();
 scheduleSync(800);
 loadWeather(false);
