@@ -363,6 +363,8 @@ function buildLoveICS(days){
 /* ---------- đồng bộ lịch ---------- */
 const SYNC_KEY = 'sotay-sync';
 let sync = (() => { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch(e){ return null; } })() || { url: '', key: '', last: 0, sent: '', err: '' };
+function ensureDevice(){ if (!sync.device) { sync.device = genKeyLate(); } return sync.device; }
+function genKeyLate(){ const x = new Uint8Array(12); crypto.getRandomValues(x); return btoa(String.fromCharCode(...x)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
 function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify(sync)); } catch(e){} }
 function genKey(){ const a = new Uint8Array(18); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
 const syncBase = () => (sync.url || '').trim().replace(/\/+$/, '');
@@ -464,7 +466,7 @@ async function syncRoom(){
   if (!syncBase() || !sync.room || roomBusy) return;
   roomBusy = true;
   try {
-    const r = await fetch(`${syncBase()}/room/${sync.room}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ events: roomMap() }) });
+    const r = await fetch(`${syncBase()}/room/${sync.room}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ events: roomMap(), device: ensureDevice(), name: sync.me || '' }) });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const merged = await r.json();
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
@@ -472,6 +474,30 @@ async function syncRoom(){
     else if (state.tab === 'more' && !sheetOpen()) render();
   } catch (e) { sync.roomErr = String(e.message || e); saveSync(); }
   finally { roomBusy = false; }
+}
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+function u8(s){ s = s.replace(/-/g, '+').replace(/_/g, '/'); s += '='.repeat((4 - s.length % 4) % 4); return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+async function enablePush(){
+  if (!pushSupported()) return toast(isStandalone() ? 'Máy này chưa hỗ trợ thông báo (cần iOS 16.4+)' : 'Mở app từ biểu tượng ngoài màn hình chính rồi bật lại');
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return toast('Chưa cho phép thông báo');
+    const reg = await navigator.serviceWorker.ready;
+    const { publicKey } = await (await fetch(`${syncBase()}/vapid`)).json();
+    let sub = await reg.pushManager.getSubscription();
+    if (sub) { try { await sub.unsubscribe(); } catch(e){} }
+    sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(publicKey) });
+    const r = await fetch(`${syncBase()}/push/${sync.room}/${ensureDevice()}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sub: sub.toJSON(), name: sync.me || '', test: true }) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    sync.push = true; saveSync(); render(); toast('Đã bật thông báo 🔔');
+  } catch (e) { toast('Bật thông báo lỗi: ' + (e.message || e)); }
+}
+async function disablePush(){
+  try { const reg = await navigator.serviceWorker.ready; const sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch(e){}
+  try { await fetch(`${syncBase()}/push/${sync.room}/${ensureDevice()}`, { method: 'DELETE' }); } catch(e){}
+  sync.push = false; saveSync(); render(); toast('Đã tắt thông báo');
 }
 function fmtTime(ms){ const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())} ${d.getDate()}/${d.getMonth() + 1}`; }
 
@@ -632,6 +658,8 @@ function viewMore(){
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
       <div class="note">Sự kiện thêm trên máy nào cũng hiện ở cả hai máy và vào Lịch iPhone (nếu đã đăng ký lịch ở trên).</div>
+      <div class="frow"><span class="lbl">🔔 Báo khi người kia thêm/sửa/xóa sự kiện${!isStandalone() ? '<div class="s">Mở app từ biểu tượng ngoài màn hình chính để bật</div>' : ''}</span>
+        ${sync.push ? '<button class="linkbtn" data-act="pushOff" style="color:var(--sub)">Tắt</button>' : '<button class="linkbtn" data-act="pushOn">Bật</button>'}</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
       <div class="pad" style="text-align:center"><button class="linkbtn" data-act="roomLeave" style="color:var(--sub);font-weight:500">Hủy ghép đôi</button></div>`
     : `
@@ -647,7 +675,7 @@ function viewMore(){
   </div>
   <div class="section-title"><span>Nguy hiểm</span></div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 2.0</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 2.1</p>`;
 }
 
 function viewCycle(){
@@ -1024,11 +1052,14 @@ $('#main').addEventListener('click', async e => {
       sync.room = c; sync.roomErr = ''; saveSync(); render(); await syncRoom(); syncNow(false); toast('Đã ghép đôi 💞'); break;
     }
     case 'roomNow': await syncRoom(); toast('Đã cập nhật'); break;
+    case 'pushOn': await enablePush(); break;
+    case 'pushOff': await disablePush(); break;
     case 'roomCopy':
       try { await navigator.clipboard.writeText(sync.room); toast('Đã sao chép mã'); } catch (e) { prompt('Mã ghép đôi:', sync.room); }
       break;
     case 'roomLeave':
       if (!confirm('Hủy ghép đôi? Sự kiện đã có vẫn giữ trên máy này.')) return;
+      if (sync.push) await disablePush();
       sync.room = ''; sync.roomLast = 0; saveSync(); render(); syncNow(false); break;
     case 'syncSub':
       if (!sync.last) return toast('Chưa đồng bộ được, bấm "Đồng bộ ngay" trước');

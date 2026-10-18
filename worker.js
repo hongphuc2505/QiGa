@@ -8,7 +8,7 @@ const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type'
 };
 
@@ -117,10 +117,118 @@ async function buildCalendar(data, env) {
   return out.map(fold).join('\r\n') + '\r\n';
 }
 
+// ---------------- Thông báo đẩy (Web Push) ----------------
+const PUSH_SUB = 'https://hongphuc2505.github.io/QiGa/';
+const enc = new TextEncoder();
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const ub64 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); s += '='.repeat((4 - s.length % 4) % 4); return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+const concat = (...arrs) => { const out = new Uint8Array(arrs.reduce((n, a) => n + a.length, 0)); let o = 0; for (const a of arrs) { out.set(a, o); o += a.length; } return out; };
+
+async function getVapid(env) {
+  const raw = await env.SOTAY.get('vapid');
+  if (raw) return JSON.parse(raw);
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const v = { publicKey: b64u(await crypto.subtle.exportKey('raw', kp.publicKey)), privateJwk: await crypto.subtle.exportKey('jwk', kp.privateKey) };
+  await env.SOTAY.put('vapid', JSON.stringify(v));
+  return v;
+}
+
+async function hkdf(salt, ikm, info, len) {
+  const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, key, len * 8));
+}
+
+async function encryptPayload(sub, text) {
+  const uaPub = ub64(sub.keys.p256dh), auth = ub64(sub.keys.auth);
+  const as = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey('raw', as.publicKey));
+  const uaKey = await crypto.subtle.importKey('raw', uaPub, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, as.privateKey, 256));
+  const ikm = await hkdf(auth, shared, concat(enc.encode('WebPush: info\0'), uaPub, asPub), 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const cek = await hkdf(salt, ikm, enc.encode('Content-Encoding: aes128gcm\0'), 16);
+  const nonce = await hkdf(salt, ikm, enc.encode('Content-Encoding: nonce\0'), 12);
+  const aes = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aes, concat(enc.encode(text), new Uint8Array([2]))));
+  const header = new Uint8Array(21); header.set(salt, 0); new DataView(header.buffer).setUint32(16, 4096); header[20] = 65;
+  return concat(header, asPub, ct);
+}
+
+async function vapidAuth(endpoint, vapid) {
+  const aud = new URL(endpoint).origin;
+  const h = b64u(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
+  const p = b64u(enc.encode(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: PUSH_SUB })));
+  const key = await crypto.subtle.importKey('jwk', vapid.privateJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, enc.encode(h + '.' + p));
+  return `vapid t=${h}.${p}.${b64u(sig)}, k=${vapid.publicKey}`;
+}
+
+async function sendPush(sub, msg, vapid) {
+  const body = await encryptPayload(sub, JSON.stringify(msg));
+  return fetch(sub.endpoint, { method: 'POST', body, headers: {
+    'Content-Encoding': 'aes128gcm', 'Content-Type': 'application/octet-stream', TTL: '86400', Urgency: 'high',
+    Authorization: await vapidAuth(sub.endpoint, vapid) } });
+}
+
+function describeChanges(cur, inc) {
+  const recent = Date.now() - 10 * 60000, out = [];
+  for (const [id, e] of Object.entries((inc && inc.events) || {})) {
+    if (!e || (+e.updated || 0) < recent) continue;
+    const old = (cur.events || {})[id];
+    if (old && (+e.updated || 0) <= (+old.updated || 0)) continue;
+    if (e.deleted) { if (old && !old.deleted) out.push({ verb: 'đã xóa', e: old }); }
+    else out.push({ verb: old && !old.deleted ? 'đã sửa' : 'vừa thêm', e });
+  }
+  return out;
+}
+const fmtEv = e => { if (!e || !e.date) return ''; const [y, m, d] = e.date.split('-'); return `${e.title} · ${+d}/${+m}${e.time ? ' ' + e.time : ''}`; };
+
+async function notifyRoom(env, room, fromDevice, name, changes) {
+  const raw = await env.SOTAY.get('push:' + room);
+  if (!raw || !changes.length) return;
+  const reg = JSON.parse(raw), vapid = await getVapid(env);
+  const who = name || 'Người ấy';
+  const msg = changes.length === 1
+    ? { title: `${who} ${changes[0].verb} sự kiện`, body: fmtEv(changes[0].e) }
+    : { title: `${who} đã cập nhật ${changes.length} sự kiện`, body: changes.slice(0, 3).map(c => fmtEv(c.e)).join('\n') };
+  let dirty = false;
+  for (const [id, d] of Object.entries(reg.devices || {})) {
+    if (id === fromDevice || !d.sub) continue;
+    try {
+      const r = await sendPush(d.sub, msg, vapid);
+      if (r.status === 404 || r.status === 410) { delete reg.devices[id]; dirty = true; }
+    } catch (err) { /* bỏ qua máy lỗi */ }
+  }
+  if (dirty) await env.SOTAY.put('push:' + room, JSON.stringify(reg));
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     const url = new URL(req.url);
+    const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { ...CORS, 'Content-Type': 'application/json' } });
+    if (url.pathname === '/vapid') {
+      if (!env.SOTAY) return new Response('Thiếu KV binding tên SOTAY', { status: 500, headers: CORS });
+      return json({ publicKey: (await getVapid(env)).publicKey });
+    }
+    const pm = url.pathname.match(/^\/push\/([A-Za-z0-9_-]{8,64})\/([A-Za-z0-9_-]{8,64})$/);
+    if (pm) {
+      const pkey = 'push:' + pm[1];
+      const reg = JSON.parse((await env.SOTAY.get(pkey)) || '{"devices":{}}');
+      if (req.method === 'PUT') {
+        let b; try { b = JSON.parse(await req.text()); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+        if (!b.sub || !b.sub.endpoint || !b.sub.keys) return new Response('Thiếu sub', { status: 400, headers: CORS });
+        reg.devices[pm[2]] = { sub: b.sub, name: String(b.name || '').slice(0, 40), at: Date.now() };
+        await env.SOTAY.put(pkey, JSON.stringify(reg));
+        if (b.test) {
+          const r = await sendPush(b.sub, { title: 'Sổ Tay', body: 'Đã bật thông báo 🔔' }, await getVapid(env));
+          return json({ ok: true, test: r.status });
+        }
+        return json({ ok: true });
+      }
+      if (req.method === 'DELETE') { delete reg.devices[pm[2]]; await env.SOTAY.put(pkey, JSON.stringify(reg)); return json({ ok: true }); }
+      return json({ devices: Object.keys(reg.devices).length });
+    }
     const r = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})$/);
     if (r) {
       if (!env.SOTAY) return new Response('Thiếu KV binding tên SOTAY', { status: 500, headers: CORS });
@@ -130,8 +238,13 @@ export default {
         const body = await req.text();
         if (body.length > 300000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
         let inc; try { inc = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+        const changes = describeChanges(cur, inc);
         const merged = mergeRoom(cur, inc);
         if (JSON.stringify(merged) !== JSON.stringify(cur)) await env.SOTAY.put(rkey, JSON.stringify(merged));
+        if (changes.length) {
+          const p = notifyRoom(env, r[1], String(inc.device || ''), String(inc.name || '').slice(0, 40), changes);
+          if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p;
+        }
         return new Response(JSON.stringify(merged), { headers: { ...CORS, 'Content-Type': 'application/json' } });
       }
       return new Response(JSON.stringify(cur), { headers: { ...CORS, 'Content-Type': 'application/json' } });
