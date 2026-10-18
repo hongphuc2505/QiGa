@@ -231,7 +231,7 @@ textarea{resize:none;min-height:64px}
 :root[data-theme=paper] .wk-row .wn{font-family:var(--hand);font-weight:400;font-size:18px}
 .wf svg{width:28px;height:28px;display:block}
 .wd{width:10px;height:10px;border-radius:50%;background:var(--line);display:block}
-.hact{align-self:center;max-width:92%;text-align:center;font-size:13px;color:var(--sub);background:var(--card);border-radius:12px;padding:5px 12px;line-height:1.35;opacity:.95}
+.hact{align-self:center;max-width:88%;text-align:center;font-size:12px;color:var(--sub);background:transparent;border:1.5px dashed var(--line);border-radius:12px;padding:4px 12px;line-height:1.35;margin:4px 0}
 .hact .hph{display:block;width:180px;max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;margin:4px auto 6px}
 .tile.wide{grid-column:span 2;min-height:0}
 .foods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -348,6 +348,19 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .coupon .t{font-weight:700;font-size:16px}
 :root[data-theme=paper] .coupon .t{font-family:var(--hand);font-weight:400;font-size:23px}
 .coupon .s{font-size:12px;color:var(--sub)}
+.cpopen{display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left;color:var(--text)}
+.coupon .cq{font-size:13px;font-weight:800;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:1px 7px;font-family:inherit;vertical-align:2px}
+.ticket{position:relative;text-align:center;background:var(--card);border-radius:18px;padding:20px 16px 16px;margin:4px 0 6px;box-shadow:0 6px 16px rgba(125,35,65,.12);border:2px dashed #f4b6c8}
+.ticket .ti{font-size:52px}
+.ticket .tt{font-size:22px;font-weight:800;margin-top:4px}
+:root[data-theme=paper] .ticket .tt{font-family:var(--hand);font-weight:400;font-size:30px}
+.ticket .tn{color:var(--accent);font-style:italic;margin-top:4px}
+.ticket .tf{font-size:12px;color:var(--sub);margin-top:8px}
+.ticket .tq{margin-top:10px;display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:4px 14px;font-size:14px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:36px;height:36px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:800}
+.stepper b{min-width:22px;text-align:center;font-size:18px}
+.qpanel{max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .coupon .usebtn{background:var(--accent);color:#fff;border-radius:12px;padding:8px 14px;font-weight:800;flex:none}
 .coupon.used{opacity:.6}
 .coupon .stamp{flex:none;transform:rotate(-12deg);border:2px solid #c2410c;color:#c2410c;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:900;letter-spacing:.5px}
@@ -442,6 +455,19 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .hb.me .bub.msg{background:var(--accent);color:#fff}
 :root[data-theme=paper] .hb.me .bub.msg{color:#fff}
 .chatdock{position:sticky;bottom:0;padding:10px 0 12px;background:linear-gradient(to bottom, transparent, var(--bg) 24px)}
+main.chatmode{display:flex;flex-direction:column;padding-bottom:0}
+main.chatmode>*{flex-shrink:0}
+main.chatmode .hist{flex:1 0 auto;justify-content:flex-end;margin-bottom:6px}
+main.chatmode .chatdock{margin:0 -16px;padding:8px 16px 10px;background:var(--bg);border-top:1px solid var(--line);box-shadow:0 -6px 12px -10px rgba(125,35,65,.25)}
+main.chatmode .week{margin-top:10px}
+.chatempty{margin:auto;text-align:center;color:var(--sub);font-size:14px;line-height:1.5;padding:30px 20px}
+.chatempty:first-line{font-size:36px}
+.hb.cont{margin-bottom:-3px}
+.hb.cont .bub{border-bottom-left-radius:18px}
+.hb.me.cont .bub{border-bottom-right-radius:18px}
+.hb.mid .bub{border-top-left-radius:6px}
+.hb.me.mid .bub{border-top-left-radius:18px;border-top-right-radius:6px}
+.bub.msg{box-shadow:0 1px 2px rgba(125,35,65,.12)}
 .chatbar{display:flex;gap:8px;align-items:center}
 .chatbar .plus{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:24px;font-weight:700;flex:none;display:grid;place-items:center;transition:transform .2s}
 .chatbar .plus.on{transform:rotate(45deg)}
@@ -458,7 +484,7 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .chatbar input{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:22px;padding:11px 16px;font-size:16px;color:var(--text)}
 .chatbar button{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
 .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;padding:0 6px;font-family:inherit;vertical-align:1px}
-.hist{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px}
+.hist{display:flex;flex-direction:column;gap:5px;margin:6px 0 10px}
 .hday{align-self:center;font-size:12px;font-weight:700;color:var(--sub);background:var(--card);border-radius:99px;padding:3px 12px;margin:10px 0 4px}
 .hb{display:flex;flex-direction:column;align-items:flex-start;max-width:82%}
 .hb.me{align-self:flex-end;align-items:flex-end}
@@ -1955,11 +1981,12 @@ function mountMap(){
     slot.innerHTML = `<div class="mapempty">Không tải được bản đồ (mạng yếu?).<br>${pts.map(x => `<a href="${mapLink(x, x.name)}" target="_blank" rel="noopener">Xem vị trí ${esc(x.name)} ›</a>`).join('<br>')}</div>`;
   });
 }
-function histItem(x, mine){
+function histItem(x, mine, tail = true, head = true){
+  const gc = `${tail ? '' : ' cont'}${head ? '' : ' mid'}`;
   const m = x.kind === 'mood' && moodOf(x.v);
   const who = mine ? '' : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
-  if (x.kind === 'msg') return `<div class="hb ${mine ? 'me' : ''}"><div class="bub msg"><div class="bn">${esc(x.note)}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
-  if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
+  if (x.kind === 'msg') return `<div class="hb ${mine ? 'me' : ''}${gc}"><div class="bub msg"><div class="bn">${esc(x.note)}</div></div>${tail ? `<div class="ht">${who}${hm(x.at)}</div>` : ''}</div>`;
+  if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}${gc}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div>${tail ? `<div class="ht">${who}${hm(x.at)}</div>` : ''}</div>`;
   if (x.kind === 'act' || x.kind === 'home' || x.kind === 'loc') {
     const t = x.kind === 'home' ? '🏠 về tới nhà rồi' : x.kind === 'loc' ? '📍 đã gửi vị trí' : `${x.icon || '•'} ${esc(x.text)}`;
     const ref = x.ref || (x.photo ? ((db.foods.find(f => f.photo === x.photo) && 'foods:' + db.foods.find(f => f.photo === x.photo).id) || (db.dates.find(d => d.photo === x.photo) && 'dates:' + db.dates.find(d => d.photo === x.photo).id)) : '');
@@ -1967,7 +1994,7 @@ function histItem(x, mine){
     return `<div class="hact ${mine ? 'me' : ''}">${x.photo && sync.room ? `<img class="hph" src="${photoUrl(x.photo)}" alt="" loading="lazy">` : ''}<span>${esc(mine ? (sync.me || 'Mình') : (x.name || 'Người ấy'))} ${t}</span><small>${hm(x.at)}</small></div>`;
   }
   if (!m) return '';
-  return `<div class="hb ${mine ? 'me' : ''}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div><div class="ht">${who}${hm(x.at)}</div></div>`;
+  return `<div class="hb ${mine ? 'me' : ''}${gc}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div>${tail ? `<div class="ht">${who}${hm(x.at)}</div>` : ''}</div>`;
 }
 function openChat(){ if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
 function chatToEnd(){ const m = $('#main'); if (m) m.scrollTop = m.scrollHeight; }
@@ -2022,16 +2049,18 @@ function viewHistory(){
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
     <div class="qlab">Nhắn nhanh <button class="linkbtn" data-act="quickEdit" style="font-size:12px;float:right">✏️ Sửa</button></div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
   const composer = `<div class="chatdock">${panel}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
-  if (!list.length) return h + `<div class="card"><div class="empty" style="padding:16px">Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
+  if (!list.length) return h + `<div class="hist"><div class="chatempty">💌<br>Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
   const shown = state.histAll ? list : list.slice(-60);
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
   let lastDay = '';
   h += `<div class="hist">`;
-  for (const x of shown) {
-    const k = keyOf(new Date(x.at));
+  const BK = new Set(['msg', 'mood', 'touch']);
+  shown.forEach((x, i) => {
+    const k = keyOf(new Date(x.at)), nx = shown[i + 1], pv = shown[i - 1];
     if (k !== lastDay) { lastDay = k; const dd = diffDays(k, tk); h += `<div class="hday">${dd === 0 ? 'Hôm nay' : dd === 1 ? 'Hôm qua' : fmtLong(k)}</div>`; }
-    h += histItem(x, isMine(x));
-  }
+    const same = (a, b) => a && b && BK.has(a.kind) && BK.has(b.kind) && isMine(a) === isMine(b) && keyOf(new Date(a.at)) === keyOf(new Date(b.at)) && Math.abs(b.at - a.at) < 5 * 60e3;
+    h += histItem(x, isMine(x), !same(x, nx), !same(pv, x));
+  });
   h += `</div><div id="histEnd"></div>` + composer;
   return h;
 }
@@ -2246,7 +2275,7 @@ function viewUs(){
   const jarSub = db.jar.length ? `${db.jar.length} mảnh${newJ ? ' · ' + newJ + ' mới tuần này' : ''}` : 'thích gì bỏ vào hũ';
   const SHORT = { moods: 'Chat', mood: 'Chat', dates: 'Hẹn hò', foods: 'Món ngon', jar: 'Hũ', letters: 'Thư', coupons: 'Phiếu', loc: 'Ở đâu', memmap: 'Bản đồ', recap: 'Tổng kết' };
   const rdy = unopenedInbox().filter(l => Date.now() >= letterOpenAt(l)).length, wait = unopenedInbox().length;
-  const BADGE = { mood: un || '', letters: rdy || (wait ? '🔒' : ''), coupons: db.coupons.filter(c => !couponMine(c) && !c.used).length || '', jar: newJ || '', dates: nd && diffDays(tk, nd.date) <= 7 ? '•' : '' };
+  const BADGE = { mood: un || '', letters: rdy || (wait ? '🔒' : ''), coupons: db.coupons.filter(c => !couponMine(c) && cpLeft(c)).length || '', jar: newJ || '', dates: nd && diffDays(tk, nd.date) <= 7 ? '•' : '' };
   const T = (s2, ic, bg, fg, t) => `<button class="app" data-act="usp" data-s="${s2 === 'mood' ? 'moods' : s2}" aria-label="${t}"><span class="ic" style="background:${bg}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${BADGE[s2] ? `<i class="bdg">${BADGE[s2]}</i>` : ''}</span><span class="an">${SHORT[s2]}</span></button>`;
   const appsH = `<div class="apps">
     ${T('mood', '<path d="M4 5h16v11H9l-5 4z"/>', '#efe7fb', '#6b4fb3', 'Chat &amp; tâm trạng', moodSub)}
@@ -2254,7 +2283,7 @@ function viewUs(){
     ${T('jar', '<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', jarSub)}
     ${T('foods', '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/>', '#ffe6dc', '#b0461f', 'Món ngon', db.foods.length ? `${db.foods.length} món · ${esc(db.foods.slice().sort((a, b) => b.at - a.at)[0].name)}` : 'chụp món ăn cùng nhau')}
     ${T('letters', '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>', '#efe7fb', '#6b4fb3', 'Thư hẹn giờ', (() => { const r = unopenedInbox(), ready = r.filter(l => Date.now() >= letterOpenAt(l)); return ready.length ? `<b style="color:var(--accent)">💌 ${ready.length} thư mở được!</b>` : r.length ? `🔒 mở sau <span data-cd="${Math.min(...r.map(letterOpenAt))}">${cdText(Math.min(...r.map(letterOpenAt)))}</span>` : 'viết thư mở vào ngày đặc biệt'; })())}
-    ${T('coupons', '<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/>', '#fff3cf', '#9a6b00', 'Phiếu yêu thương', (() => { const n = db.coupons.filter(c => !couponMine(c) && !c.used).length; return n ? `<b style="color:var(--accent)">${n} phiếu chưa dùng</b>` : 'tặng nhau phiếu dễ thương'; })())}
+    ${T('coupons', '<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/>', '#fff3cf', '#9a6b00', 'Phiếu yêu thương', (() => { const n = db.coupons.filter(c => !couponMine(c) && cpLeft(c)).length; return n ? `<b style="color:var(--accent)">${n} phiếu chưa dùng</b>` : 'tặng nhau phiếu dễ thương'; })())}
     ${T('memmap', '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>', '#e3f4e8', '#2f7a4a', 'Bản đồ kỷ niệm', `${memPoints().length} chỗ đã đi`)}
     ${T('recap', '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', '#efe7fb', '#6b4fb3', 'Tổng kết tháng', `tháng ${new Date().getMonth() + 1} · ${streakInfo().cur ? '🔥 ' + streakInfo().cur + ' ngày' : 'xem lại tháng này'}`)}
     ${T('loc', '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/>', '#e4effa', '#2f5f8f', 'Đang ở đâu', locSub)}
@@ -2478,7 +2507,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.6</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 5.8</p>`;
 }
 
 function viewCycle(){
@@ -2590,6 +2619,7 @@ function render(){
   const keepVals = {}, ae = document.activeElement, focusId = ae && $('#main').contains(ae) && ae.id;
   document.querySelectorAll('#main input[id], #main textarea[id]').forEach(i => { if (i.type !== 'checkbox' && i.type !== 'file' && i.value) keepVals[i.id] = i.value; });
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
+  $('#main').classList.toggle('chatmode', state.tab === 'us' && state.usp === 'moods');
   $('#main').innerHTML = ({ today: viewToday, health: viewHealth, us: viewUs, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore }[state.tab] || viewToday)();
   afterRender();
   for (const [id, v] of Object.entries(keepVals)) { const n = document.getElementById(id); if (n && !n.value && n.type !== 'date' && n.type !== 'time') n.value = v; }
@@ -3086,17 +3116,35 @@ function openStreak(){
 const COUPON_TPL = [['🍜', 'Được chọn quán ăn'], ['💆', 'Massage vai 15 phút'], ['🎬', 'Được chọn phim'], ['🧽', 'Rửa chén hộ 1 lần'], ['🤗', 'Ôm 10 phút không buông'],
   ['🏆', 'Thắng 1 lần cãi nhau'], ['🧋', 'Một ly trà sữa'], ['🚗', 'Đưa đón 1 ngày'], ['📵', '1 buổi hẹn không điện thoại'], ['🙇', 'Hết giận ngay lập tức']];
 const couponMine = c => c.dev === ensureDevice() || (sync.me && norm(c.name) === norm(sync.me));
+const cpUses = c => Array.isArray(c.uses) ? c.uses : (c.used ? [c.usedAt || c.updated || c.at] : []);
+const cpQty = c => Math.max(1, +c.qty || 1);
+const cpLeft = c => Math.max(0, cpQty(c) - cpUses(c).length);
+function fmtWhen(ms){ const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())} · ${WD_LONG[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; }
 function couponCard(c, mine){
-  return `<div class="coupon ${c.used ? 'used' : ''}"><span class="ci">${c.icon || '🎟️'}</span><span class="main"><div class="t">${esc(c.title)}</div>
-    <div class="s">${mine ? 'tặng ' + esc(peerName(peerMain())) : 'từ ' + esc(c.name || 'Người ấy')} · ${relDay(c.at)}${c.used ? ' · đã dùng ' + relDay(c.usedAt) : ''}${c.note ? '<br>' + esc(c.note) : ''}</div></span>
-    ${!mine && !c.used ? `<button class="usebtn" data-act="couponUse" data-id="${c.id}">Dùng</button>` : c.used ? '<span class="stamp">ĐÃ DÙNG</span>' : ''}</div>`;
+  const q = cpQty(c), left = cpLeft(c), done = !left, u = cpUses(c);
+  return `<div class="coupon ${done ? 'used' : ''}"><button class="cpopen" data-act="couponView" data-id="${c.id}"><span class="ci">${c.icon || '🎟️'}</span><span class="main"><div class="t">${esc(c.title)}${q > 1 ? ` <span class="cq">×${q}</span>` : ''}</div>
+    <div class="s">${mine ? 'tặng ' + esc(peerName(peerMain())) : 'từ ' + esc(c.name || 'Người ấy')} · ${relDay(c.at)}${q > 1 ? ` · còn ${left}/${q} lần` : ''}${u.length ? ` · dùng gần nhất ${relDay(u[u.length - 1])}` : ''}</div></span></button>
+    ${!mine && !done ? `<button class="usebtn" data-act="couponUse" data-id="${c.id}">Dùng</button>` : done ? '<span class="stamp">ĐÃ DÙNG</span>' : ''}</div>`;
+}
+function openCouponView(id){
+  const c = db.coupons.find(x => x.id === id); if (!c) return;
+  const mine = couponMine(c), q = cpQty(c), u = cpUses(c), left = cpLeft(c);
+  openSheet('Phiếu yêu thương 🎟️', `<div class="ticket"><span class="ti">${c.icon || '🎟️'}</span><div class="tt">${esc(c.title)}</div>${c.note ? `<div class="tn">“${esc(c.note)}”</div>` : ''}
+      <div class="tf">${mine ? 'Mình tặng ' + esc(peerName(peerMain())) : esc(c.name || 'Người ấy') + ' tặng mình'} · ${fmtShort(keyOf(new Date(c.at)))}</div>
+      <div class="tq">${left ? `Còn <b>${left}</b>/${q} lần` : `<b>Đã dùng hết</b> ${q > 1 ? q + ' lần' : ''}`}</div></div>
+    <div class="section-title"><span>Lịch sử dùng</span></div>
+    <div class="card">${u.length ? u.slice().reverse().map((t, i) => `<div class="frow"><span class="lbl">Lần ${u.length - i}</span><span class="s">${fmtWhen(t)}</span></div>`).join('') : '<div class="empty" style="padding:14px">Chưa dùng lần nào</div>'}</div>
+    ${!mine && left ? `<button class="btn" id="cvUse">Dùng 1 lần${q > 1 ? ` (còn ${left})` : ''}</button>` : ''}${mine && !u.length ? '<button class="btn danger" id="cvDel">Thu hồi phiếu</button>' : ''}`, () => {
+    if ($('#cvUse')) $('#cvUse').onclick = () => { closeSheet(); useCoupon(c.id); };
+    if ($('#cvDel')) $('#cvDel').onclick = () => { if (!confirm('Thu hồi phiếu này?')) return; removeItem('coupons', c.id); closeSheet(); render(); };
+  });
 }
 function viewCoupons(){
-  const list = db.coupons.slice().sort((a, b) => (a.used - b.used) || (b.at - a.at));
+  const list = db.coupons.slice().sort((a, b) => (!cpLeft(a) - !cpLeft(b)) || (b.at - a.at));
   const inbox = list.filter(c => !couponMine(c)), sent = list.filter(couponMine);
   let h = subBack() + `<h1>Phiếu yêu thương</h1><p class="subtitle" style="margin-top:-4px">tặng nhau, muốn dùng lúc nào thì bấm Dùng</p>
     <button class="btn" data-act="couponNew">🎟️ Tặng phiếu</button>`;
-  h += `<div class="section-title"><span>Phiếu của mình · ${inbox.filter(c => !c.used).length} chưa dùng</span></div>${inbox.length ? inbox.map(c => couponCard(c, false)).join('') : '<div class="card"><div class="empty" style="padding:16px">Chưa có phiếu nào. Nhắc người ấy tặng đi 😆</div></div>'}`;
+  h += `<div class="section-title"><span>Phiếu của mình · ${inbox.filter(c => cpLeft(c)).length} còn dùng được</span></div>${inbox.length ? inbox.map(c => couponCard(c, false)).join('') : '<div class="card"><div class="empty" style="padding:16px">Chưa có phiếu nào. Nhắc người ấy tặng đi 😆</div></div>'}`;
   if (sent.length) h += `<div class="section-title"><span>Mình đã tặng</span></div>${sent.map(c => couponCard(c, true)).join('')}`;
   return h;
 }
@@ -3105,23 +3153,28 @@ function openCouponNew(){
   openSheet('Tặng phiếu 🎟️', `<div class="tplgrid" id="cpTpl">${COUPON_TPL.map(([i, t], n) => `<button type="button" data-n="${n}" class="${n === 0 ? 'on' : ''}"><span>${i}</span>${t}</button>`).join('')}<button type="button" data-n="-1"><span>✏️</span>Tự viết</button></div>
     <div class="card"><label class="f"><span>Tên phiếu</span><input id="cpTitle" maxlength="60" value="${esc(COUPON_TPL[0][1])}" autocomplete="off"></label>
     <label class="f"><span>Lời nhắn (không bắt buộc)</span><input id="cpNote" maxlength="100" placeholder="VD: dùng khi nào em mệt nha" autocomplete="off"></label></div>
+    <div class="card"><div class="frow"><span class="lbl">Số lần dùng<div class="s">VD: 3 lần massage</div></span><span class="stepper"><button type="button" id="cpMinus" aria-label="Bớt">−</button><b id="cpQty">1</b><button type="button" id="cpPlus" aria-label="Thêm">+</button></span></div></div>
     <button class="btn" id="cpSend">Tặng ${esc(peerName(peerMain()))}</button>`, () => {
+    let qty = 1; const setQ = v => { qty = Math.max(1, Math.min(20, v)); $('#cpQty').textContent = qty; };
+    $('#cpMinus').onclick = () => setQ(qty - 1); $('#cpPlus').onclick = () => setQ(qty + 1);
     $('#cpTpl').onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; pick = +b.dataset.n; $('#cpTpl').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
       $('#cpTitle').value = pick >= 0 ? COUPON_TPL[pick][1] : ''; if (pick < 0) $('#cpTitle').focus(); };
     $('#cpSend').onclick = () => {
       const title = $('#cpTitle').value.trim(); if (!title) return toast('Đặt tên phiếu nha');
       const icon = pick >= 0 && title === COUPON_TPL[pick][1] ? COUPON_TPL[pick][0] : '🎟️';
-      const cid = uid(); logAct('🎟️', `tặng phiếu: ${icon} ${title}`, '', 'coupons:' + cid);
-      upsert('coupons', { id: cid, icon, title, note: $('#cpNote').value.trim(), dev: ensureDevice(), name: sync.me || '', at: Date.now(), used: false });
+      const cid = uid(); logAct('🎟️', `tặng phiếu: ${icon} ${title}${qty > 1 ? ' ×' + qty : ''}`, '', 'coupons:' + cid);
+      upsert('coupons', { id: cid, icon, title, note: $('#cpNote').value.trim(), qty, uses: [], dev: ensureDevice(), name: sync.me || '', at: Date.now(), used: false });
       closeSheet(); render(); bigHearts('🎟️', 'Đã tặng phiếu');
     };
   });
 }
 function useCoupon(id){
-  const c = db.coupons.find(x => x.id === id); if (!c || c.used) return;
-  if (!confirm(`Dùng phiếu "${c.title}" luôn nha?`)) return;
-  logAct('🎟️', `dùng phiếu: ${c.icon || ''} ${c.title}`, '', 'coupons:' + c.id);
-  upsert('coupons', Object.assign({}, c, { used: true, usedAt: Date.now() })); render(); bigHearts(c.icon || '🎟️', 'Đã dùng phiếu');
+  const c = db.coupons.find(x => x.id === id); if (!c || !cpLeft(c)) return;
+  const q = cpQty(c), n = cpUses(c).length + 1;
+  if (!confirm(`Dùng phiếu "${c.title}"${q > 1 ? ` (lần ${n}/${q})` : ''} luôn nha?`)) return;
+  const uses = cpUses(c).concat([Date.now()]);
+  logAct('🎟️', `dùng phiếu: ${c.icon || ''} ${c.title}${q > 1 ? ` (lần ${n}/${q})` : ''}`, '', 'coupons:' + c.id);
+  upsert('coupons', Object.assign({}, c, { uses, qty: q, used: uses.length >= q, usedAt: Date.now() })); render(); bigHearts(c.icon || '🎟️', q > 1 ? `Đã dùng · còn ${q - uses.length} lần` : 'Đã dùng phiếu');
 }
 
 /* --- bản đồ kỷ niệm --- */
@@ -3190,7 +3243,7 @@ function recapData(mk){
     dates, foods, topFood: foods.slice().sort((a, b) => (b.rate || 0) - (a.rate || 0))[0],
     jarDone: db.jar.filter(j => j.done && inM(j.doneAt)).length, jarNew: db.jar.filter(j => inM(j.at)).length,
     bucketDone: db.bucket.filter(b => b.done && inM(b.doneAt)).length,
-    coupons: db.coupons.filter(c => inM(c.at)).length, couponsUsed: db.coupons.filter(c => c.used && inM(c.usedAt)).length,
+    coupons: db.coupons.filter(c => inM(c.at)).length, couponsUsed: db.coupons.reduce((n, c) => n + cpUses(c).filter(inM).length, 0),
     letters: db.letters.filter(l => inM(l.at)).length, best, photos, days: Object.keys(by).filter(k => k.slice(0, 7) === mk && by[k].size >= 2).length
   };
 }
@@ -3410,6 +3463,7 @@ $('#main').addEventListener('click', async e => {
     case 'letterOpen': await openLetter(id); break;
     case 'couponNew': state.chatPanel = false; openCouponNew(); break;
     case 'couponUse': useCoupon(id); break;
+    case 'couponView': openCouponView(id); break;
     case 'streakInfo': openStreak(); break;
     case 'recapM': if (id <= monthKey(Date.now())) { state.recapMonth = id; render(); } break;
     case 'chatPlus': state.chatPanel = !state.chatPanel; state.histAtEnd = true; render(); break;

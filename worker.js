@@ -306,8 +306,9 @@ function describeColls(cur, inc) {
   });
   walk('coupons', (e, o) => {
     if (e.deleted) return null;
-    if (!o) return { icon: '🎟️', text: `tặng một phiếu: ${e.icon || ''} ${clip(e.title, 50)}` };
-    if (e.used && !o.used) return { icon: '🎟️', text: `vừa dùng phiếu: ${e.icon || ''} ${clip(e.title, 50)}` };
+    const q = Math.max(1, +e.qty || 1), nu = Array.isArray(e.uses) ? e.uses.length : (e.used ? 1 : 0), ou = o ? (Array.isArray(o.uses) ? o.uses.length : (o.used ? 1 : 0)) : 0;
+    if (!o) return { icon: '🎟️', text: `tặng một phiếu: ${e.icon || ''} ${clip(e.title, 50)}${q > 1 ? ' ×' + q : ''}` };
+    if (nu > ou) return { icon: '🎟️', text: `vừa dùng phiếu: ${e.icon || ''} ${clip(e.title, 50)}${q > 1 ? ` (lần ${nu}/${q})` : ''}` };
     return null;
   });
   walk('foods', (e, o) => {
