@@ -503,6 +503,51 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--sub);animation:dot 1.2s infinite}
 .dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
 @keyframes dot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.qc.gift{background:#ffe0ea;color:#b5385f}
+.qc.gift.hot{background:linear-gradient(90deg,#ff6f9b,#ff9a62);color:#fff;animation:glow 1.6s ease-in-out infinite}
+.gpreview{display:grid;place-items:center;margin:0 0 6px}
+.gpick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:0 16px}
+.gpick::-webkit-scrollbar{display:none}
+.gpick button{flex:none;display:flex;align-items:center;gap:6px;background:var(--card);border:2px solid transparent;border-radius:99px;padding:6px 12px;font-weight:600;font-size:14px;color:var(--text)}
+.gpick button.on{border-color:var(--accent);background:var(--accent-soft)}
+.gdot{width:14px;height:14px;border-radius:50%}
+.bub.giftb{display:flex;gap:10px;align-items:center;text-align:left;background:linear-gradient(135deg,#fff0f5,#fff8ee);color:#4a1f30;padding:8px 14px 8px 6px;border:2px solid #ffc2d6;max-width:280px}
+.giftb .gsv svg{display:block}
+.giftb .gtx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.giftb .gtx b{color:#b5385f}
+:root[data-theme=paper] .giftb .gtx b{font-family:var(--hand);font-weight:400;font-size:20px}
+.giftb .gtx span{font-size:14px;line-height:1.3}
+:root[data-theme=paper] .giftb .gtx span{font-family:var(--hand);font-size:18px}
+.giftb .gtx small{font-size:11px;color:#9a7a86}
+.giftfx{position:fixed;inset:0;z-index:95;background:radial-gradient(circle at 50% 40%,#ffe6ef,#ffc2d6 70%,#ff9fbf);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.gbox{position:relative;width:180px;height:170px;cursor:pointer;animation:gbob 1.6s ease-in-out infinite}
+.gbody{position:absolute;left:10px;right:10px;bottom:0;height:110px;background:#e23a5a;border-radius:10px;box-shadow:0 10px 24px rgba(125,35,65,.3)}
+.gbody::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:22px;margin-left:-11px;background:#ffd166}
+.glid{position:absolute;left:0;right:0;top:30px;height:36px;background:#ff5c7c;border-radius:8px;z-index:2;transition:transform .5s ease-in}
+.glid::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:22px;margin-left:-11px;background:#ffd166}
+.glid::after{content:'🎀';position:absolute;left:50%;top:-34px;transform:translateX(-50%);font-size:44px}
+.gtxt{position:absolute;left:-60px;right:-60px;top:186px;text-align:center;color:#7d2341;font-weight:700;font-size:17px}
+:root[data-theme=paper] .gtxt{font-family:var(--hand);font-weight:400;font-size:24px}
+.gtxt small{font-weight:600;font-size:13px;opacity:.8}
+.gopen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:10px}
+.giftfx.opened .gbox{animation:gaway .6s forwards}
+.giftfx.opened .glid{transform:translateY(-120px) rotate(-25deg)}
+.giftfx.opened .gopen{display:flex}
+.gflower{animation:gpop .9s .35s both cubic-bezier(.2,1.4,.4,1)}
+.gflower svg{display:block;max-height:38vh;width:auto}
+.gfcard{background:#fffaf3;color:#3b2530;border-radius:10px;padding:16px 18px;max-width:320px;box-shadow:0 10px 24px rgba(125,35,65,.2);transform:rotate(-1.5deg);animation:gpop .7s .9s both}
+.gmsg{font-size:18px;line-height:1.4}
+:root[data-theme=paper] .gmsg{font-family:var(--hand);font-size:25px;line-height:1.2}
+.gsig{text-align:right;margin-top:6px;color:#b5385f;font-weight:700}
+:root[data-theme=paper] .gsig{font-family:var(--hand);font-weight:400;font-size:22px}
+.gbtns{display:flex;gap:8px;animation:gpop .5s 1.4s both}
+.gbtns button{border-radius:99px;padding:10px 16px;font-weight:700;background:#fff;color:#b5385f}
+.gbtns .gthanks{background:#b5385f;color:#fff}
+.gpetal{position:absolute;top:-40px;animation:gfall 4.5s linear forwards;pointer-events:none}
+@keyframes gbob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes gaway{to{transform:scale(.4) translateY(200px);opacity:0}}
+@keyframes gpop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes gfall{to{transform:translateY(110vh) rotate(360deg)}}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--accent);color:#fff}
@@ -1192,7 +1237,7 @@ function applyRoom(merged){
     const arr = [], del = {};
     for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
     if (c === 'moods') for (const x of db.moods) if (!merged.moods[x.id] && Date.now() - x.at < 5 * 60000) arr.push(x); // vừa nhận qua thông báo
-    if (c === 'moods') setTimeout(() => playIncomingTouch(db.moods), 0);
+    if (c === 'moods') setTimeout(() => { playIncomingTouch(db.moods); checkGifts(); }, 0);
     db[c] = c === 'moods' ? arr.sort((a, b) => a.at - b.at).slice(-HIST_MAX) : arr; db.del[c] = del;
   }
   if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods, db.foods, db.letters, db.coupons, db.days]) !== before) {
@@ -1546,8 +1591,8 @@ function duoCard(){
     h += `<div class="peer"><span class="av q">?</span><div><div class="t">Chưa có tin từ máy kia</div><div class="s">Máy kia mở app bản mới là thấy</div></div></div>`;
   } else {
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
-    const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood') && !isMineH(x)).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
-    const lcText = x => { if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
+    const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood' || x.kind === 'gift') && !isMineH(x)).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
+    const lcText = x => { if (x.kind === 'gift') return '💐 tặng bó hoa' + (x.note ? ` “${esc(x.note)}”` : ''); if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
     const line = lc ? `${lcText(lc)} · ${ago(lc.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
     const un = unreadChat();
     h += `<button class="peer peerbtn" data-act="goHist">${avSpan(av, pn)}<span class="pm"><span class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} <i class="mf">${m.svg}</i>` : `${esc(pn)}`}</span><span class="s">${line}</span></span><span class="chatpill">Chat${un ? ` <b>${un}</b>` : ''} ›</span></button>`;
@@ -1561,7 +1606,7 @@ function duoCard(){
     }
   }
   h += `<div class="qmbox"><div class="qmrow"><input id="qmIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button class="qmsend" data-act="qmSend" aria-label="Gửi"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div>
-    <div class="qmchips"><button class="qc face" data-act="moodPick" aria-label="Gửi cảm xúc">${MOODS[0].svg}</button><button class="qc heart" data-touch="1" aria-label="Chạm: gửi tim · Giữ: ôm"><span class="th">💗</span></button><button class="qc" data-act="spin" aria-label="Ăn gì hôm nay">🎲</button>${quickPhrases().map((t, i) => `<button class="qc" data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}<button class="qc edit" data-act="quickEdit">✏️ Sửa</button></div>
+    <div class="qmchips"><button class="qc face" data-act="moodPick" aria-label="Gửi cảm xúc">${MOODS[0].svg}</button><button class="qc heart" data-touch="1" aria-label="Chạm: gửi tim · Giữ: ôm"><span class="th">💗</span></button><button class="qc" data-act="spin" aria-label="Ăn gì hôm nay">🎲</button><button class="qc gift ${(() => { const d = new Date(); return (d.getMonth() === 9 && d.getDate() === 20) || (d.getMonth() === 2 && d.getDate() === 8) || (d.getMonth() === 1 && d.getDate() === 14) ? 'hot' : ''; })()}" data-act="giftNew" aria-label="Tặng hoa">💐 Tặng hoa</button>${quickPhrases().map((t, i) => `<button class="qc" data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}<button class="qc edit" data-act="quickEdit">✏️ Sửa</button></div>
     <div class="qmhint">chạm 💗 gửi tim · giữ để ôm</div></div>
   </div>`;
   return h;
@@ -2049,6 +2094,7 @@ function histItem(x, mine, tail = true, head = true){
     const ps = Array.isArray(x.photos) ? x.photos : [], ph = ps.length && sync.room ? `<span class="cph n${Math.min(ps.length, 4)}">${ps.slice(0, 4).map((pid, i) => `<span class="cpi"><img src="${photoUrl(pid)}" alt="" loading="lazy" data-view="c${x.id}">${i === 3 && ps.length > 4 ? `<i>+${ps.length - 4}</i>` : ''}</span>`).join('')}</span>` : '';
     return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub msg ${ph && !x.note ? 'onlyph' : ''}">${quote}${ph}${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div>${rxH}${meta}</div>`;
   }
+  if (x.kind === 'gift') return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><button class="bub giftb" data-act="giftView" data-id="${x.id}"><span class="gsv">${bouquetSVG(x.flower, 92)}</span><span class="gtx"><b>💐 ${mine ? 'Đã tặng hoa' : 'Tặng ' + esc(sync.me || 'bạn') + ' bó hoa'}</b>${x.note ? `<span>${esc(x.note)}</span>` : ''}<small>bấm để xem</small></span></button>${rxH}${meta}</div>`;
   if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div>${rxH}${meta}</div>`;
   if (x.kind === 'act' || x.kind === 'home' || x.kind === 'loc') {
     const t = x.kind === 'home' ? '🏠 về tới nhà rồi' : x.kind === 'loc' ? '📍 đã gửi vị trí' : `${x.icon || '•'} ${esc(x.text)}`;
@@ -2087,7 +2133,7 @@ function openJarQuick(){
     setTimeout(() => $('#jqIn').focus(), 300);
   });
 }
-function msgShort(x){ if (!x) return ''; if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
+function msgShort(x){ if (!x) return ''; if (x.kind === 'gift') return '💐 Bó hoa' + (x.note ? ' · ' + x.note : ''); if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
 function takeReply(){ const r = state.replyTo && db.moods.find(x => x.id === state.replyTo); state.replyTo = null; return r ? { reply: { id: r.id, name: isMineH(r) ? (sync.me || 'Mình') : (r.name || 'Người ấy'), text: msgShort(r).slice(0, 80) } } : {}; }
 function setReply(id){ if (!db.moods.some(x => x.id === id)) return; state.replyTo = id; state.histAtEnd = true; render(); const i = $('#chatIn'); if (i) i.focus(); }
 function updateMsg(id, patch){ const x = db.moods.find(m => m.id === id); if (!x) return null; const n = Object.assign({}, x, patch, { updated: Date.now() }); db.moods = db.moods.map(m => m.id === id ? n : m); return n; }
@@ -2158,7 +2204,7 @@ function viewHistory(){
   const pn = peerName(peerMain());
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const pr = partnerPron(), QA = [['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
+  const pr = partnerPron(), QA = [['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
@@ -2171,7 +2217,7 @@ function viewHistory(){
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
   let lastDay = '';
   h += `<div class="hist">`;
-  const BK = new Set(['msg', 'mood', 'touch']);
+  const BK = new Set(['msg', 'mood', 'touch', 'gift']);
   const lastMine = [...shown].reverse().find(x => BK.has(x.kind)), pSeen = (peerMain() || {}).seenAt || 0;
   if (lastMine && isMine(lastMine)) shown = shown.map(x => x === lastMine ? Object.assign({}, x, { _seen: pSeen >= x.at ? 'Đã xem' : 'Đã gửi' }) : x);
   shown.forEach((x, i) => {
@@ -2629,7 +2675,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.1</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.2</p>`;
 }
 
 function viewCycle(){
@@ -3414,6 +3460,99 @@ function seedDays(){ // lần đầu: dựng chuỗi ngày từ lịch sử chat
   db.daysSeeded = true;
 }
 
+/* ---------- tặng hoa ---------- */
+const BOUQUETS = [
+  { id: 'qiga', name: 'Bó QiGa thích', wrap: '#fff1e6', ribbon: '#ff6f9b', fall: '🌸' },
+  { id: 'prose', name: 'Hồng phấn', wrap: '#fff7f0', ribbon: '#ff6f9b', fall: '🌸' },
+  { id: 'sun', name: 'Hướng dương', wrap: '#eef5e3', ribbon: '#e0a800', fall: '🌻' },
+  { id: 'daisy', name: 'Cúc li ti', wrap: '#f3f0ff', ribbon: '#9b8ae0', fall: '🌼' },
+  { id: 'rose', name: 'Hồng đỏ', wrap: '#f6d6c8', ribbon: '#e23a5a', fall: '🌹' }
+];
+const bq = id => BOUQUETS.find(b => b.id === id) || BOUQUETS[0];
+const f1 = n => n.toFixed(1);
+function roseSVG(cx, cy, r, c, d){ // hoa hồng: các lớp cánh xoáy
+  let g = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`;
+  for (let i = 0; i < 5; i++) { const a = i * 1.26, x = cx + Math.cos(a) * r * .55, y = cy + Math.sin(a) * r * .55; g += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r * .55)}" fill="${c}" stroke="${d}" stroke-width="1.2"/>`; }
+  g += `<circle cx="${cx}" cy="${cy}" r="${f1(r * .62)}" fill="${c}" stroke="${d}" stroke-width="1.4"/>`;
+  g += `<path d="M${f1(cx - r * .35)} ${cy} a${f1(r * .35)} ${f1(r * .35)} 0 1 1 ${f1(r * .5)} ${f1(r * .2)} a${f1(r * .2)} ${f1(r * .2)} 0 1 1 ${f1(-r * .25)} ${f1(-r * .25)}" fill="none" stroke="${d}" stroke-width="1.6" stroke-linecap="round"/>`;
+  return g;
+}
+function sunSVG(cx, cy, r){ // hướng dương: nhiều cánh vàng, nhụy nâu có chấm
+  let g = '';
+  for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, x = cx + Math.cos(a) * r * .72, y = cy + Math.sin(a) * r * .72;
+    g += `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(r * .42)}" ry="${f1(r * .15)}" fill="${i % 2 ? '#ffd23f' : '#ffc107'}" transform="rotate(${f1(a * 180 / Math.PI)} ${f1(x)} ${f1(y)})"/>`; }
+  g += `<circle cx="${cx}" cy="${cy}" r="${f1(r * .45)}" fill="#6b3e12"/>`;
+  for (let i = 0; i < 8; i++) { const a = i * .785, x = cx + Math.cos(a) * r * .25, y = cy + Math.sin(a) * r * .25; g += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r * .05)}" fill="#3e220a"/>`; }
+  return g;
+}
+function daisySVG(cx, cy, r){ // cúc li ti: hoa trắng nhỏ, nhụy vàng
+  let g = '';
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, x = cx + Math.cos(a) * r * .6, y = cy + Math.sin(a) * r * .6;
+    g += `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(r * .45)}" ry="${f1(r * .2)}" fill="#ffffff" stroke="#e6dff0" stroke-width=".6" transform="rotate(${f1(a * 180 / Math.PI)} ${f1(x)} ${f1(y)})"/>`; }
+  return g + `<circle cx="${cx}" cy="${cy}" r="${f1(r * .3)}" fill="#ffcf33"/>`;
+}
+function bouquetSVG(id, size){
+  const b = bq(id), PINK = ['#ff9fbf', '#d9567f'], PINK2 = ['#ffc2d6', '#e0789a'], RED = ['#e23a5a', '#8f1530'];
+  const tiny = (pts, r) => pts.map(([x, y]) => daisySVG(x, y, r)).join('');
+  const fillers = tiny([[52, 70], [148, 72], [64, 46], [136, 44], [100, 34], [44, 96], [156, 98], [82, 30], [120, 28], [58, 108], [142, 108]], 7);
+  let fl = '';
+  if (id === 'qiga') fl = fillers + sunSVG(100, 72, 26) + roseSVG(68, 84, 17, ...PINK) + roseSVG(132, 84, 17, ...PINK2) + roseSVG(84, 52, 14, ...PINK2) + roseSVG(118, 50, 14, ...PINK) + roseSVG(100, 104, 15, ...PINK) + tiny([[76, 104], [124, 104], [100, 40]], 6);
+  else if (id === 'prose') fl = tiny([[50, 72], [150, 72], [100, 30], [62, 44], [138, 44]], 7) + [[100, 70, 22], [70, 86, 19], [130, 86, 19], [84, 50, 16], [116, 50, 16], [100, 104, 17], [56, 64, 14], [144, 64, 14]].map(([x, y, r], i) => roseSVG(x, y, r, ...(i % 2 ? PINK2 : PINK))).join('');
+  else if (id === 'sun') fl = tiny([[52, 92], [148, 92], [100, 28], [60, 50], [140, 50]], 7) + sunSVG(100, 66, 26) + sunSVG(66, 92, 20) + sunSVG(134, 92, 20) + sunSVG(100, 106, 16);
+  else if (id === 'daisy') { const pts = []; for (let i = 0; i < 34; i++) { const a = i * 2.4, rr = 8 + Math.sqrt(i) * 9.5; pts.push([100 + Math.cos(a) * rr, 76 + Math.sin(a) * rr * .8]); } fl = tiny(pts, 8.5); }
+  else fl = [[100, 70, 22], [70, 86, 19], [130, 86, 19], [84, 50, 16], [116, 50, 16], [100, 104, 17], [56, 64, 14], [144, 64, 14]].map(([x, y, r]) => roseSVG(x, y, r, ...RED)).join('') + tiny([[50, 90], [150, 90], [100, 30]], 6);
+  return `<svg viewBox="0 0 200 230" width="${size}" height="${Math.round(size * 1.15)}" aria-hidden="true">
+    <g stroke="#3d7a3a" stroke-width="3" stroke-linecap="round"><path d="M100 120 L100 200M80 115 L94 196M120 115 L106 196M64 100 L90 194M136 100 L110 194"/></g>
+    <g fill="#5fae5a"><ellipse cx="58" cy="114" rx="18" ry="7" transform="rotate(-35 58 114)"/><ellipse cx="144" cy="112" rx="18" ry="7" transform="rotate(35 144 112)"/><ellipse cx="76" cy="126" rx="14" ry="6" transform="rotate(-20 76 126)"/><ellipse cx="126" cy="126" rx="14" ry="6" transform="rotate(20 126 126)"/></g>
+    ${fl}
+    <path d="M42 116 L100 222 L158 116 Q100 140 42 116z" fill="${b.wrap}" stroke="#d9b8a8" stroke-width="2"/>
+    <path d="M42 116 L74 176 L100 130z" fill="#fff" opacity=".4"/>
+    <path d="M86 176 q14 10 28 0 l-4 14 q-10 -6 -20 0z" fill="${b.ribbon}"/><circle cx="100" cy="178" r="5" fill="${b.ribbon}"/>
+    <path d="M100 180 q-14 14 -22 30M100 180 q14 14 22 30" stroke="${b.ribbon}" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+const giftDefault = () => { const p = partnerPron() || 'em', n = (peerName(peerMain()) !== 'Người ấy' ? peerName(peerMain()) : db.love.nameTo) || ''; const d = new Date();
+  if (d.getMonth() === 9 && d.getDate() === 20) return `Chúc ${n} 20/10 thật xinh, thật vui, lúc nào cũng được thương 💕`;
+  if (d.getMonth() === 2 && d.getDate() === 8) return `Chúc ${n} 8/3 vui vẻ, mãi là cô gái hạnh phúc nhất 💕`;
+  return `Tặng ${p} bó hoa này, thương ${p} nhiều lắm 💕`; };
+function openGift(){
+  if (!sync.room) return toast('Ghép đôi ở tab Khác để tặng hoa nha');
+  let pick = state.giftPick || 'qiga';
+  openSheet('Tặng hoa 💐', `<div class="gpreview" id="gPrev">${bouquetSVG(pick, 170)}</div>
+    <div class="gpick" id="gPick">${BOUQUETS.map(b => `<button type="button" data-g="${b.id}" class="${b.id === pick ? 'on' : ''}"><span class="gdot" style="background:${{ qiga: 'linear-gradient(135deg,#ff9fbf 50%,#ffc107 50%)', prose: '#ff9fbf', sun: '#ffc107', daisy: '#fff;border:1px solid #ddd', rose: '#e23a5a' }[b.id]}"></span>${b.name}</button>`).join('')}</div>
+    <div class="card"><label class="f"><span>Lời chúc</span><textarea id="gNote" rows="3" maxlength="200">${esc(giftDefault())}</textarea></label></div>
+    <button class="btn" id="gSend">💐 Tặng ${esc(peerName(peerMain()))}</button>`, () => {
+    $('#gPick').onclick = e => { const b = e.target.closest('[data-g]'); if (!b) return; pick = state.giftPick = b.dataset.g; $('#gPick').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); $('#gPrev').innerHTML = bouquetSVG(pick, 170); };
+    $('#gSend').onclick = async () => {
+      const note = $('#gNote').value.trim();
+      logHistory('gift', { flower: pick, note }); db.chatSeen = Date.now(); save(); closeSheet(); render();
+      bigHearts(bq(pick).fall, 'Đã gửi hoa 💐');
+      const ok = await syncRoom(); toast(ok ? sentTo() + ' 💐' : 'Chưa gửi được, sẽ tự thử lại');
+    };
+  });
+}
+function showGift(x){ // màn mở quà cho người nhận
+  if (document.querySelector('.giftfx')) return;
+  const b = bq(x.flower), from = x.name || 'Người ấy';
+  const v = document.createElement('div'); v.className = 'giftfx';
+  v.innerHTML = `<div class="gbox" id="gBox"><div class="glid"></div><div class="gbody"></div><div class="gtxt">${esc(from)} gửi quà cho ${esc(sync.me || 'bạn')} 🎁<br><small>Chạm để mở</small></div></div>
+    <div class="gopen"><div class="gflower">${bouquetSVG(x.flower, 220)}</div><div class="gfcard"><div class="gmsg">${esc(x.note || '')}</div><div class="gsig">— ${esc(from)}</div></div>
+    <div class="gbtns"><button class="gthanks">💕 Cảm ơn ${esc(from)}</button><button class="gclose">Đóng</button></div></div>`;
+  document.body.appendChild(v);
+  const fall = () => { for (let i = 0; i < 26; i++) { const s = document.createElement('span'); s.className = 'gpetal'; s.textContent = b.fall; s.style.left = Math.random() * 100 + 'vw'; s.style.animationDelay = (Math.random() * 2.5) + 's'; s.style.fontSize = (16 + Math.random() * 20) + 'px'; v.appendChild(s); } };
+  const open = () => { if (v.classList.contains('opened')) return; v.classList.add('opened'); fall(); };
+  v.querySelector('#gBox').onclick = open;
+  if (x._replay) open();
+  v.querySelector('.gclose').onclick = () => v.remove();
+  v.querySelector('.gthanks').onclick = async () => { v.remove(); const p = partnerPron(); await sendQuick(`Cảm ơn ${p ? p + ' ' : ''}vì bó hoa 💐💕`); };
+}
+function checkGifts(){ // quà mới từ người kia → mở màn quà
+  const seen = db.giftSeen || {}, g = db.moods.filter(x => x.kind === 'gift' && !isMineH(x) && !seen[x.id] && Date.now() - x.at < 7 * 864e5).sort((a, b) => a.at - b.at)[0];
+  if (!g) return;
+  db.giftSeen = Object.assign({}, seen, { [g.id]: Date.now() }); try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  setTimeout(() => showGift(g), 300);
+}
+
 /* ---------- ảnh: luôn có sẵn trên máy ---------- */
 const PHOTO_CACHE = 'sotay-photos';
 function allPhotos(){
@@ -3610,6 +3749,8 @@ $('#main').addEventListener('click', async e => {
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
+    case 'giftNew': state.chatPanel = false; openGift(); break;
+    case 'giftView': { const g = db.moods.find(x => x.id === id); if (g) showGift(Object.assign({}, g, { _replay: true })); break; }
     case 'chatPhoto': state.chatPanel = false; sendChatPhotos(); break;
     case 'replyCancel': state.replyTo = null; render(); break;
     case 'pinList': openPinList(); break;
@@ -3782,7 +3923,7 @@ function applyLive(m){ // dữ liệu đi kèm thông báo: hiện ngay
     db.peers[m.peer.dev] = n;
   }
   for (const x of m.hist || []) if (x && x.id && !db.moods.some(y => y.id === x.id)) { db.moods = db.moods.concat([x]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); changed = true; }
-  if (m.hist && m.hist.length) playIncomingTouch(m.hist);
+  if (m.hist && m.hist.length) { playIncomingTouch(m.hist); if (m.hist.some(x => x.kind === 'gift')) setTimeout(checkGifts, 0); }
   if (!changed) return;
   try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
   if (sheetOpen()) { pendingRender = true; const el = $('#replyTo'); if (el) el.outerHTML = replyBox(); } else softRender();

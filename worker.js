@@ -454,8 +454,11 @@ async function roomRequest(env, code, req, store) {
       : { title: `${collLines[0].icon} ${who || 'Người ấy'} vừa cập nhật ${collLines.length} mục`, body: collLines.slice(0, 4).map(l => l.icon + ' ' + l.text).join('\n') }));
     for (const m of pplMsgs) jobs.push(sendToRoom(env, code, dev, m));
     const recentT = Date.now() - 10 * 60000;
-    const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
-    for (const x of chats) jobs.push(sendToRoom(env, code, dev, x.kind === 'touch'
+    const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'gift') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
+    for (const x of chats) jobs.push(sendToRoom(env, code, dev, x.kind === 'gift'
+      ? { title: `💐 ${who || 'Người ấy'} tặng một bó hoa!`, body: x.note ? clip(x.note, 160) : 'Mở app nhận quà nha 🎁', tab: 'us', usp: 'moods',
+          hist: [{ id: cleanStr(x.id, 40), kind: 'gift', flower: cleanStr(x.flower, 12), note: cleanStr(x.note, 200), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
+      : x.kind === 'touch'
       ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
           hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
           : { title: `💬 ${who || 'Người ấy'}`, body: x.note ? clip(x.note, 160) : (Array.isArray(x.photos) && x.photos.length ? `📷 Đã gửi ${x.photos.length > 1 ? x.photos.length + ' ảnh' : 'ảnh'}` : '…'), tab: 'us', usp: 'moods',
