@@ -602,6 +602,27 @@ main.chatmode.wp-night .bub.msg.recalled,main.chatmode.wp-photo .bub.msg.recalle
 main.chatmode.wp-photo{--wpov:rgba(255,255,255,.3);background-size:cover;background-position:center}
 main.chatmode.wp-night .hist .ht,main.chatmode.wp-photo .hist .ht{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 @media (prefers-color-scheme:dark){.wps-pink,main.chatmode.wp-pink{background:linear-gradient(180deg,#2a1820,#3a1f2b)}.wps-hearts,main.chatmode.wp-hearts{background-color:#1f1418}.wps-grid,main.chatmode.wp-grid{background-color:#16181d;background-image:linear-gradient(#262b35 1px,transparent 1px),linear-gradient(90deg,#262b35 1px,transparent 1px)}main.chatmode.wp-photo{--wpov:rgba(0,0,0,.45)}}
+.chatbar .stkbtn{width:40px;height:44px;border-radius:50%;background:transparent;color:var(--accent);display:grid;place-items:center;flex:none;margin:0 -6px}
+.chatbar .stkbtn.on{background:var(--accent-soft)}
+.stkpanel{padding:8px 8px 10px}
+.stktabs{display:flex;gap:6px;align-items:center;margin:0 2px 8px}
+.stktabs button{width:auto;height:auto;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:700;background:var(--bg);color:var(--sub)}
+.stktabs button.on{background:var(--accent-soft);color:var(--accent)}
+.stktabs .stked{margin-left:auto;background:none;color:var(--accent)}
+.stkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:236px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.stkgrid button{width:auto;height:auto;background:none;border-radius:14px;padding:4px;display:grid;place-items:center;position:relative}
+.stkgrid button:active{background:var(--accent-soft);transform:scale(.94)}
+.stkgrid .stkimg{border-width:3px;border-radius:16px}
+.stkgrid button.del::after{content:'×';position:absolute;top:0;right:2px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font:700 16px/22px sans-serif}
+.stkgrid button.del{animation:wig .35s ease-in-out infinite alternate}
+@keyframes wig{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
+.stkadd{flex-direction:column;color:var(--accent);font-size:28px;font-weight:300;border:2px dashed var(--line)!important;min-height:84px}
+.stkadd small{font-size:11px;font-weight:700}
+.stkmsg{display:flex;flex-direction:column;align-items:inherit;gap:4px}
+.hb.me .stkmsg{align-items:flex-end}
+.stkmsg .stksvg{display:block;filter:drop-shadow(0 2px 3px rgba(125,35,65,.18));animation:stkpop .35s cubic-bezier(.2,1.5,.5,1)}
+@keyframes stkpop{from{transform:scale(.6)}to{transform:none}}
+.stkimg{display:block;object-fit:cover;border-radius:24px;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.18);background:#fff}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--mybub,var(--accent));color:#fff}
@@ -1235,6 +1256,7 @@ function roomBody(full = true){ // full=false: chỉ gửi những mục sửa t
   if (db.us.aiAt) meta.ai = { v: db.us.ai || {}, updated: db.us.aiAt };
   if (db.us.chatStAt) meta.chat = { v: db.us.chatSt || {}, updated: db.us.chatStAt };
   if (db.us.nickAt) meta.nick = { v: db.us.nick || {}, updated: db.us.nickAt };
+  if (db.us.stkAt) meta.stk = { v: db.us.stk || [], updated: db.us.stkAt };
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
   const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
   const mark = full ? 0 : (state.upMark || 0) - 5000;
@@ -1284,6 +1306,8 @@ function applyRoom(merged){
   const mc = merged.meta && merged.meta.chat;
   if (mc && mc.v && typeof mc.v === 'object' && (+mc.updated || 0) > (db.us.chatStAt || 0)) { const v = mc.v;
     db.us.chatSt = { bg: WPS.some(w => w[0] === v.bg) ? v.bg : 'dots', bub: /^#[0-9a-f]{6}$/i.test(v.bub || '') ? v.bub : '', photo: /^[A-Za-z0-9_-]{1,40}$/.test(v.photo || '') ? v.photo : '' }; db.us.chatStAt = +mc.updated; }
+  const ms = merged.meta && merged.meta.stk;
+  if (ms && Array.isArray(ms.v) && (+ms.updated || 0) > (db.us.stkAt || 0)) { db.us.stk = ms.v.filter(x => x && /^[A-Za-z0-9_-]{1,40}$/.test(x.id || '')).slice(-80).map(x => ({ id: x.id, at: +x.at || 0 })); db.us.stkAt = +ms.updated; }
   const mn = merged.meta && merged.meta.nick;
   if (mn && mn.v && typeof mn.v === 'object' && (+mn.updated || 0) > (db.us.nickAt || 0)) { const o = {}; for (const [k, v] of Object.entries(mn.v).slice(0, 8)) if (typeof v === 'string') o[String(k).slice(0, 40)] = v.slice(0, 24); db.us.nick = o; db.us.nickAt = +mn.updated; }
   const ai = merged.meta && merged.meta.ai;
@@ -1693,7 +1717,7 @@ function duoCard(){
   } else {
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
     const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood' || x.kind === 'gift') && !isMineH(x) && !x.ai).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
-    const lcText = x => { if (x.recalled) return 'đã thu hồi một tin nhắn'; if (x.kind === 'gift') return '💐 tặng bó hoa' + (x.note ? ` “${esc(x.note)}”` : ''); if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
+    const lcText = x => { if (x.recalled) return 'đã thu hồi một tin nhắn'; if (x.kind === 'gift') return '💐 tặng bó hoa' + (x.note ? ` “${esc(x.note)}”` : ''); if (x.kind === 'msg') return x.stk ? '🧸 gửi sticker' : `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
     const line = lc ? `${lcText(lc)} · ${ago(lc.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
     const un = unreadChat();
     h += `<button class="peer peerbtn" data-act="goHist">${avSpan(av, pn)}<span class="pm"><span class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} <i class="mf">${m.svg}</i>` : `${esc(pn)}`}</span><span class="s">${line}</span></span><span class="chatpill">Chat${un ? ` <b>${un}</b>` : ''} ›</span></button>`;
@@ -2203,6 +2227,10 @@ function histItem(x, mine, tail = true, head = true){
   const rx = Object.values(x.react || {}).filter(Boolean), rxH = rx.length ? `<span class="rx">${rx.join('')}${rx.length > 1 ? `<i>${rx.length}</i>` : ''}</span>` : '';
   const meta = tail || x.pinned ? `<div class="ht">${x.pinned ? '📌 ' : ''}${who}${hm(x.at)}${x.edited && !x.recalled ? ' · đã sửa' : ''}${fxOf(x) ? ` · <button class="fxre" data-act="fxReplay" data-id="${x.id}" aria-label="Xem lại hiệu ứng">✨</button>` : ''}${x._seen ? ` · <b class="seen">${x._seen}</b>` : ''}</div>` : '';
   if (x.kind === 'msg' && x.recalled) return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub msg recalled"><div class="bn">↩️ ${mine ? 'Bạn' : esc(dispName(x.name) || 'Người ấy')} đã thu hồi một tin nhắn</div></div>${meta}</div>`;
+  if (x.kind === 'msg' && x.stk && stkOK(x.stk)) {
+    const q2 = x.reply ? `<button class="quote" data-act="jumpTo" data-id="${esc(x.reply.id)}"><b>↩ ${esc(dispName(x.reply.name || ''))}</b><span>${esc(x.reply.text || '')}</span></button>` : '';
+    return `<div class="hb ${mine ? 'me' : ''}${gc} stkhb" data-mid="${x.id}"><div class="stkmsg">${q2}${stkHTML(x.stk, 128)}</div>${rxH}${meta}</div>`;
+  }
   if (x.kind === 'msg') {
     const quote = x.reply ? `<button class="quote" data-act="jumpTo" data-id="${esc(x.reply.id)}"><b>↩ ${esc(dispName(x.reply.name || ''))}</b><span>${esc(x.reply.text || '')}</span></button>` : '';
     const ps = Array.isArray(x.photos) ? x.photos : [], ph = ps.length && sync.room ? `<span class="cph n${Math.min(ps.length, 4)}">${ps.slice(0, 4).map((pid, i) => `<span class="cpi"><img src="${photoUrl(pid)}" alt="" loading="lazy" data-view="c${x.id}">${i === 3 && ps.length > 4 ? `<i>+${ps.length - 4}</i>` : ''}</span>`).join('')}</span>` : '';
@@ -2247,7 +2275,7 @@ function openJarQuick(){
     setTimeout(() => $('#jqIn').focus(), 300);
   });
 }
-function msgShort(x){ if (!x) return ''; if (x.recalled) return '↩️ Tin nhắn đã thu hồi'; if (x.kind === 'gift') return '💐 Bó hoa' + (x.note ? ' · ' + x.note : ''); if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
+function msgShort(x){ if (!x) return ''; if (x.recalled) return '↩️ Tin nhắn đã thu hồi'; if (x.stk) return '🧸 Sticker' + (x.stk.startsWith('b:') ? ' · ' + ((STK.find(s => 'b:' + s[0] === x.stk) || [])[1] || '') : ''); if (x.kind === 'gift') return '💐 Bó hoa' + (x.note ? ' · ' + x.note : ''); if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
 function takeReply(){ const r = state.replyTo && db.moods.find(x => x.id === state.replyTo); state.replyTo = null; return r ? { reply: { id: r.id, name: isMineH(r) ? (sync.me || 'Mình') : (r.name || 'Người ấy'), text: msgShort(r).slice(0, 80) } } : {}; }
 function setReply(id){ if (!db.moods.some(x => x.id === id)) return; state.replyTo = id; state.histAtEnd = true; render(); const i = $('#chatIn'); if (i) i.focus(); }
 function updateMsg(id, patch){ const x = db.moods.find(m => m.id === id); if (!x) return null; const n = Object.assign({}, x, patch, { updated: Date.now() }); db.moods = db.moods.map(m => m.id === id ? n : m); return n; }
@@ -2371,7 +2399,7 @@ function viewHistory(){
   const rpx = state.replyTo && db.moods.find(x => x.id === state.replyTo);
   const exm = state.editId && db.moods.find(x => x.id === state.editId);
   const replyBar = exm ? `<div class="replybar editbar"><span class="rb">✏️ <b>Đang sửa tin</b><span>${esc(msgShort(exm))}</span></span><button data-act="editCancel" aria-label="Huỷ sửa">×</button></div>` : rpx ? `<div class="replybar"><span class="rb">↩ Trả lời <b>${esc(isMineH(rpx) ? 'chính mình' : (rpx.name || 'Người ấy'))}</b><span>${esc(msgShort(rpx))}</span></span><button data-act="replyCancel" aria-label="Bỏ trả lời">×</button></div>` : '';
-  const composer = `<div class="chatdock">${panel}${replyBar}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><button class="cam" data-act="chatPhoto" aria-label="Gửi ảnh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi (giữ để chọn hiệu ứng)" class="${state.fxPick ? 'fxon' : ''}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
+  const composer = `<div class="chatdock">${panel}${state.stkPanel ? stkPanel() : ''}${replyBar}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><button class="cam" data-act="chatPhoto" aria-label="Gửi ảnh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><button class="stkbtn ${state.stkPanel ? 'on' : ''}" data-act="stkToggle" aria-label="Sticker"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12.5V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h5.5z"/><path d="M20 12.5 12.5 20v-4.5a3 3 0 0 1 3-3z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="14.5" cy="10" r="1" fill="currentColor"/></svg></button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi (giữ để chọn hiệu ứng)" class="${state.fxPick ? 'fxon' : ''}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
   if (!list.length) return h + `<div class="hist"><div class="chatempty">💌<br>Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
   let shown = state.histAll ? list : list.slice(-60);
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
@@ -2792,13 +2820,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 10))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 11))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
-      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 10 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 11 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2839,7 +2867,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 7.0</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 7.1</p>`;
 }
 
 function viewCycle(){
@@ -3095,6 +3123,103 @@ function applyChatStyle(){
   if (bg && bg !== 'dots' && !(bg === 'photo' && !(cs.photo && sync.room))) m.classList.add('wp-' + bg);
   m.style.backgroundImage = bg === 'photo' && cs.photo && sync.room ? `linear-gradient(var(--wpov),var(--wpov)),url("${photoUrl(cs.photo)}")` : '';
   if (cm && /^#[0-9a-f]{6}$/i.test(cs.bub || '')) m.style.setProperty('--mybub', cs.bub); else m.style.removeProperty('--mybub');
+}
+
+/* ---------- sticker: bộ "Mochi" tự vẽ + sticker từ ảnh của hai đứa ---------- */
+const STK = [
+  ['hi', 'Hii', { e: 'happy', m: 'open', x: ['✨'] }],
+  ['morning', 'Chào buổi sáng', { e: 'happy', m: 'smile', x: ['☀️'] }],
+  ['night', 'Ngủ ngon nha', { e: 'sleep', m: 'o', x: ['💤', '🌙'] }],
+  ['miss', 'Nhớ quá à', { e: 'dot', m: 'sad', tear: 1, x: ['💕'] }],
+  ['love', 'Yêu nhiều', { e: 'heart', m: 'open', x: ['💗', '💖'] }],
+  ['kiss', 'Hôn cái nè', { e: 'happy', m: 'kiss', x: ['💋'] }],
+  ['hug', 'Ôm cái', { two: 1, e: 'happy', m: 'smile', x: ['💞'] }],
+  ['hungry', 'Đói quá', { e: 'dot', m: 'drool', x: ['🍜'] }],
+  ['angry', 'Giận rồi đó', { e: 'angry', m: 'flat', col: '#ffa3a3', x: ['💢'] }],
+  ['sorry', 'Xin lỗi mà', { e: 'cry', m: 'sad', tear: 1, x: ['💦'] }],
+  ['thanks', 'Cảm ơn nha', { e: 'happy', m: 'smile', x: ['🌸', '✨'] }],
+  ['omw', 'Đang tới nè', { e: 'dot', m: 'smile', x: ['💨'] }],
+  ['wait', 'Chờ xíu', { e: 'dot', m: 'flat', x: ['⏰'] }],
+  ['hihi', 'Hihi', { e: 'happy', m: 'open', blush: 2, x: ['✨'] }],
+  ['sad', 'Buồn xỉu', { e: 'cry', m: 'sad', tear: 2, col: '#c4dbff' }],
+  ['yeah', 'Yeahhh', { e: 'star', m: 'open', x: ['🎉'] }],
+  ['ok', 'Okela', { e: 'wink', m: 'smile', x: ['👍'] }],
+  ['bored', 'Chán ghê', { e: 'half', m: 'flat', x: ['💭'] }],
+  ['shy', 'Ngại quá', { e: 'happy', m: 'small', blush: 2, x: ['💗'] }],
+  ['cute', 'Dễ thương ghê', { e: 'star', m: 'smile', x: ['💖', '✨'] }]
+];
+function blobSVG(cx, cy, s, col, o){
+  const L = '#5a3a44', n = v => (+v).toFixed(1);
+  const ear = dx => { const ex = cx + dx * s, ey = cy - 30 * s, r = dx > 0 ? 18 : -18;
+    return `<ellipse cx="${n(ex)}" cy="${n(ey)}" rx="${n(9 * s)}" ry="${n(16 * s)}" fill="${col}" stroke="${L}" stroke-width="${n(2.4 * s)}" transform="rotate(${r} ${n(ex)} ${n(ey)})"/><ellipse cx="${n(ex)}" cy="${n(ey + 2 * s)}" rx="${n(4 * s)}" ry="${n(10 * s)}" fill="#ff8fb1" opacity=".5" transform="rotate(${r} ${n(ex)} ${n(ey)})"/>`; };
+  let g = ear(-17) + ear(17) + `<ellipse cx="${cx}" cy="${cy}" rx="${n(38 * s)}" ry="${n(32 * s)}" fill="${col}" stroke="${L}" stroke-width="${n(2.6 * s)}"/>`;
+  g += `<ellipse cx="${n(cx - 12 * s)}" cy="${n(cy - 16 * s)}" rx="${n(10 * s)}" ry="${n(5 * s)}" fill="#fff" opacity=".45"/>`;
+  const st = `stroke="#3b2730" stroke-width="${n(3 * s)}" stroke-linecap="round" fill="none"`;
+  const eye = (x, y, t) => {
+    if (t === 'happy') return `<path d="M${n(x - 5 * s)} ${n(y + 2 * s)} Q${n(x)} ${n(y - 5 * s)} ${n(x + 5 * s)} ${n(y + 2 * s)}" ${st}/>`;
+    if (t === 'sleep') return `<path d="M${n(x - 5 * s)} ${n(y)} Q${n(x)} ${n(y + 4 * s)} ${n(x + 5 * s)} ${n(y)}" ${st}/>`;
+    if (t === 'half') return `<path d="M${n(x - 5 * s)} ${n(y - 1 * s)} H${n(x + 5 * s)}" ${st}/><circle cx="${n(x)}" cy="${n(y + 2 * s)}" r="${n(2.6 * s)}" fill="#3b2730"/>`;
+    if (t === 'heart') return `<path d="M${n(x)} ${n(y + 5 * s)} C${n(x - 9 * s)} ${n(y - 1 * s)} ${n(x - 5 * s)} ${n(y - 8 * s)} ${n(x)} ${n(y - 3 * s)} C${n(x + 5 * s)} ${n(y - 8 * s)} ${n(x + 9 * s)} ${n(y - 1 * s)} ${n(x)} ${n(y + 5 * s)}z" fill="#ff4d7d"/>`;
+    if (t === 'star') return `<circle cx="${n(x)}" cy="${n(y)}" r="${n(5.5 * s)}" fill="#3b2730"/><circle cx="${n(x + 2 * s)}" cy="${n(y - 2 * s)}" r="${n(2 * s)}" fill="#fff"/><circle cx="${n(x - 2 * s)}" cy="${n(y + 2 * s)}" r="${n(1.1 * s)}" fill="#fff"/>`;
+    const big = t === 'cry';
+    return `<circle cx="${n(x)}" cy="${n(y)}" r="${n((big ? 5 : 4) * s)}" fill="#3b2730"/><circle cx="${n(x + 1.4 * s)}" cy="${n(y - 1.5 * s)}" r="${n((big ? 2 : 1.4) * s)}" fill="#fff"/>`;
+  };
+  const ey = cy - 4 * s, exl = cx - 13 * s, exr = cx + 13 * s;
+  if (o.e === 'wink') g += eye(exl, ey, 'happy') + eye(exr, ey, 'dot');
+  else g += eye(exl, ey, o.e) + eye(exr, ey, o.e);
+  if (o.e === 'angry') g += `<path d="M${n(exl - 6 * s)} ${n(ey - 9 * s)} L${n(exl + 4 * s)} ${n(ey - 5 * s)} M${n(exr + 6 * s)} ${n(ey - 9 * s)} L${n(exr - 4 * s)} ${n(ey - 5 * s)}" ${st}/>`;
+  const bo = o.blush === 2 ? .8 : .45, br = o.blush === 2 ? 7.5 : 6;
+  g += `<ellipse cx="${n(cx - 22 * s)}" cy="${n(cy + 5 * s)}" rx="${n(br * s)}" ry="${n(3.6 * s)}" fill="#ff7aa2" opacity="${bo}"/><ellipse cx="${n(cx + 22 * s)}" cy="${n(cy + 5 * s)}" rx="${n(br * s)}" ry="${n(3.6 * s)}" fill="#ff7aa2" opacity="${bo}"/>`;
+  const mx = cx, my = cy + 9 * s, P = (d, extra = '') => `<path d="${d}" ${st} ${extra}/>`;
+  const mouth = {
+    smile: P(`M${n(mx - 6 * s)} ${n(my)} Q${n(mx)} ${n(my + 6 * s)} ${n(mx + 6 * s)} ${n(my)}`),
+    small: P(`M${n(mx - 3 * s)} ${n(my + 1 * s)} Q${n(mx)} ${n(my + 3 * s)} ${n(mx + 3 * s)} ${n(my + 1 * s)}`),
+    open: `<path d="M${n(mx - 7 * s)} ${n(my - 1 * s)} Q${n(mx)} ${n(my + 11 * s)} ${n(mx + 7 * s)} ${n(my - 1 * s)}z" fill="#7a2b3d" stroke="#3b2730" stroke-width="${n(2 * s)}" stroke-linejoin="round"/><ellipse cx="${n(mx)}" cy="${n(my + 4.5 * s)}" rx="${n(3.2 * s)}" ry="${n(2 * s)}" fill="#ff8fa8"/>`,
+    o: `<circle cx="${n(mx)}" cy="${n(my + 1 * s)}" r="${n(3 * s)}" ${st}/>`,
+    sad: P(`M${n(mx - 6 * s)} ${n(my + 4 * s)} Q${n(mx)} ${n(my - 2 * s)} ${n(mx + 6 * s)} ${n(my + 4 * s)}`),
+    flat: P(`M${n(mx - 5 * s)} ${n(my + 2 * s)} H${n(mx + 5 * s)}`),
+    kiss: P(`M${n(mx - 2 * s)} ${n(my - 4 * s)} Q${n(mx + 4 * s)} ${n(my - 2 * s)} ${n(mx - 1 * s)} ${n(my)} Q${n(mx + 4 * s)} ${n(my + 2 * s)} ${n(mx - 2 * s)} ${n(my + 4 * s)}`),
+    drool: P(`M${n(mx - 6 * s)} ${n(my)} Q${n(mx)} ${n(my + 6 * s)} ${n(mx + 6 * s)} ${n(my)}`) + `<path d="M${n(mx + 4 * s)} ${n(my + 3 * s)} q${n(2 * s)} ${n(6 * s)} 0 ${n(8 * s)} q${n(-2 * s)} ${n(-2 * s)} 0 ${n(-8 * s)}z" fill="#8fd3ff"/>`
+  };
+  g += mouth[o.m] || mouth.smile;
+  if (o.tear) for (const [x, k] of [[exl, -1], [exr, 1]].slice(0, o.tear === 2 ? 2 : 1))
+    g += `<path d="M${n(x + k * 2 * s)} ${n(ey + 5 * s)} q${n(-4 * s)} ${n(8 * s)} 0 ${n(10 * s)} q${n(4 * s)} ${n(-2 * s)} 0 ${n(-10 * s)}z" fill="#7cc4ff" stroke="#4a9ad8" stroke-width="${n(1 * s)}"/>`;
+  return g;
+}
+function stkSVG(id, size){
+  const d = STK.find(x => x[0] === id) || STK[0], [, cap, o] = d, col = o.col || '#ffc9da';
+  let g = o.two ? blobSVG(80, 66, .74, '#ffe39a', Object.assign({}, o)) + blobSVG(42, 64, .78, col, o) : blobSVG(60, 62, 1, col, o);
+  (o.x || []).forEach((e, i) => { const [x, y, fs] = [[98, 30, 20], [22, 34, 17]][i] || [98, 30, 20]; g += `<text x="${x}" y="${y}" font-size="${fs}" text-anchor="middle">${e}</text>`; });
+  const fsz = cap.length > 11 ? 15 : 18;
+  g += `<text x="60" y="122" text-anchor="middle" font-family="'Patrick Hand',cursive" font-size="${fsz}" font-weight="700" fill="#b5385f" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke">${esc(cap)}</text>`;
+  return `<svg class="stksvg" viewBox="0 0 120 130" width="${size}" height="${Math.round(size * 130 / 120)}" aria-label="${esc(cap)}">${g}</svg>`;
+}
+const stkOK = k => typeof k === 'string' && (/^b:[a-z]{1,12}$/.test(k) || /^p:[A-Za-z0-9_-]{1,40}$/.test(k));
+const stkHTML = (k, size) => k.startsWith('p:') ? (sync.room ? `<img class="stkimg" src="${photoUrl(k.slice(2))}" alt="sticker" style="width:${size}px;height:${size}px" loading="lazy">` : '🧸') : stkSVG(k.slice(2), size);
+function stkPanel(){
+  const tab = state.stkTab || 'mochi', mine = db.us.stk || [];
+  const head = `<div class="stktabs"><button data-act="stkTab" data-id="mochi" class="${tab === 'mochi' ? 'on' : ''}">🐰 Mochi</button><button data-act="stkTab" data-id="mine" class="${tab === 'mine' ? 'on' : ''}">📷 Của hai đứa${mine.length ? ` (${mine.length})` : ''}</button>${tab === 'mine' && mine.length ? `<button class="stked" data-act="stkEdit">${state.stkEdit ? 'Xong' : '✏️ Sửa'}</button>` : ''}</div>`;
+  const body = tab === 'mochi'
+    ? STK.map(([id]) => `<button data-act="stkSend" data-id="b:${id}">${stkSVG(id, 72)}</button>`).join('')
+    : `<button class="stkadd" data-act="stkAdd">＋<small>Tạo từ ảnh</small></button>` + mine.slice().reverse().map(s => `<button data-act="${state.stkEdit ? 'stkDel' : 'stkSend'}" data-id="p:${s.id}" class="${state.stkEdit ? 'del' : ''}">${stkHTML('p:' + s.id, 72)}</button>`).join('');
+  return `<div class="qpanel stkpanel">${head}<div class="stkgrid">${body}</div></div>`;
+}
+async function sendSticker(k){
+  if (!stkOK(k)) return;
+  logHistory('msg', Object.assign({ note: '', stk: k }, takeReply())); db.chatSeen = Date.now(); state.histAtEnd = true; save();
+  patchChat() || render(); chatToEnd();
+  if (!sync.room) return;
+  const ok = await syncRoom(); if (!ok) toast('Chưa gửi được, sẽ tự thử lại');
+}
+function addStickers(){
+  if (!sync.room) return toast('Ghép đôi để tạo sticker nha');
+  pickPhoto(async fs => {
+    toast(`Đang tạo ${fs.length > 1 ? fs.length + ' sticker' : 'sticker'}…`);
+    try {
+      const add = []; for (const f of fs.slice(0, 8)) add.push({ id: await uploadPhoto(f), at: Date.now() });
+      db.us.stk = (db.us.stk || []).concat(add).slice(-80); db.us.stkAt = Date.now(); save(); render(); toast('Xong rồi, bấm để gửi nha 🧸'); syncRoom();
+    } catch (e) { toast('Tải ảnh lỗi, thử lại nha'); }
+  });
 }
 
 function patchChat(){ // Chat: chỉ vẽ lại phần tin nhắn, giữ nguyên ô nhập (bàn phím không bị đóng)
@@ -4136,7 +4261,13 @@ $('#main').addEventListener('click', async e => {
     case 'couponView': openCouponView(id); break;
     case 'streakInfo': openStreak(); break;
     case 'recapM': if (id <= monthKey(Date.now())) { state.recapMonth = id; render(); } break;
-    case 'chatPlus': state.chatPanel = !state.chatPanel; state.histAtEnd = true; render(); break;
+    case 'chatPlus': state.chatPanel = !state.chatPanel; state.stkPanel = false; state.histAtEnd = true; render(); break;
+    case 'stkToggle': state.stkPanel = !state.stkPanel; state.chatPanel = false; state.stkEdit = false; state.histAtEnd = true; render(); break;
+    case 'stkTab': state.stkTab = id; state.stkEdit = false; render(); break;
+    case 'stkSend': sendSticker(id); break;
+    case 'stkAdd': addStickers(); break;
+    case 'stkEdit': state.stkEdit = !state.stkEdit; render(); break;
+    case 'stkDel': { const pid = id.slice(2); db.us.stk = (db.us.stk || []).filter(x => x.id !== pid); db.us.stkAt = Date.now(); if (!db.us.stk.length) state.stkEdit = false; save(); render(); syncRoom(); break; }
     case 'chatQuick': await sendQuick(quickPhrases()[+id]); break;
     case 'jarQuick': state.chatPanel = false; openJarQuick(); break;
     case 'foodAdd': state.chatPanel = false; pickPhoto(fs => openFood(null, fs)); break;

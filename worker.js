@@ -5,7 +5,7 @@
 
 // File lời chúc trên GitHub (mỗi dòng một câu). Sửa file này là lời chúc đổi theo.
 import { DurableObject } from 'cloudflare:workers';
-const SERVER_V = 10; // phiên bản máy chủ, app hiện ở tab Khác
+const SERVER_V = 11; // phiên bản máy chủ, app hiện ở tab Khác
 
 const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
@@ -471,9 +471,9 @@ async function roomRequest(env, code, req, store) {
       : x.kind === 'touch'
       ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
           hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
-          : { title: `💬 ${who || 'Người ấy'}`, body: x.note ? clip(x.note, 160) : (Array.isArray(x.photos) && x.photos.length ? `📷 Đã gửi ${x.photos.length > 1 ? x.photos.length + ' ảnh' : 'ảnh'}` : '…'), tab: 'us', usp: 'moods',
+          : { title: `💬 ${who || 'Người ấy'}`, body: x.note ? clip(x.note, 160) : x.stk ? '🧸 Đã gửi sticker' : (Array.isArray(x.photos) && x.photos.length ? `📷 Đã gửi ${x.photos.length > 1 ? x.photos.length + ' ảnh' : 'ảnh'}` : '…'), tab: 'us', usp: 'moods',
               hist: [Object.assign({ id: cleanStr(x.id, 40), kind: 'msg', dev, name: who, note: cleanStr(x.note, 300), at: +x.at, updated: +x.updated || +x.at },
-                Array.isArray(x.photos) ? { photos: x.photos.slice(0, 12).map(v => cleanStr(v, 40)) } : {}, x.fx ? { fx: cleanStr(x.fx, 10) } : {},
+                Array.isArray(x.photos) ? { photos: x.photos.slice(0, 12).map(v => cleanStr(v, 40)) } : {}, x.fx ? { fx: cleanStr(x.fx, 10) } : {}, x.stk ? { stk: cleanStr(x.stk, 48) } : {},
                 x.reply && typeof x.reply === 'object' ? { reply: { id: cleanStr(x.reply.id, 40), name: cleanStr(x.reply.name, 40), text: cleanStr(x.reply.text, 80) } } : {})] }));
     if (jobs.length) await Promise.all(jobs.map(j => j.catch(() => {})));
     { // thêm thư mới vào lịch mở
