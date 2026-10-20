@@ -5,7 +5,7 @@
 
 // File lời chúc trên GitHub (mỗi dòng một câu). Sửa file này là lời chúc đổi theo.
 import { DurableObject } from 'cloudflare:workers';
-const SERVER_V = 8; // phiên bản máy chủ, app hiện ở tab Khác
+const SERVER_V = 9; // phiên bản máy chủ, app hiện ở tab Khác
 
 const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
@@ -492,6 +492,33 @@ function deltaOf(room, since) { // chỉ gửi lại những mục đổi sau l�
     out[c] = m; }
   return out;
 }
+// ---- AI trong chat (Workers AI, miễn phí 10.000 neuron/ngày) ----
+const AI_MODELS = ['@cf/google/gemma-4-26b-a4b-it', '@cf/meta/llama-3.3-70b-instruct-fp8-fast', '@cf/meta/llama-3.1-8b-instruct'];
+const AI_DAILY = 200; // tối đa số câu AI trả lời mỗi ngày cho một cặp
+async function askAI(env, messages) {
+  for (const m of AI_MODELS) {
+    try {
+      const r = await env.AI.run(m, { messages, max_tokens: 400, temperature: 0.8 });
+      let t = typeof r === 'string' ? r : (r && (r.response ?? (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content))) || '';
+      if (typeof t !== 'string') t = JSON.stringify(t);
+      t = t.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/^\s*(AI|Bé AI)\s*:\s*/i, '').trim();
+      if (t) return t;
+    } catch (e) {}
+  }
+  return '';
+}
+function aiPrompt(room, asker) {
+  const names = [...new Set(Object.values(room.people || {}).map(p => p && p.name).filter(Boolean))].slice(0, 2);
+  const now = new Date(Date.now() + 7 * 3600e3), WD = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+  const hist = Object.values(room.moods || {}).filter(x => x && !x.deleted && x.kind === 'msg' && x.note).sort((a, b) => a.at - b.at).slice(-12)
+    .map(x => `${x.ai ? 'AI' : (x.name || 'Ai đó')}: ${clip(x.note, 200)}`).join('\n');
+  return `Bạn là "AI" — một người bạn nhỏ vui tính sống trong app chat riêng của cặp đôi ${names.join(' và ') || 'hai bạn'}. ` +
+    `Hôm nay là ${WD[now.getUTCDay()]}, ${now.getUTCDate()}/${now.getUTCMonth() + 1}/${now.getUTCFullYear()}, giờ Việt Nam ${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}. ` +
+    `Trả lời bằng tiếng Việt tự nhiên như người Việt nói chuyện, thân thiện, hài hước nhẹ nhàng, ngắn gọn (thường 1–3 câu, không quá khoảng 80 chữ), dùng emoji vừa phải. ` +
+    `Xưng "mình", gọi người hỏi bằng tên (${asker || 'bạn'}). Không viết tiêu đề hay gạch đầu dòng trừ khi được nhờ liệt kê. ` +
+    `Nếu hai bạn trêu nhau hay cãi nhau thì đứng giữa, làm hoà dễ thương. Chuyện nghiêm túc (sức khoẻ, tiền bạc, pháp luật) thì trả lời cẩn thận và khuyên hỏi người có chuyên môn. ` +
+    `Bạn không biết gì về hai bạn ngoài đoạn chat dưới đây, đừng bịa.` + (hist ? `\n\nĐoạn chat gần đây:\n${hist}` : '');
+}
 const kvStore = (env, code) => ({ get: async () => JSON.parse((await env.SOTAY.get('room:' + code)) || 'null'), put: v => env.SOTAY.put('room:' + code, JSON.stringify(v)) });
 const roomStub = (env, code) => env.ROOM.get(env.ROOM.idFromName(code));
 async function readRoom(env, code) { // dùng cho lịch iPhone
@@ -545,6 +572,24 @@ export class Room extends DurableObject {
       const pair = new WebSocketPair(); this.ctx.acceptWebSocket(pair[1]);
       pair[1].serializeAttachment({ dev, chat: url.searchParams.get('chat') === '1', vis: true, at: Date.now() });
       return new Response(null, { status: 101, webSocket: pair[0] });
+    }
+    if (op === 'ai' && req.method === 'POST') { // hỏi AI: trả lời rồi thêm vào chat chung
+      const H = { ...CORS, 'Content-Type': 'application/json' }, bad = (e, st) => new Response(JSON.stringify({ error: e }), { status: st, headers: H });
+      if (!env.AI) return bad('noai', 501);
+      let b; try { b = await req.json(); } catch (e) { return bad('format', 400); }
+      const q = cleanStr(b.q, 400).replace(/(^|\s)@ai\b[:,]?/ig, ' ').trim(), asker = cleanStr(b.name, 40);
+      if (!q) return bad('empty', 400);
+      const day = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10), cnt = (await storage.get('aiCount')) || {};
+      if (cnt.d !== day) { cnt.d = day; cnt.n = 0; }
+      if (cnt.n >= AI_DAILY) return bad('limit', 429);
+      cnt.n++; await storage.put('aiCount', cnt);
+      const text = await askAI(env, [{ role: 'system', content: aiPrompt((await store.get()) || {}, asker) }, { role: 'user', content: `${asker || 'Bạn'}: ${q}` }]);
+      if (!text) return bad('ai', 502);
+      const now = Date.now(), item = Object.assign({ id: 'ai' + now.toString(36) + Math.random().toString(36).slice(2, 6), kind: 'msg', ai: true, dev: 'ai', name: 'AI', note: text.slice(0, 800), at: now, updated: now },
+        b.qid ? { reply: { id: cleanStr(b.qid, 40), name: asker, text: clip(q, 80) } } : {});
+      const room = (await store.get()) || { events: {} }; room.moods = room.moods || {}; // đọc lại sau khi AI trả lời (trong lúc chờ có thể có tin mới)
+      room.moods[item.id] = Object.assign({}, item, { _s: now }); await store.put(room); store.broadcast('');
+      return new Response(JSON.stringify({ item, left: AI_DAILY - cnt.n }), { headers: H });
     }
     if (op === 'arc') { const k = url.pathname.split('/')[3] || '', H = { ...CORS, 'Content-Type': 'application/json' };
       if (!k) { const room = (await store.get()) || {}; return new Response(JSON.stringify({ arcs: room.arcs || [] }), { headers: H }); }
@@ -615,6 +660,11 @@ export default {
       }
       if (req.method === 'DELETE') { delete reg.devices[pm[2]]; await env.SOTAY.put(pkey, JSON.stringify(reg)); return json({ ok: true }); }
       return json({ devices: Object.keys(reg.devices).length });
+    }
+    const rai = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/ai$/);
+    if (rai && req.method === 'POST') {
+      if (!env.ROOM) return json({ error: 'noai' }, 501);
+      return roomStub(env, rai[1]).fetch(`https://room/ai/${rai[1]}`, { method: 'POST', body: await req.text() });
     }
     const rw = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/ws$/);
     if (rw) { // kênh realtime: máy mở app nối thẳng vào phòng

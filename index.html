@@ -551,6 +551,9 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 @keyframes gaway{to{transform:scale(.4) translateY(200px);opacity:0}}
 @keyframes gpop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes gfall{to{transform:translateY(110vh) rotate(360deg)}}
+.aiav{display:inline-grid;place-items:center;background:#e6ecff;font-size:12px;vertical-align:middle}
+.hb.aimsg .bub.msg{background:#eef2ff;color:#2b2f55;border:1.5px dashed #b7c3f3}
+@media (prefers-color-scheme:dark){.hb.aimsg .bub.msg{background:#262a44;color:#e6e9ff;border-color:#4a5490}.aiav{background:#33395c}}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--accent);color:#fff}
@@ -1630,7 +1633,7 @@ function duoCard(){
     h += `<div class="peer"><span class="av q">?</span><div><div class="t">Chưa có tin từ máy kia</div><div class="s">Máy kia mở app bản mới là thấy</div></div></div>`;
   } else {
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
-    const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood' || x.kind === 'gift') && !isMineH(x)).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
+    const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood' || x.kind === 'gift') && !isMineH(x) && !x.ai).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
     const lcText = x => { if (x.kind === 'gift') return '💐 tặng bó hoa' + (x.note ? ` “${esc(x.note)}”` : ''); if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
     const line = lc ? `${lcText(lc)} · ${ago(lc.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
     const un = unreadChat();
@@ -2137,7 +2140,7 @@ function mountMap(){
 function histItem(x, mine, tail = true, head = true){
   const gc = `${tail ? '' : ' cont'}${head ? '' : ' mid'}`;
   const m = x.kind === 'mood' && moodOf(x.v);
-  const who = mine ? '' : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
+  const who = mine ? '' : x.ai ? '<span class="av aiav mini">🤖</span>AI · ' : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
   const rx = Object.values(x.react || {}).filter(Boolean), rxH = rx.length ? `<span class="rx">${rx.join('')}${rx.length > 1 ? `<i>${rx.length}</i>` : ''}</span>` : '';
   const meta = tail || x.pinned ? `<div class="ht">${x.pinned ? '📌 ' : ''}${who}${hm(x.at)}${x._seen ? ` · <b class="seen">${x._seen}</b>` : ''}</div>` : '';
   if (x.kind === 'msg') {
@@ -2231,13 +2234,28 @@ async function sendChatPhotos(){
     } catch (e) { toast('Gửi ảnh lỗi, thử lại nha'); }
   });
 }
+const AI_RE = /(^|\s)@ai\b/i;
+async function askAI(q, qid){ // gõ @AI trong chat → AI trả lời vào chat chung
+  if (!sync.room) return toast('Ghép đôi ở tab Khác để dùng AI nha');
+  if ((sync.sv || 0) < 9) return toast('Cần up worker.js bản mới để dùng AI');
+  state.aiThinking = true; state.histAtEnd = true; patchChat() || render(); chatToEnd();
+  try {
+    const r = await fetch(`${syncBase()}/room/${sync.room}/ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q, qid, name: sync.me || '' }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) toast(j.error === 'limit' ? 'Hôm nay AI nói nhiều quá rồi, mai nói tiếp nha 😴' : j.error === 'noai' ? 'Máy chủ chưa bật AI (cần up wrangler.jsonc mới)' : 'AI đang lag, thử lại nha');
+    else if (j.item && !db.moods.some(x => x.id === j.item.id)) { db.moods = db.moods.concat([j.item]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); save(); }
+  } catch (e) { toast('AI đang lag, thử lại nha'); }
+  state.aiThinking = false; state.histAtEnd = true; patchChat() || render(); chatToEnd();
+}
 async function sendChat(){
   const inp = $('#chatIn'), t = (inp && inp.value || '').trim(); if (!t) return;
   inp.value = ''; logHistory('msg', Object.assign({ note: t.slice(0, 300) }, takeReply())); db.chatSeen = Date.now(); state.histAtEnd = true; save();
   if (!patchChat()) render(); chatToEnd();
   const i2 = $('#chatIn'); if (i2 && document.activeElement !== i2) i2.focus();
   if (!sync.room) return toast('Đã lưu · ghép đôi để gửi cho người ấy');
+  const qx = db.moods[db.moods.length - 1];
   const ok = await syncRoom(); if (!ok) toast('Chưa gửi được, sẽ tự thử lại');
+  if (AI_RE.test(t)) askAI(t, qx && qx.note === t.slice(0, 300) ? qx.id : '');
 }
 function viewHistory(){
   const me = ensureDevice(), myName = norm(sync.me);
@@ -2245,7 +2263,7 @@ function viewHistory(){
   const ids = new Set(db.moods.map(x => x.id));
   const list = db.moods.concat((state.arcItems || []).filter(x => !ids.has(x.id))).sort((a, b) => a.at - b.at);
   db.chatSeen = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
-  const lastPeerAt = Math.max(0, ...list.filter(x => !isMine(x)).map(x => x.at));
+  const lastPeerAt = Math.max(0, ...list.filter(x => !isMine(x) && !x.ai).map(x => x.at));
   if (lastPeerAt > (db.mine.seenAt || 0)) { db.mine.seenAt = lastPeerAt; setTimeout(() => syncRoom(), 300); } // báo "đã xem" cho người kia
   const pins = list.filter(x => x.pinned).sort((a, b) => (b.pinnedAt || 0) - (a.pinnedAt || 0));
   const pinBar = pins.length ? `<button class="pinbar" data-act="pinList"><span class="pi">📌</span><span class="pt"><b>${pins.length > 1 ? pins.length + ' tin đã ghim' : 'Tin đã ghim'}</b><span>${esc(msgShort(pins[0]))}</span></span><span class="chev">›</span></button>` : '';
@@ -2256,7 +2274,7 @@ function viewHistory(){
   const pn = peerName(peerMain());
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const pr = partnerPron(), QA = [['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
+  const pr = partnerPron(), QA = [['aiAsk', '🤖', 'Hỏi AI'], ['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
@@ -2276,12 +2294,14 @@ function viewHistory(){
   shown.forEach((x, i) => {
     const k = keyOf(new Date(x.at)), nx = shown[i + 1], pv = shown[i - 1];
     if (k !== lastDay) { lastDay = k; const dd = diffDays(k, tk); h += `<div class="hday">${dd === 0 ? 'Hôm nay' : dd === 1 ? 'Hôm qua' : fmtLong(k)}</div>`; }
-    const same = (a, b) => a && b && BK.has(a.kind) && BK.has(b.kind) && isMine(a) === isMine(b) && keyOf(new Date(a.at)) === keyOf(new Date(b.at)) && Math.abs(b.at - a.at) < 5 * 60e3;
+    const same = (a, b) => a && b && BK.has(a.kind) && BK.has(b.kind) && isMine(a) === isMine(b) && !!a.ai === !!b.ai && keyOf(new Date(a.at)) === keyOf(new Date(b.at)) && Math.abs(b.at - a.at) < 5 * 60e3;
     const hi = histItem(x, isMine(x), !same(x, nx), !same(pv, x));
-    h += x._arc ? hi.replace(/ data-mid=/g, ' data-arc=') : hi;
+    const hj = x.ai ? hi.replace('<div class="hb ', '<div class="hb aimsg ') : hi;
+    h += x._arc ? hj.replace(/ data-mid=/g, ' data-arc=') : hj;
   });
-  const pm = peerMain(), lastPeer = Math.max(0, ...list.filter(x => !isMine(x)).map(x => x.at));
+  const pm = peerMain(), lastPeer = Math.max(0, ...list.filter(x => !isMine(x) && !x.ai).map(x => x.at));
   state.typingShown = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > lastPeer);
+  if (state.aiThinking) h += `<div class="hb typing aimsg"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht"><span class="av aiav mini">🤖</span>AI đang nghĩ…</div></div>`;
   if (state.typingShown) h += `<div class="hb typing"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht">${esc(peerName(pm))} đang nhập…</div></div>`;
   h += `</div><div id="histEnd"></div>` + composer;
   return h;
@@ -2682,13 +2702,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 8))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 9))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
-      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 8 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 9 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2729,7 +2749,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.6</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.7</p>`;
 }
 
 function viewCycle(){
@@ -3758,7 +3778,7 @@ $('#main').addEventListener('input', e => { // báo "đang nhập…" (tối đa
   if (e.target.id !== 'chatIn' || !sync.room || !e.target.value) return;
   if (Date.now() - typingSent < 3000) return; typingSent = Date.now(); db.mine.typingAt = typingSent; syncRoom();
 });
-const typingCheck = () => { const pm = peerMain(); const show = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > Math.max(0, ...db.moods.filter(x => !isMineH(x)).map(x => x.at)));
+const typingCheck = () => { const pm = peerMain(); const show = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > Math.max(0, ...db.moods.filter(x => !isMineH(x) && !x.ai).map(x => x.at)));
   if (show !== !!state.typingShown) { if (!patchChat()) softRender(); } };
 const wsFresh = () => wsLive() && Date.now() - (sync.roomLast || 0) < 30000; // đang nối realtime → khỏi hỏi liên tục
 setInterval(() => { // trong Chat: hỏi máy chủ mỗi 3 giây (khi chưa có realtime), ẩn "đang nhập…" khi hết hạn
@@ -3850,6 +3870,7 @@ $('#main').addEventListener('click', async e => {
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
     case 'arcMore': loadArc(); break;
+    case 'aiAsk': { state.chatPanel = false; if (!patchChat()) render(); const i = $('#chatIn'); if (i) { if (!AI_RE.test(i.value)) i.value = '@AI ' + i.value; i.focus(); i.setSelectionRange(i.value.length, i.value.length); } break; }
     case 'giftNew': state.chatPanel = false; openGift(); break;
     case 'giftView': { const g = db.moods.find(x => x.id === id); if (g) showGift(Object.assign({}, g, { _replay: true })); break; }
     case 'chatPhoto': state.chatPanel = false; sendChatPhotos(); break;
