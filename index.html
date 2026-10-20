@@ -630,7 +630,7 @@ main.chatmode.wp-night .hist .ht,main.chatmode.wp-photo .hist .ht{color:#fff;tex
 .hb.me .bub.msg{background:var(--mybub,var(--accent));color:#fff}
 :root[data-theme=paper] .hb.me .bub.msg{color:#fff}
 .chatdock{position:sticky;bottom:0;padding:10px 0 12px;background:linear-gradient(to bottom, transparent, var(--bg) 24px)}
-main.chatmode{display:flex;flex-direction:column;padding-bottom:0}
+main.chatmode{display:flex;flex-direction:column;padding-bottom:0;overscroll-behavior-y:none} /* iPhone: không cho nảy (bounce) kéo cả ô nhập lên */
 main.chatmode>*{flex-shrink:0}
 main.chatmode .hist{flex:1 0 auto;justify-content:flex-end;margin-bottom:6px}
 main.chatmode .chatdock{margin:0 -16px;padding:8px 16px 10px;background:var(--bg);border-top:1px solid var(--line);box-shadow:0 -6px 12px -10px rgba(125,35,65,.25)}
@@ -4133,6 +4133,15 @@ $('#main').addEventListener('touchstart', e => { const b = e.target.closest('[da
   sendLp = setTimeout(() => { sendLp = null; sendLpFired = true; try { navigator.vibrate && navigator.vibrate(10); } catch (_) {} openFxPick(true); }, 450); }, { passive: true });
 ['touchend', 'touchcancel', 'touchmove'].forEach(ev => $('#main').addEventListener(ev, () => { clearTimeout(sendLp); sendLp = null; }, { passive: true }));
 $('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-act=chatSend]')) { e.preventDefault(); clearTimeout(sendLp); openFxPick(true); } });
+(() => { // chặn "nảy" ở đầu/cuối Chat trên iPhone (nảy làm ô nhập bị kéo theo)
+  let y0 = 0; const m = $('#main');
+  m.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });
+  m.addEventListener('touchmove', e => {
+    if (!inChatView() || e.target.closest('.stkgrid,.qpanel')) return;
+    const dy = e.touches[0].clientY - y0, top = m.scrollTop <= 0, end = m.scrollTop + m.clientHeight >= m.scrollHeight - 1;
+    if ((end && dy < 0) || (top && dy > 0) || (e.target.closest('.chatdock') && !e.target.closest('input'))) { if (e.cancelable) e.preventDefault(); }
+  }, { passive: false });
+})();
 let typingSent = 0;
 $('#main').addEventListener('input', e => { // báo "đang nhập…" (tối đa mỗi 3 giây 1 lần)
   if (e.target.id !== 'chatIn' || !sync.room || !e.target.value) return;
