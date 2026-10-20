@@ -554,9 +554,57 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .aiav{display:inline-grid;place-items:center;background:#e6ecff;font-size:12px;vertical-align:middle}
 .hb.aimsg .bub.msg{background:#eef2ff;color:#2b2f55;border:1.5px dashed #b7c3f3}
 @media (prefers-color-scheme:dark){.hb.aimsg .bub.msg{background:#262a44;color:#e6e9ff;border-color:#4a5490}.aiav{background:#33395c}}
+.navb{position:absolute;top:4px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:var(--red);color:#fff;font:700 11px/17px -apple-system,sans-serif;font-style:normal;text-align:center}
+nav button{position:relative}
+.sbsrch{position:absolute;right:0;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:var(--accent-soft);font-size:16px;display:grid;place-items:center}
+.sbrow{position:relative}
+.fxlayer{position:fixed;inset:0;z-index:96;pointer-events:none;overflow:hidden}
+.fxrise{position:absolute;bottom:-60px;opacity:0;animation:fxrise 3.4s ease-out forwards}
+@keyframes fxrise{0%{transform:translateY(0) scale(.6);opacity:0}10%{opacity:1}100%{transform:translateY(-118vh) scale(1.1);opacity:.85}}
+.fxfall{position:absolute;top:-60px;animation:fxfall 4.2s linear forwards}
+@keyframes fxfall{to{transform:translateY(118vh) translateX(40px) rotate(300deg)}}
+.fxconf{position:absolute;top:-24px;border-radius:2px;animation:fxconf 3.6s cubic-bezier(.3,.6,.6,1) forwards}
+@keyframes fxconf{to{transform:translateY(115vh) rotate(var(--rot))}}
+.fxspark{position:absolute;opacity:0;animation:fxspark 1.4s ease-out forwards}
+@keyframes fxspark{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1);opacity:0}}
+body.fxshake{animation:fxshake .6s}
+@keyframes fxshake{0%,100%{transform:none}20%{transform:translate(-10px,4px)}40%{transform:translate(9px,-5px)}60%{transform:translate(-7px,3px)}80%{transform:translate(5px,-2px)}}
+.fxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fxgrid button{background:var(--card);border:2px solid transparent;border-radius:14px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;font-size:13px;color:var(--text)}
+.fxgrid button span{font-size:30px;line-height:1.1}
+.fxgrid button.on{border-color:var(--accent);background:var(--accent-soft)}
+.chatbar button.fxon{box-shadow:0 0 0 3px #ffd166,0 0 16px #ffb703}
+.chatbar button[data-act=chatSend]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.fxre{background:none;padding:0 2px;font-size:12px;line-height:1}
+.bub.msg.recalled,.hb.me .bub.msg.recalled{background:transparent;color:var(--sub);border:1.5px dashed var(--sub);box-shadow:none;font-style:italic}
+.editbar{border-left-color:var(--orange)}
+main.chatmode.wp-night .bub.msg.recalled,main.chatmode.wp-photo .bub.msg.recalled{color:#ece8ff;border-color:#b9b2e6;background:rgba(0,0,0,.18)}
+.csq{width:100%;box-sizing:border-box;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 14px;font-size:16px;color:var(--text);margin-bottom:10px}
+.csr{display:flex;flex-direction:column;gap:6px;max-height:56vh;overflow:auto}
+.csrow{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:var(--card);border-radius:12px;padding:10px 12px;gap:2px;color:var(--text)}
+.csw{font-size:12px;color:var(--sub);font-weight:600}
+.cst{font-size:15px;line-height:1.35;word-break:break-word}
+.cst mark{background:#ffe08a;color:#3b2a00;border-radius:3px;padding:0 1px}
+.bubrow{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 14px}
+.bubrow button{width:36px;height:36px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1px var(--line)}
+.bubrow button.on{box-shadow:0 0 0 3px var(--text)}
+.wprow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 14px}
+.wprow button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--text);background:none;border:2px solid transparent;border-radius:12px;padding:4px}
+.wprow button.on{border-color:var(--accent)}
+.wpsw{width:100%;aspect-ratio:3/4;border-radius:8px;box-shadow:0 0 0 1px var(--line);display:grid;place-items:center;font-size:22px}
+.wps-dots{background:var(--bg) radial-gradient(var(--dot,#e7c3cf) 1px,transparent 1.3px) 0 0/10px 10px}
+.wps-plain,main.chatmode.wp-plain{background:var(--bg)}
+.wps-pink,main.chatmode.wp-pink{background:linear-gradient(180deg,#fff0f5,#ffd6e5)}
+.wps-hearts,main.chatmode.wp-hearts{background:#fff5f8 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M12 20s-6-4-8-7.4C2.6 9.8 4.3 7 7.2 7c1.7 0 3 1 4.8 2.6C13.8 8 15.1 7 16.8 7c2.9 0 4.6 2.8 3.2 5.6C18 16 12 20 12 20z' fill='%23ff8fb1' fill-opacity='.3'/%3E%3Cpath d='M36 44s-4-2.7-5.4-5c-.9-1.9.2-3.8 2.2-3.8 1.1 0 2 .7 3.2 1.8 1.2-1.1 2.1-1.8 3.2-1.8 2 0 3.1 1.9 2.2 3.8C40 41.3 36 44 36 44z' fill='%23ff8fb1' fill-opacity='.22'/%3E%3C/svg%3E") 0 0/48px 48px}
+.wps-grid,main.chatmode.wp-grid{background-color:#fffdf7;background-image:linear-gradient(#e6ecf6 1px,transparent 1px),linear-gradient(90deg,#e6ecf6 1px,transparent 1px);background-size:22px 22px}
+.wps-night,main.chatmode.wp-night{background:radial-gradient(#ffffff99 1px,transparent 1.6px) 0 0/34px 34px,radial-gradient(#ffffff55 1px,transparent 1.6px) 17px 17px/34px 34px,linear-gradient(180deg,#1f1b3d,#3a2d5c)}
+.wps-photo{background:var(--card)}
+main.chatmode.wp-photo{--wpov:rgba(255,255,255,.3);background-size:cover;background-position:center}
+main.chatmode.wp-night .hist .ht,main.chatmode.wp-photo .hist .ht{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+@media (prefers-color-scheme:dark){.wps-pink,main.chatmode.wp-pink{background:linear-gradient(180deg,#2a1820,#3a1f2b)}.wps-hearts,main.chatmode.wp-hearts{background-color:#1f1418}.wps-grid,main.chatmode.wp-grid{background-color:#16181d;background-image:linear-gradient(#262b35 1px,transparent 1px),linear-gradient(90deg,#262b35 1px,transparent 1px)}main.chatmode.wp-photo{--wpov:rgba(0,0,0,.45)}}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
-.hb.me .bub.msg{background:var(--accent);color:#fff}
+.hb.me .bub.msg{background:var(--mybub,var(--accent));color:#fff}
 :root[data-theme=paper] .hb.me .bub.msg{color:#fff}
 .chatdock{position:sticky;bottom:0;padding:10px 0 12px;background:linear-gradient(to bottom, transparent, var(--bg) 24px)}
 main.chatmode{display:flex;flex-direction:column;padding-bottom:0}
@@ -785,6 +833,7 @@ details.grp .gsub{font-family:inherit;font-size:14px;color:var(--sub)}
 <nav id="nav">
   <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Hôm nay</button>
   <button data-tab="health"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.6 4.4 6.2 8 6.2 11.1a6.2 6.2 0 0 1-12.4 0c0-3.1 2.6-6.7 6.2-11.1z"/><path d="M12 11v6M9 14h6"/></svg>Sức khỏe</button>
+  <button data-tab="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10.5H9.5L5 19.5V16H4z"/><path d="M12 13.2s-3-1.9-3-4a1.6 1.6 0 0 1 3-.9 1.6 1.6 0 0 1 3 .9c0 2.1-3 4-3 4z" fill="currentColor" stroke="none"/></svg>Chat<i class="navb" id="navChatB"></i></button>
   <button data-tab="us"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 20a5.5 5.5 0 0 1 9.5-3.8A5.5 5.5 0 0 1 21.5 20"/></svg>Hai đứa</button>
   <button data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg>Khác</button>
 </nav>
@@ -1184,6 +1233,8 @@ function roomBody(full = true){ // full=false: chỉ gửi những mục sửa t
   for (const [id, ts] of Object.entries(db.us.delSp)) if (!specials[id]) specials[id] = { id, deleted: true, updated: ts };
   const meta = db.us.startAt ? { start: { v: db.us.start || '', updated: db.us.startAt } } : {};
   if (db.us.aiAt) meta.ai = { v: db.us.ai || {}, updated: db.us.aiAt };
+  if (db.us.chatStAt) meta.chat = { v: db.us.chatSt || {}, updated: db.us.chatStAt };
+  if (db.us.nickAt) meta.nick = { v: db.us.nick || {}, updated: db.us.nickAt };
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
   const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
   const mark = full ? 0 : (state.upMark || 0) - 5000;
@@ -1230,6 +1281,11 @@ function applyRoom(merged){
   }
   const st = merged.meta && merged.meta.start;
   if (st && (+st.updated || 0) >= (db.us.startAt || 0)) { db.us.start = st.v || ''; db.us.startAt = st.updated; }
+  const mc = merged.meta && merged.meta.chat;
+  if (mc && mc.v && typeof mc.v === 'object' && (+mc.updated || 0) > (db.us.chatStAt || 0)) { const v = mc.v;
+    db.us.chatSt = { bg: WPS.some(w => w[0] === v.bg) ? v.bg : 'dots', bub: /^#[0-9a-f]{6}$/i.test(v.bub || '') ? v.bub : '', photo: /^[A-Za-z0-9_-]{1,40}$/.test(v.photo || '') ? v.photo : '' }; db.us.chatStAt = +mc.updated; }
+  const mn = merged.meta && merged.meta.nick;
+  if (mn && mn.v && typeof mn.v === 'object' && (+mn.updated || 0) > (db.us.nickAt || 0)) { const o = {}; for (const [k, v] of Object.entries(mn.v).slice(0, 8)) if (typeof v === 'string') o[String(k).slice(0, 40)] = v.slice(0, 24); db.us.nick = o; db.us.nickAt = +mn.updated; }
   const ai = merged.meta && merged.meta.ai;
   if (ai && ai.v && (+ai.updated || 0) > (db.us.aiAt || 0)) { db.us.ai = { name: String(ai.v.name || AI_DEF).slice(0, 40), emo: String(ai.v.emo || '💞').slice(0, 8) }; db.us.aiAt = +ai.updated; }
   if (merged.people) { // gộp theo từng mục, giữ cái mới hơn (dữ liệu nhận qua thông báo có thể mới hơn máy chủ)
@@ -1257,7 +1313,7 @@ function applyRoom(merged){
       for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
       if (c === 'moods') for (const x of db.moods) if (!merged.moods[x.id] && Date.now() - x.at < 5 * 60000) arr.push(x); // vừa nhận qua thông báo
     }
-    if (c === 'moods') setTimeout(() => { playIncomingTouch(db.moods); checkGifts(); }, 0);
+    if (c === 'moods') setTimeout(() => { playIncomingTouch(db.moods); playIncomingFx(db.moods); checkGifts(); }, 0);
     db[c] = c === 'moods' ? arr.sort((a, b) => a.at - b.at).slice(-HIST_MAX) : arr; db.del[c] = del;
   }
   if (JSON.stringify([db.events, db.deletedEvents, db.us, db.peers, db.dates, db.bucket, db.jar, db.moods, db.foods, db.letters, db.coupons, db.days]) !== before) {
@@ -1637,7 +1693,7 @@ function duoCard(){
   } else {
     const m = p.mood && moodOf(p.mood.v), fresh = m && Date.now() - p.mood.at < 36 * 3600e3;
     const lc = db.moods.filter(x => (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'mood' || x.kind === 'gift') && !isMineH(x) && !x.ai).sort((a, b) => b.at - a.at)[0]; // tin cuối của người kia
-    const lcText = x => { if (x.kind === 'gift') return '💐 tặng bó hoa' + (x.note ? ` “${esc(x.note)}”` : ''); if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
+    const lcText = x => { if (x.recalled) return 'đã thu hồi một tin nhắn'; if (x.kind === 'gift') return '💐 tặng bó hoa' + (x.note ? ` “${esc(x.note)}”` : ''); if (x.kind === 'msg') return `“${esc(x.note)}”`; if (x.kind === 'touch') return esc(x.text || 'gửi tim'); const mm = moodOf(x.v); return `${mm ? mm.emo + ' ' + mm.l : 'cảm xúc'}${x.note ? ` “${esc(x.note)}”` : ''}`; };
     const line = lc ? `${lcText(lc)} · ${ago(lc.at)}` : fresh ? ago(p.mood.at) : 'mở app ' + ago(p.at || Date.now());
     const un = unreadChat();
     h += `<button class="peer peerbtn" data-act="goHist">${avSpan(av, pn)}<span class="pm"><span class="t">${fresh ? `${esc(pn)} ${esc(p.mood.label || m.label(''))} <i class="mf">${m.svg}</i>` : `${esc(pn)}`}</span><span class="s">${line}</span></span><span class="chatpill">Chat${un ? ` <b>${un}</b>` : ''} ›</span></button>`;
@@ -2143,11 +2199,12 @@ function mountMap(){
 function histItem(x, mine, tail = true, head = true){
   const gc = `${tail ? '' : ' cont'}${head ? '' : ' mid'}`;
   const m = x.kind === 'mood' && moodOf(x.v);
-  const who = mine ? '' : x.ai ? `<span class="av aiav mini">${aiEmo()}</span>${esc(aiName())} · ` : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
+  const who = mine ? '' : x.ai ? `<span class="av aiav mini">${aiEmo()}</span>${esc(aiName())} · ` : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(dispName(x.name) || 'Người ấy') + ' · ';
   const rx = Object.values(x.react || {}).filter(Boolean), rxH = rx.length ? `<span class="rx">${rx.join('')}${rx.length > 1 ? `<i>${rx.length}</i>` : ''}</span>` : '';
-  const meta = tail || x.pinned ? `<div class="ht">${x.pinned ? '📌 ' : ''}${who}${hm(x.at)}${x._seen ? ` · <b class="seen">${x._seen}</b>` : ''}</div>` : '';
+  const meta = tail || x.pinned ? `<div class="ht">${x.pinned ? '📌 ' : ''}${who}${hm(x.at)}${x.edited && !x.recalled ? ' · đã sửa' : ''}${fxOf(x) ? ` · <button class="fxre" data-act="fxReplay" data-id="${x.id}" aria-label="Xem lại hiệu ứng">✨</button>` : ''}${x._seen ? ` · <b class="seen">${x._seen}</b>` : ''}</div>` : '';
+  if (x.kind === 'msg' && x.recalled) return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub msg recalled"><div class="bn">↩️ ${mine ? 'Bạn' : esc(dispName(x.name) || 'Người ấy')} đã thu hồi một tin nhắn</div></div>${meta}</div>`;
   if (x.kind === 'msg') {
-    const quote = x.reply ? `<button class="quote" data-act="jumpTo" data-id="${esc(x.reply.id)}"><b>↩ ${esc(x.reply.name || '')}</b><span>${esc(x.reply.text || '')}</span></button>` : '';
+    const quote = x.reply ? `<button class="quote" data-act="jumpTo" data-id="${esc(x.reply.id)}"><b>↩ ${esc(dispName(x.reply.name || ''))}</b><span>${esc(x.reply.text || '')}</span></button>` : '';
     const ps = Array.isArray(x.photos) ? x.photos : [], ph = ps.length && sync.room ? `<span class="cph n${Math.min(ps.length, 4)}">${ps.slice(0, 4).map((pid, i) => `<span class="cpi"><img src="${photoUrl(pid)}" alt="" loading="lazy" data-view="c${x.id}">${i === 3 && ps.length > 4 ? `<i>+${ps.length - 4}</i>` : ''}</span>`).join('')}</span>` : '';
     return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub msg ${ph && !x.note ? 'onlyph' : ''}">${quote}${ph}${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div>${rxH}${meta}</div>`;
   }
@@ -2190,7 +2247,7 @@ function openJarQuick(){
     setTimeout(() => $('#jqIn').focus(), 300);
   });
 }
-function msgShort(x){ if (!x) return ''; if (x.kind === 'gift') return '💐 Bó hoa' + (x.note ? ' · ' + x.note : ''); if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
+function msgShort(x){ if (!x) return ''; if (x.recalled) return '↩️ Tin nhắn đã thu hồi'; if (x.kind === 'gift') return '💐 Bó hoa' + (x.note ? ' · ' + x.note : ''); if (x.kind === 'msg') return x.note || (x.photos && x.photos.length ? '📷 Ảnh' : ''); if (x.kind === 'touch') return x.text || '💗'; const mm = moodOf(x.v); return (mm ? mm.emo + ' ' + mm.l : '') + (x.note ? ' · ' + x.note : ''); }
 function takeReply(){ const r = state.replyTo && db.moods.find(x => x.id === state.replyTo); state.replyTo = null; return r ? { reply: { id: r.id, name: isMineH(r) ? (sync.me || 'Mình') : (r.name || 'Người ấy'), text: msgShort(r).slice(0, 80) } } : {}; }
 function setReply(id){ if (!db.moods.some(x => x.id === id)) return; state.replyTo = id; state.histAtEnd = true; render(); const i = $('#chatIn'); if (i) i.focus(); }
 function updateMsg(id, patch){ const x = db.moods.find(m => m.id === id); if (!x) return null; const n = Object.assign({}, x, patch, { updated: Date.now() }); db.moods = db.moods.map(m => m.id === id ? n : m); return n; }
@@ -2216,14 +2273,16 @@ function openPinList(){
   });
 }
 function openMsgMenu(id){
-  const x = db.moods.find(m => m.id === id); if (!x) return;
+  const x = db.moods.find(m => m.id === id); if (!x || x.recalled) return;
   const me = sync.me || 'Mình', cur = (x.react || {})[me];
   openSheet('Tin nhắn', `<div class="mmprev">${esc(msgShort(x)) || '…'}</div>
     <div class="emorow" id="mmEmo">${['❤️', '😂', '🥰', '😢', '😮', '👍'].map(e => `<button type="button" data-e="${e}" class="${cur === e ? 'on' : ''}">${e}</button>`).join('')}</div>
-    <button class="btn" id="mmReply">↩️ Trả lời tin này</button><button class="btn ghost" id="mmPin">${x.pinned ? '📌 Bỏ ghim' : '📌 Ghim tin này'}</button>${x.note ? '<button class="btn ghost" id="mmCopy">📋 Sao chép</button>' : ''}`, () => {
+    <button class="btn" id="mmReply">↩️ Trả lời tin này</button><button class="btn ghost" id="mmPin">${x.pinned ? '📌 Bỏ ghim' : '📌 Ghim tin này'}</button>${x.note ? '<button class="btn ghost" id="mmCopy">📋 Sao chép</button>' : ''}${canEdit(x) ? (x.note ? '<button class="btn ghost" id="mmEdit">✏️ Sửa tin</button>' : '') + '<button class="btn ghost" id="mmRecall" style="color:var(--red)">↩️ Thu hồi</button>' : ''}`, () => {
     $('#mmEmo').onclick = e => { const b = e.target.closest('[data-e]'); if (!b) return; closeSheet(); reactMsg(id, b.dataset.e); };
     $('#mmReply').onclick = () => { closeSheet(); setTimeout(() => setReply(id), 200); };
     $('#mmPin').onclick = () => { closeSheet(); pinMsg(id); };
+    if ($('#mmEdit')) $('#mmEdit').onclick = () => { closeSheet(); setTimeout(() => startEdit(id), 200); };
+    if ($('#mmRecall')) $('#mmRecall').onclick = () => { closeSheet(); recallMsg(id); };
     if ($('#mmCopy')) $('#mmCopy').onclick = async () => { try { await navigator.clipboard.writeText(x.note); toast('Đã sao chép'); } catch (e) {} closeSheet(); };
   });
 }
@@ -2270,7 +2329,14 @@ async function askAI(q, qid){ // gõ @AI trong chat → AI trả lời vào chat
 }
 async function sendChat(){
   const inp = $('#chatIn'), t = (inp && inp.value || '').trim(); if (!t) return;
-  inp.value = ''; logHistory('msg', Object.assign({ note: t.slice(0, 300) }, takeReply())); db.chatSeen = Date.now(); state.histAtEnd = true; save();
+  if (state.editId) { // đang sửa tin
+    const id = state.editId, x = db.moods.find(m => m.id === id); state.editId = null; inp.value = '';
+    if (!x || x.recalled || Date.now() - x.at > 15 * 60e3) { toast('Hết thời gian sửa rồi'); return patchChat() || render(); }
+    if (t.slice(0, 300) !== x.note) { db.moods = db.moods.map(m => m.id === id ? Object.assign({}, m, { note: t.slice(0, 300), edited: true, updated: Date.now() }) : m); save(); }
+    render(); if (sync.room) syncRoom(); return;
+  }
+  const fx = state.fxPick || ''; state.fxPick = ''; fxUi();
+  inp.value = ''; logHistory('msg', Object.assign({ note: t.slice(0, 300) }, takeReply(), fx ? { fx } : {})); setTimeout(() => playFx(fx || fxAuto(t)), 120); db.chatSeen = Date.now(); state.histAtEnd = true; save();
   if (!patchChat()) render(); chatToEnd();
   const i2 = $('#chatIn'); if (i2 && document.activeElement !== i2) i2.focus();
   if (!sync.room) return toast('Đã lưu · ghép đôi để gửi cho người ấy');
@@ -2288,22 +2354,24 @@ function viewHistory(){
   if (lastPeerAt > (db.mine.seenAt || 0)) { db.mine.seenAt = lastPeerAt; setTimeout(() => syncRoom(), 300); } // báo "đã xem" cho người kia
   const pins = list.filter(x => x.pinned).sort((a, b) => (b.pinnedAt || 0) - (a.pinnedAt || 0));
   const pinBar = pins.length ? `<button class="pinbar" data-act="pinList"><span class="pi">📌</span><span class="pt"><b>${pins.length > 1 ? pins.length + ' tin đã ghim' : 'Tin đã ghim'}</b><span>${esc(msgShort(pins[0]))}</span></span><span class="chev">›</span></button>` : '';
-  let h = subBack(`${avSpan(norm(peerName(peerMain())) === norm(db.love.nameFrom) ? 'h' : 'q', peerName(peerMain()), 'mini')}${esc(peerName(peerMain()))}`, pinBar);
+  let h = subBack(`${avSpan(norm(peerName(peerMain())) === norm(db.love.nameFrom) ? 'h' : 'q', peerName(peerMain()), 'mini')}${esc(dispName(peerName(peerMain())))}`, pinBar).replace('</div>', '<button class="sbsrch" data-act="chatSearch" aria-label="Tìm trong chat">🔍</button></div>');
+  if (!state.back) h = h.replace(/<button class="backbtn"[^>]*>[^<]*<\/button>/, '');
   // 7 ngày qua: mặt cuối cùng mỗi ngày của từng người
   const tk = todayKey(), days = Array.from({ length: 7 }, (_, i) => addDays(tk, i - 6));
   const lastOn = (k, mine) => { const xs = list.filter(x => x.kind === 'mood' && keyOf(new Date(x.at)) === k && isMine(x) === mine); return xs.length ? moodOf(xs[xs.length - 1].v) : null; };
-  const pn = peerName(peerMain());
+  const pn = dispName(peerName(peerMain()));
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const pr = partnerPron(), QA = [['aiAsk', aiEmo(), aiName().length > 12 ? 'Hỏi trợ lý' : 'Hỏi ' + aiName()], ['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
+  const pr = partnerPron(), QA = [['fxPick', '✨', 'Hiệu ứng'], ['chatSearch', '🔍', 'Tìm tin'], ['chatStyle', '🎨', 'Màu & biệt danh'], ['aiAsk', aiEmo(), aiName().length > 12 ? 'Hỏi trợ lý' : 'Hỏi ' + aiName()], ['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
     <div class="qlab">Bạn AI <button class="linkbtn" data-act="aiSetup" style="font-size:12px;float:right">✏️ Đổi tên</button></div>
     <div class="qlab">Nhắn nhanh <button class="linkbtn" data-act="quickEdit" style="font-size:12px;float:right">✏️ Sửa</button></div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
   const rpx = state.replyTo && db.moods.find(x => x.id === state.replyTo);
-  const replyBar = rpx ? `<div class="replybar"><span class="rb">↩ Trả lời <b>${esc(isMineH(rpx) ? 'chính mình' : (rpx.name || 'Người ấy'))}</b><span>${esc(msgShort(rpx))}</span></span><button data-act="replyCancel" aria-label="Bỏ trả lời">×</button></div>` : '';
-  const composer = `<div class="chatdock">${panel}${replyBar}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><button class="cam" data-act="chatPhoto" aria-label="Gửi ảnh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
+  const exm = state.editId && db.moods.find(x => x.id === state.editId);
+  const replyBar = exm ? `<div class="replybar editbar"><span class="rb">✏️ <b>Đang sửa tin</b><span>${esc(msgShort(exm))}</span></span><button data-act="editCancel" aria-label="Huỷ sửa">×</button></div>` : rpx ? `<div class="replybar"><span class="rb">↩ Trả lời <b>${esc(isMineH(rpx) ? 'chính mình' : (rpx.name || 'Người ấy'))}</b><span>${esc(msgShort(rpx))}</span></span><button data-act="replyCancel" aria-label="Bỏ trả lời">×</button></div>` : '';
+  const composer = `<div class="chatdock">${panel}${replyBar}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><button class="cam" data-act="chatPhoto" aria-label="Gửi ảnh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi (giữ để chọn hiệu ứng)" class="${state.fxPick ? 'fxon' : ''}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
   if (!list.length) return h + `<div class="hist"><div class="chatempty">💌<br>Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
   let shown = state.histAll ? list : list.slice(-60);
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
@@ -2324,7 +2392,7 @@ function viewHistory(){
   const pm = peerMain(), lastPeer = Math.max(0, ...list.filter(x => !isMine(x) && !x.ai).map(x => x.at));
   state.typingShown = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > lastPeer);
   if (state.aiThinking) h += `<div class="hb typing aimsg"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht"><span class="av aiav mini">${aiEmo()}</span>${esc(aiName())} đang nghĩ…</div></div>`;
-  if (state.typingShown) h += `<div class="hb typing"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht">${esc(peerName(pm))} đang nhập…</div></div>`;
+  if (state.typingShown) h += `<div class="hb typing"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht">${esc(dispName(peerName(pm)))} đang nhập…</div></div>`;
   h += `</div><div id="histEnd"></div>` + composer;
   return h;
 }
@@ -2724,13 +2792,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 9))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 10))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
-      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 9 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 10 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2771,7 +2839,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.8</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 7.0</p>`;
 }
 
 function viewCycle(){
@@ -2885,15 +2953,150 @@ async function loadArc(){ // tải thêm một phần chat cũ (mới nhất tr�
   const next = arcLeft().pop(); if (!next || state.arcLoading || !sync.room) return;
   state.arcLoading = true; patchChat() || render();
   try {
-    const r = await fetch(`${syncBase()}/room/${sync.room}/arc/${next.k}`); if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    state.arcItems = (state.arcItems || []).concat((j.items || []).map(x => Object.assign({}, x, { _arc: 1 })));
-    state.arcLoaded = Object.assign({}, state.arcLoaded, { [next.k]: 1 }); state.histAll = true;
+    await fetchArcPart(next); state.histAll = true;
   } catch (e) { toast('Chưa tải được tin cũ, thử lại nha'); }
   state.arcLoading = false;
   const m = $('#main'), h0 = m.scrollHeight, t0 = m.scrollTop;
   patchChat() || render(); m.scrollTop = t0 + (m.scrollHeight - h0);
 }
+/* ---------- chat: hiệu ứng, sửa/thu hồi, tìm kiếm, giao diện ---------- */
+const FX = [['hearts', '💕', 'Mưa tim'], ['fireworks', '🎆', 'Pháo hoa'], ['confetti', '🎉', 'Giấy màu'], ['petals', '🌸', 'Hoa rơi'], ['shake', '📳', 'Rung']];
+const fxAuto = t => { t = String(t || '').toLowerCase();
+  if (/chúc mừng|sinh nhật|happy birthday|\bhpbd\b|congrat/.test(t)) return 'fireworks';
+  if (/nhớ (anh|em|quá|lắm|nhiều)|miss (you|u)\b|yêu (anh|em)|thương (anh|em)|love (you|u)\b/.test(t)) return 'hearts';
+  if (/hoan hô|tuyệt vời quá|đậu rồi|\byeah+\b/.test(t)) return 'confetti';
+  return ''; };
+const fxOf = x => x && x.kind === 'msg' && !x.recalled && !x.ai ? (FX.some(f => f[0] === x.fx) ? x.fx : fxAuto(x.note)) : '';
+let fxBusy = 0, sendLp = null, sendLpFired = false;
+function playFx(kind){
+  if (!kind || Date.now() - fxBusy < 800) return; fxBusy = Date.now();
+  const L = document.createElement('div'); L.className = 'fxlayer'; document.body.appendChild(L);
+  const R = Math.random, add = (cls, txt, css) => { const s = document.createElement('span'); s.className = cls; if (txt) s.textContent = txt;
+    for (const [k, v] of Object.entries(css)) k.startsWith('--') ? s.style.setProperty(k, v) : (s.style[k] = v); L.appendChild(s); };
+  if (kind === 'hearts') for (let i = 0; i < 34; i++) add('fxrise', ['💗', '💖', '💕', '💞', '🩷', '❤️'][i % 6], { left: R() * 96 + 'vw', fontSize: (18 + R() * 26) + 'px', animationDelay: R() * 1.4 + 's' });
+  if (kind === 'petals') for (let i = 0; i < 34; i++) add('fxfall', ['🌸', '🌷', '🌺', '💮'][i % 4], { left: R() * 96 + 'vw', fontSize: (16 + R() * 22) + 'px', animationDelay: R() * 1.6 + 's' });
+  if (kind === 'confetti') { const C = ['#ff6f9b', '#ffd166', '#06d6a0', '#4cc9f0', '#b388eb', '#ff9a62'];
+    for (let i = 0; i < 80; i++) add('fxconf', '', { left: R() * 100 + 'vw', background: C[i % 6], animationDelay: R() * 1.2 + 's', width: (6 + R() * 6) + 'px', height: (8 + R() * 8) + 'px', '--rot': (R() * 720 - 360) + 'deg' }); }
+  if (kind === 'fireworks') for (let b = 0; b < 5; b++) { const cx = 15 + R() * 70, cy = 15 + R() * 45, d = b * 0.45;
+    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = 70 + R() * 60; add('fxspark', ['✨', '💥', '🎆', '⭐'][i % 4], { left: cx + 'vw', top: cy + 'vh', animationDelay: d + 's', '--dx': Math.cos(a) * r + 'px', '--dy': Math.sin(a) * r + 'px', fontSize: (14 + R() * 12) + 'px' }); } }
+  if (kind === 'shake') { const b = document.body; b.classList.remove('fxshake'); void b.offsetWidth; b.classList.add('fxshake'); setTimeout(() => b.classList.remove('fxshake'), 700);
+    for (let i = 0; i < 6; i++) add('fxspark', '💥', { left: (20 + R() * 60) + 'vw', top: (20 + R() * 50) + 'vh', '--dx': '0px', '--dy': '-30px', fontSize: '34px', animationDelay: (i * 0.08) + 's' }); }
+  try { navigator.vibrate && navigator.vibrate(kind === 'shake' ? [60, 40, 60] : 15); } catch (e) {}
+  setTimeout(() => L.remove(), 5200);
+}
+function playIncomingFx(items){ // tin có hiệu ứng từ người kia → chạy 1 lần
+  if (document.hidden) return;
+  const seen = +(db.fxSeen || 0);
+  const fresh = (items || []).filter(x => x.kind === 'msg' && !isMineH(x) && x.at > seen && Date.now() - x.at < 30 * 60e3 && fxOf(x)).sort((a, b) => a.at - b.at);
+  if (!fresh.length) return;
+  const x = fresh[fresh.length - 1]; db.fxSeen = x.at; try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  setTimeout(() => playFx(fxOf(x)), 250);
+}
+function fxUi(){ const b = document.querySelector('[data-act=chatSend]'); if (b) b.classList.toggle('fxon', !!state.fxPick); }
+function openFxPick(sendNow){
+  const opts = FX.concat(state.fxPick ? [['', '🚫', 'Không hiệu ứng']] : []);
+  openSheet('Gửi kèm hiệu ứng ✨', `<div class="fxgrid">${opts.map(([k, e, l]) => `<button type="button" data-fx="${k}" class="${state.fxPick === k && k ? 'on' : ''}"><span>${e}</span>${l}</button>`).join('')}</div>
+    <p class="subtitle" style="margin:10px 0 0">Mẹo: <b>giữ nút gửi</b> để chọn nhanh. Gõ "nhớ em", "yêu anh", "chúc mừng"… cũng tự có hiệu ứng.</p>`, () => {
+    document.querySelector('.fxgrid').onclick = e => { const b = e.target.closest('[data-fx]'); if (!b) return;
+      state.fxPick = b.dataset.fx; closeSheet(); fxUi();
+      const i = $('#chatIn');
+      if (sendNow && i && i.value.trim()) sendChat();
+      else { if (state.fxPick) { playFx(state.fxPick); toast('Tin tiếp theo sẽ có hiệu ứng ✨'); } setTimeout(() => { const j = $('#chatIn'); if (j) j.focus(); }, 250); } };
+  });
+}
+// sửa / thu hồi (trong 10 phút)
+const canEdit = x => !!x && x.kind === 'msg' && isMineH(x) && !x.recalled && !x.ai && Date.now() - x.at < 10 * 60e3;
+function recallMsg(id){
+  const x = db.moods.find(m => m.id === id); if (!canEdit(x)) return toast('Chỉ thu hồi được trong 10 phút');
+  db.moods = db.moods.map(m => m.id === id ? Object.assign({}, m, { recalled: true, note: '', photos: [], fx: '', pinned: false, updated: Date.now() }) : m);
+  if (state.editId === id) state.editId = null;
+  save(); patchChat() || render(); toast('Đã thu hồi'); if (sync.room) syncRoom();
+}
+function startEdit(id){
+  const x = db.moods.find(m => m.id === id); if (!canEdit(x) || !x.note) return toast('Chỉ sửa được trong 10 phút');
+  state.editId = id; state.replyTo = null; render();
+  const i = $('#chatIn'); if (i) { i.value = x.note; i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+// tìm kiếm (không cần gõ dấu)
+const foldVN = t => String(t || '').normalize('NFC').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+const searchText = x => (x.kind === 'msg' ? (x.note || '') : msgShort(x) || '').normalize('NFC');
+function hlSnip(t, s){
+  const i = foldVN(t).indexOf(s); if (i < 0) return esc(t.slice(0, 90));
+  const a = Math.max(0, i - 30), b = Math.min(t.length, i + s.length + 60);
+  return (a ? '…' : '') + esc(t.slice(a, i)) + '<mark>' + esc(t.slice(i, i + s.length)) + '</mark>' + esc(t.slice(i + s.length, b)) + (b < t.length ? '…' : '');
+}
+async function fetchArcPart(a){
+  const r = await fetch(`${syncBase()}/room/${sync.room}/arc/${a.k}`); if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  state.arcItems = (state.arcItems || []).concat((j.items || []).map(x => Object.assign({}, x, { _arc: 1 })));
+  state.arcLoaded = Object.assign({}, state.arcLoaded, { [a.k]: 1 });
+}
+function jumpToMsg(id){
+  state.histAll = true; state.histScrolled = true; state.histAtEnd = false;
+  if (!inChatView()) { state.back = state.back || state.tab; state.tab = 'us'; state.usp = 'moods'; }
+  render();
+  setTimeout(() => { const el = document.querySelector(`[data-mid="${id}"],[data-arc="${id}"]`);
+    if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); } }, 200);
+}
+function openChatSearch(){
+  openSheet('Tìm trong chat 🔍', `<input id="csQ" class="csq" placeholder="Gõ chữ cần tìm…" autocomplete="off" enterkeyhint="search">
+    <div id="csR" class="csr"><p class="subtitle">Tìm trong tin nhắn, lời chúc, cảm xúc… không cần gõ dấu. Tìm được cả tin cũ trong kho.</p></div>`, () => {
+    let tm = null, run = 0; const q = $('#csQ'); setTimeout(() => q.focus(), 50);
+    const go = async () => {
+      const my = ++run, s = foldVN(q.value.trim()); if (!$('#csR')) return;
+      if (s.length < 2) { $('#csR').innerHTML = '<p class="subtitle">Gõ ít nhất 2 chữ nha</p>'; return; }
+      if (arcLeft().length && sync.room) { $('#csR').innerHTML = '<p class="subtitle">Đang tải tin cũ để tìm…</p>'; try { for (const a of arcLeft().reverse()) await fetchArcPart(a); } catch (e) {} if (my !== run || !$('#csR')) return; }
+      const ids = new Set(db.moods.map(x => x.id)), all = db.moods.concat((state.arcItems || []).filter(x => !ids.has(x.id)));
+      const hits = all.filter(x => !x.recalled && foldVN(searchText(x)).includes(s)).sort((a, b) => b.at - a.at).slice(0, 60);
+      $('#csR').innerHTML = hits.length ? `<p class="subtitle" style="margin:0 0 4px">${hits.length >= 60 ? 'Hơn 60' : hits.length} kết quả</p>` + hits.map(x => `<button class="csrow" data-cs="${x.id}"><span class="csw">${x.ai ? aiEmo() + ' ' + esc(aiName()) : esc(isMineH(x) ? (sync.me || 'Mình') : dispName(x.name || 'Người ấy'))} · ${fmtLong(keyOf(new Date(x.at)))} ${hm(x.at)}</span><span class="cst">${hlSnip(searchText(x), s)}</span></button>`).join('')
+        : '<p class="subtitle">Không thấy tin nào 🥲</p>';
+    };
+    q.oninput = () => { clearTimeout(tm); tm = setTimeout(go, 200); };
+    $('#csR').onclick = e => { const b = e.target.closest('[data-cs]'); if (!b) return; closeSheet(); setTimeout(() => jumpToMsg(b.dataset.cs), 150); };
+  });
+}
+// giao diện chat chung: màu bong bóng, hình nền, biệt danh (đồng bộ 2 máy)
+const BUBS = ['', '#3b82f6', '#8b5cf6', '#0d9488', '#16a34a', '#f97316', '#e11d48', '#334155'];
+const WPS = [['dots', 'Chấm bi'], ['plain', 'Trơn'], ['pink', 'Hồng phấn'], ['hearts', 'Tim nhỏ'], ['grid', 'Giấy kẻ'], ['night', 'Đêm sao'], ['photo', 'Ảnh riêng']];
+const dispName = n => (n && db.us.nick && db.us.nick[norm(n)]) || n;
+function openChatStyle(){
+  const cs = Object.assign({ bg: 'dots', bub: '' }, db.us.chatSt || {}), nk = Object.assign({}, db.us.nick || {});
+  const pnm = peerName(peerMain()), me = sync.me || 'Mình';
+  const wpBtn = ([k, l]) => `<button type="button" data-w="${k}" class="${cs.bg === k ? 'on' : ''}"><span class="wpsw wps-${k}" ${k === 'photo' && cs.photo && sync.room ? `style="background:url('${photoUrl(cs.photo)}') center/cover"` : ''}>${k === 'photo' && !cs.photo ? '📷' : ''}</span>${l}</button>`;
+  openSheet('Tuỳ chỉnh chat 🎨', `
+    <div class="qlab">Màu tin nhắn của mình</div><div class="bubrow" id="csBub">${BUBS.map(c => `<button type="button" data-c="${c}" class="${cs.bub === c ? 'on' : ''}" style="background:${c || 'var(--accent)'}" aria-label="màu"></button>`).join('')}</div>
+    <div class="qlab">Hình nền</div><div class="wprow" id="csWp">${WPS.map(wpBtn).join('')}</div>
+    <div class="qlab">Biệt danh</div>
+    <div class="card"><label class="f"><span>Gọi ${esc(pnm)} là</span><input id="nkP" maxlength="24" value="${esc(nk[norm(pnm)] || '')}" placeholder="${esc(pnm)}"></label>
+      <label class="f"><span>Gọi ${esc(me)} là</span><input id="nkM" maxlength="24" value="${esc(nk[norm(me)] || '')}" placeholder="${esc(me)}"></label></div>
+    <p class="subtitle" style="margin:8px 0 12px">Biệt danh hiện trong chat thay cho tên. Đổi ở đây thì máy ${esc(pnm)} cũng đổi theo.</p>
+    <button class="btn" id="csSave">Lưu</button>`, () => {
+    const mark = (box, sel) => box.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.matches(sel)));
+    $('#csBub').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cs.bub = b.dataset.c; mark($('#csBub'), `[data-c="${cs.bub}"]`); };
+    $('#csWp').onclick = e => { const b = e.target.closest('[data-w]'); if (!b) return;
+      if (b.dataset.w === 'photo') {
+        if (!sync.room) return toast('Ghép đôi để dùng ảnh làm nền nha');
+        return pickPhoto(async fs => { toast('Đang tải ảnh nền…'); try { cs.photo = await uploadPhoto(fs[0]); cs.bg = 'photo'; const sw = $('#csWp [data-w=photo] .wpsw'); if (sw) { sw.textContent = ''; sw.style.background = `url('${photoUrl(cs.photo)}') center/cover`; } mark($('#csWp'), '[data-w=photo]'); toast('Xong, bấm Lưu nha'); } catch (err) { toast('Tải ảnh lỗi, thử lại nha'); } });
+      }
+      cs.bg = b.dataset.w; mark($('#csWp'), `[data-w="${cs.bg}"]`); };
+    $('#csSave').onclick = async () => {
+      const p = $('#nkP').value.trim(), m = $('#nkM').value.trim(), n2 = Object.assign({}, nk);
+      if (p) n2[norm(pnm)] = p; else delete n2[norm(pnm)];
+      if (m) n2[norm(me)] = m; else delete n2[norm(me)];
+      db.us.chatSt = { bg: cs.bg, bub: cs.bub, photo: cs.photo || '' }; db.us.chatStAt = Date.now(); db.us.nick = n2; db.us.nickAt = Date.now();
+      save(); closeSheet(); render(); toast('Đã lưu 🎨'); if (sync.room) await syncRoom();
+    };
+  });
+}
+function applyChatStyle(){
+  const m = $('#main'), cm = inChatView(), cs = db.us.chatSt || {};
+  [...m.classList].filter(c => c.startsWith('wp-')).forEach(c => m.classList.remove(c));
+  const bg = cm && WPS.some(w => w[0] === cs.bg) ? cs.bg : '';
+  if (bg && bg !== 'dots' && !(bg === 'photo' && !(cs.photo && sync.room))) m.classList.add('wp-' + bg);
+  m.style.backgroundImage = bg === 'photo' && cs.photo && sync.room ? `linear-gradient(var(--wpov),var(--wpov)),url("${photoUrl(cs.photo)}")` : '';
+  if (cm && /^#[0-9a-f]{6}$/i.test(cs.bub || '')) m.style.setProperty('--mybub', cs.bub); else m.style.removeProperty('--mybub');
+}
+
 function patchChat(){ // Chat: chỉ vẽ lại phần tin nhắn, giữ nguyên ô nhập (bàn phím không bị đóng)
   if (!(state.tab === 'us' && state.usp === 'moods')) return false;
   const m = $('#main'), dock = m.querySelector('.chatdock'); if (!dock) return false;
@@ -2909,8 +3112,9 @@ function patchChat(){ // Chat: chỉ vẽ lại phần tin nhắn, giữ nguyên
 function render(){
   const keepVals = {}, ae = document.activeElement, focusId = ae && $('#main').contains(ae) && ae.id;
   document.querySelectorAll('#main input[id], #main textarea[id]').forEach(i => { if (i.type !== 'checkbox' && i.type !== 'file' && i.value) keepVals[i.id] = i.value; });
-  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === 'chat' ? inChatView() : b.dataset.tab === state.tab && !(b.dataset.tab === 'us' && inChatView())));
   $('#main').classList.toggle('chatmode', state.tab === 'us' && state.usp === 'moods');
+  applyChatStyle(); navBadge();
   $('#main').innerHTML = ({ today: viewToday, health: viewHealth, us: viewUs, cal: viewCal, cycle: viewCycle, meds: viewMeds, more: viewMore }[state.tab] || viewToday)();
   afterRender();
   for (const [id, v] of Object.entries(keepVals)) { const n = document.getElementById(id); if (n && !n.value && n.type !== 'date' && n.type !== 'time') n.value = v; }
@@ -3754,9 +3958,11 @@ function toast(msg){
 }
 
 /* ---------- sự kiện ---------- */
+function navBadge(){ const e = document.getElementById('navChatB'); if (!e) return; const n = inChatView() ? 0 : db.moods.filter(x => x.at > (db.chatSeen || 0) && !isMineH(x) && !x.ai).length; e.textContent = n > 9 ? '9+' : n || ''; e.style.display = n ? '' : 'none'; }
 $('#nav').onclick = e => {
   state.back = null;
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tab === 'chat') { state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; state.loveAdmin = false; render(); return; }
   state.tab = b.dataset.tab; state.usp = "";
   state.loveAdmin = false;
   if (state.tab === 'cal') { /* giữ ngày đang chọn */ }
@@ -3795,6 +4001,10 @@ $('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-to
     const now = Date.now(); if (lastTap.id === hb.dataset.mid && now - lastTap.t < 320) { lastTap = { id: '', t: 0 }; reactMsg(hb.dataset.mid, '❤️'); } else lastTap = { id: hb.dataset.mid, t: now }; });
 })();
 $('#main').addEventListener('toggle', e => { const g = e.target.dataset && e.target.dataset.g; if (g) state.grp[g] = e.target.open; }, true);
+$('#main').addEventListener('touchstart', e => { const b = e.target.closest('[data-act=chatSend]'); sendLpFired = false; clearTimeout(sendLp); if (!b) return;
+  sendLp = setTimeout(() => { sendLp = null; sendLpFired = true; try { navigator.vibrate && navigator.vibrate(10); } catch (_) {} openFxPick(true); }, 450); }, { passive: true });
+['touchend', 'touchcancel', 'touchmove'].forEach(ev => $('#main').addEventListener(ev, () => { clearTimeout(sendLp); sendLp = null; }, { passive: true }));
+$('#main').addEventListener('contextmenu', e => { if (e.target.closest('[data-act=chatSend]')) { e.preventDefault(); clearTimeout(sendLp); openFxPick(true); } });
 let typingSent = 0;
 $('#main').addEventListener('input', e => { // báo "đang nhập…" (tối đa mỗi 3 giây 1 lần)
   if (e.target.id !== 'chatIn' || !sync.room || !e.target.value) return;
@@ -3890,8 +4100,13 @@ $('#main').addEventListener('click', async e => {
     case 'goTab': state.tab = b.dataset.t; state.usp = ''; ($('#main').scrollTop = 0); render(); break;
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
-    case 'chatSend': await sendChat(); break;
+    case 'chatSend': if (sendLpFired) { sendLpFired = false; break; } await sendChat(); break;
     case 'arcMore': loadArc(); break;
+    case 'fxPick': state.chatPanel = false; render(); openFxPick(false); break;
+    case 'fxReplay': { const x = db.moods.concat(state.arcItems || []).find(m => m.id === id); if (x) { fxBusy = 0; playFx(fxOf(x)); } break; }
+    case 'editCancel': { state.editId = null; const i = $('#chatIn'); if (i) i.value = ''; render(); break; }
+    case 'chatSearch': state.chatPanel = false; openChatSearch(); break;
+    case 'chatStyle': state.chatPanel = false; render(); openChatStyle(); break;
     case 'aiAsk': { state.chatPanel = false; if (!patchChat()) render(); const i = $('#chatIn'); if (i) { if (!AI_RE.test(i.value)) i.value = '@ ' + i.value; i.focus(); i.setSelectionRange(i.value.length, i.value.length); } break; }
     case 'giftNew': state.chatPanel = false; openGift(); break;
     case 'giftView': { const g = db.moods.find(x => x.id === id); if (g) showGift(Object.assign({}, g, { _replay: true })); break; }
@@ -4034,7 +4249,7 @@ $('#fileIn').onchange = async () => {
 /* cập nhật trạng thái "quá giờ" và đổi ngày */
 setInterval(() => { if (state.tab !== 'more' && state.tab !== 'meds') softRender(); }, 60000);
 $('#main').addEventListener('focusout', () => setTimeout(() => { if (softPending && !typing() && !sheetOpen()) { softPending = false; render(); } }, 700));
-document.addEventListener('visibilitychange', () => { if (document.hidden) wsDrop(); else wsConnect(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) wsDrop(); else { wsConnect(); setTimeout(() => playIncomingFx(db.moods), 500); } });
 window.addEventListener('pagehide', wsDrop);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { autoLocate(); if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); loadWeather(false); } });
 
@@ -4070,7 +4285,7 @@ function applyLive(m){ // dữ liệu đi kèm thông báo: hiện ngay
     db.peers[m.peer.dev] = n;
   }
   for (const x of m.hist || []) if (x && x.id && !db.moods.some(y => y.id === x.id)) { db.moods = db.moods.concat([x]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); changed = true; }
-  if (m.hist && m.hist.length) { playIncomingTouch(m.hist); if (m.hist.some(x => x.kind === 'gift')) setTimeout(checkGifts, 0); }
+  if (m.hist && m.hist.length) { playIncomingTouch(m.hist); playIncomingFx(m.hist); if (m.hist.some(x => x.kind === 'gift')) setTimeout(checkGifts, 0); }
   if (!changed) return;
   try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
   if (sheetOpen()) { pendingRender = true; const el = $('#replyTo'); if (el) el.outerHTML = replyBox(); } else softRender();
