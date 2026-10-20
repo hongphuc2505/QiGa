@@ -5,7 +5,7 @@
 
 // File lời chúc trên GitHub (mỗi dòng một câu). Sửa file này là lời chúc đổi theo.
 import { DurableObject } from 'cloudflare:workers';
-const SERVER_V = 6; // phiên bản máy chủ, app hiện ở tab Khác
+const SERVER_V = 7; // phiên bản máy chủ, app hiện ở tab Khác
 
 const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
@@ -130,11 +130,13 @@ const COLLS = ['events', 'specials', 'dates', 'bucket', 'jar', 'moods', 'foods',
 function mergeRoom(cur, inc) {
   inc = inc || {};
   const out = { meta: lww(cur.meta, inc.meta) };
-  const cutoff = Date.now() - 60 * 864e5; // dọn các mục đã xóa quá 60 ngày
+  const now = Date.now(), cutoff = now - 60 * 864e5; // dọn các mục đã xóa quá 60 ngày
   for (const c of COLLS) {
     const m = lww(cur[c], inc[c]);
     if (c === 'letters') for (let [id, e] of Object.entries(m)) { const o = (cur.letters || {})[id]; if (e && !e.deleted && o) { if (!e.body && o.body) m[id] = e = Object.assign({}, e, { body: o.body }); if (!e.title && o.title) m[id] = Object.assign({}, e, { title: o.title }); } }
     for (const [id, e] of Object.entries(m)) if (e.deleted && (+e.updated || 0) < cutoff) delete m[id];
+    const old = cur[c] || {};
+    for (const [id, e] of Object.entries(m)) if (e !== old[id] && e && typeof e === 'object') m[id] = Object.assign({}, e, { _s: now });
     out[c] = m;
   }
   const people = Object.assign({}, cur.people || {});
@@ -151,9 +153,14 @@ function mergeRoom(cur, inc) {
   const ids = Object.keys(people).sort((a, b) => (people[b].at || 0) - (people[a].at || 0));
   for (const id of ids.slice(6)) delete people[id]; // giữ tối đa 6 máy
   const mk = Object.keys(out.moods || {});
-  if (mk.length > 600) { mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0)); for (const id of mk.slice(600)) delete out.moods[id]; } // chat giữ 600 mục mới nhất
+  if (mk.length > 600) { // chat giữ 600 mục mới nhất trong phòng, phần cũ hơn chuyển vào kho lưu trữ theo tháng
+    mk.sort((a, b) => (+out.moods[b].at || 0) - (+out.moods[a].at || 0));
+    out._arc = mk.slice(600).map(id => out.moods[id]).filter(x => x && !x.deleted);
+    for (const id of mk.slice(600)) delete out.moods[id];
+  }
   const dk = Object.keys(out.days || {});
-  if (dk.length > 500) { dk.sort().reverse(); for (const id of dk.slice(500)) delete out.days[id]; }
+  if (dk.length > 2000) { dk.sort().reverse(); for (const id of dk.slice(2000)) delete out.days[id]; }
+  if (cur.arcs) out.arcs = cur.arcs;
   out.people = people;
   return out;
 }
@@ -436,13 +443,14 @@ async function roomRequest(env, code, req, store) {
   const cur = (await store.get()) || { events: {} };
     if (req.method === 'PUT') {
     const body = await req.text();
-    if (body.length > 600000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
+    if (body.length > 1800000) return new Response('Dữ liệu quá lớn', { status: 413, headers: CORS });
     let inc; try { inc = JSON.parse(body); } catch (err) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
     const dev = String(inc.device || ''), who = String(inc.name || '').slice(0, 40);
     const ann = Array.isArray(inc.announce) ? new Set(inc.announce.slice(0, 200).map(String)) : null;
     const incA = ann ? onlyAnnounced(inc, ann) : inc, curA = ann ? withoutAnnounced(cur, ann) : cur;
     const changes = describeChanges(curA, incA), usLines = describeUs(curA, incA), collLines = describeColls(curA, incA);
-    const merged = mergeRoom(cur, inc);
+    const merged = mergeRoom(cur, inc), arcItems = merged._arc; delete merged._arc;
+    if (arcItems && arcItems.length && store.archive) merged.arcs = await store.archive(arcItems, merged.arcs || []);
     const pplMsgs = describePeople(cur, merged, dev, who, inc, ann);
     if (JSON.stringify(merged) !== JSON.stringify(cur)) await store.put(merged);
     const jobs = [];
@@ -470,9 +478,17 @@ async function roomRequest(env, code, req, store) {
       const fresh = Object.values(inc.letters || {}).filter(l => l && !l.deleted && l.dev === dev && +l.openAt > Date.now() && !(cur.letters || {})[l.id]);
       if (fresh.length) { const li = JSON.parse((await env.SOTAY.get('letter-index')) || '[]'); for (const l of fresh) li.push({ room: code, id: l.id, at: +l.openAt, dev, from: who, title: l.hideTitle ? '' : clip(l.title || '', 40) }); await env.SOTAY.put('letter-index', JSON.stringify(li)); }
     }
-    return new Response(JSON.stringify(Object.assign(lockLetters(merged, dev), { sv: SERVER_V })), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+    const since = +inc.since || 0, view = lockLetters(merged, dev);
+    return new Response(JSON.stringify(Object.assign(since > 0 ? deltaOf(view, since) : view, { sv: SERVER_V, now: Date.now() })), { headers: { ...CORS, 'Content-Type': 'application/json' } });
   }
   return new Response(JSON.stringify(Object.assign(lockLetters(cur, ''), { sv: SERVER_V })), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+}
+function deltaOf(room, since) { // chỉ gửi lại những mục đổi sau lần hỏi trước (đỡ tốn dữ liệu di động)
+  const out = { delta: true, meta: room.meta, events: room.events, specials: room.specials, people: room.people, arcs: room.arcs }, now = Date.now();
+  for (const c of COLLS) { if (c === 'events' || c === 'specials') continue; const m = {};
+    for (const [id, e] of Object.entries(room[c] || {})) if ((+e._s || 0) > since || (c === 'letters' && +e.openAt > since - 120000 && +e.openAt <= now + 1000)) m[id] = e;
+    out[c] = m; }
+  return out;
 }
 const kvStore = (env, code) => ({ get: async () => JSON.parse((await env.SOTAY.get('room:' + code)) || 'null'), put: v => env.SOTAY.put('room:' + code, JSON.stringify(v)) });
 const roomStub = (env, code) => env.ROOM.get(env.ROOM.idFromName(code));
@@ -491,7 +507,24 @@ export class Room extends DurableObject {
   async fetch(req) {
     const url = new URL(req.url), [, op, code] = url.pathname.split('/');
     const storage = this.ctx.storage, env = this.env;
-    const store = { get: async () => { let v = await storage.get('room'); if (!v && env.SOTAY) { const raw = await env.SOTAY.get('room:' + code); v = raw ? JSON.parse(raw) : null; if (v) await storage.put('room', v); } return v; }, put: v => storage.put('room', v) };
+    const store = { get: async () => { let v = await storage.get('room'); if (!v && env.SOTAY) { const raw = await env.SOTAY.get('room:' + code); v = raw ? JSON.parse(raw) : null; if (v) await storage.put('room', v); } return v; }, put: v => storage.put('room', v),
+      archive: async (items, arcs) => { // kho chat cũ: mỗi tháng một phần (đầy ~1.2MB thì sang phần mới)
+        arcs = arcs.slice(); const byM = {};
+        for (const x of items) { const mo = new Date((+x.at || 0) + 7 * 3600e3).toISOString().slice(0, 7); (byM[mo] = byM[mo] || []).push(x); }
+        for (const mo of Object.keys(byM).sort()) {
+          const same = arcs.filter(a => a.m === mo); let e = same[same.length - 1];
+          if (!e || e.sz > 1200000) { e = { k: `${mo}.${same.length}`, m: mo, n: 0, sz: 0 }; arcs.push(e); }
+          const key = 'arc:' + e.k, obj = (await storage.get(key)) || {};
+          for (const x of byM[mo]) { const y = Object.assign({}, x); delete y._s; obj[x.id] = y; }
+          await storage.put(key, obj);
+          arcs[arcs.indexOf(e)] = Object.assign({}, e, { n: Object.keys(obj).length, sz: JSON.stringify(obj).length });
+        }
+        return arcs.sort((a, b) => a.m.localeCompare(b.m) || (+a.k.split('.')[1]) - (+b.k.split('.')[1]));
+      } };
+    if (op === 'arc') { const k = url.pathname.split('/')[3] || '', H = { ...CORS, 'Content-Type': 'application/json' };
+      if (!k) { const room = (await store.get()) || {}; return new Response(JSON.stringify({ arcs: room.arcs || [] }), { headers: H }); }
+      const obj = (await storage.get('arc:' + k)) || {};
+      return new Response(JSON.stringify({ items: Object.values(obj).sort((a, b) => (a.at || 0) - (b.at || 0)) }), { headers: H }); }
     if (op === 'get') return new Response(JSON.stringify((await store.get()) || { events: {} }), { headers: { 'Content-Type': 'application/json' } });
     if (op === 'append') { const item = await req.json(), room = (await store.get()) || { events: {} }; room.moods = room.moods || {}; if (!room.moods[item.id]) { room.moods[item.id] = item; await store.put(room); } return new Response('ok'); }
     return roomRequest(env, code, req, store);
@@ -557,6 +590,11 @@ export default {
       }
       if (req.method === 'DELETE') { delete reg.devices[pm[2]]; await env.SOTAY.put(pkey, JSON.stringify(reg)); return json({ ok: true }); }
       return json({ devices: Object.keys(reg.devices).length });
+    }
+    const ra = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/arc(?:\/(\d{4}-\d{2}\.\d{1,3}))?$/);
+    if (ra && req.method === 'GET') {
+      if (!env.ROOM) return json({ arcs: [], items: [] });
+      return roomStub(env, ra[1]).fetch(`https://room/arc/${ra[1]}/${ra[2] || ''}`);
     }
     const r = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})$/);
     if (r) {

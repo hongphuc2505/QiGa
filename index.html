@@ -1175,19 +1175,21 @@ function roomMap(){
   for (const [id, ts] of Object.entries(db.deletedEvents)) if (!map[id]) map[id] = { id, deleted: true, updated: ts };
   return map;
 }
-function roomBody(){
+function roomBody(full = true){ // full=false: chỉ gửi những mục sửa từ lần gửi trước
   const specials = {};
   for (const x of db.us.specials) specials[x.id] = { id: x.id, name: x.name, date: x.date, yearly: x.yearly !== false, repeat: spRepeat(x), updated: x.updated || 1 };
   for (const [id, ts] of Object.entries(db.us.delSp)) if (!specials[id]) specials[id] = { id, deleted: true, updated: ts };
   const meta = db.us.startAt ? { start: { v: db.us.start || '', updated: db.us.startAt } } : {};
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
   const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
+  const mark = full ? 0 : (state.upMark || 0) - 5000;
   for (const c of ['dates', 'bucket', 'jar', 'moods', 'foods', 'letters', 'coupons', 'days']) {
     const m = {};
-    for (const x of db[c]) m[x.id] = Object.assign({}, x, { updated: x.updated || 1 });
-    for (const [id, ts] of Object.entries(db.del[c] || {})) if (!m[id]) m[id] = { id, deleted: true, updated: ts };
+    for (const x of db[c]) if ((x.updated || 1) >= mark) { const y = Object.assign({}, x, { updated: x.updated || 1 }); delete y._s; m[x.id] = y; }
+    for (const [id, ts] of Object.entries(db.del[c] || {})) if (!m[id] && ts >= mark) m[id] = { id, deleted: true, updated: ts };
     out[c] = m;
   }
+  if (!full && state.rs) out.since = state.rs - 2000;
   out.announce = pendingAnnounce(out);
   return out;
 }
@@ -1206,7 +1208,7 @@ function afterAnnounce(sent, merged){
   const seen = {};
   for (const c of ['events', 'specials', 'dates', 'bucket', 'jar', 'moods', 'foods', 'letters', 'coupons']) for (const [id, e] of Object.entries(merged[c] || {})) seen[c + ':' + id] = +e.updated || 0;
   if (merged.meta && merged.meta.start) seen['meta:start'] = +merged.meta.start.updated || 0;
-  sync.seen = seen;
+  sync.seen = merged.delta ? Object.assign({}, sync.seen || {}, seen) : seen;
 }
 function applyRoom(merged){
   const map = merged.events;
@@ -1237,9 +1239,18 @@ function applyRoom(merged){
     db.peers = pp;
   }
   for (const c of ['dates', 'bucket', 'jar', 'moods', 'foods', 'letters', 'coupons', 'days']) if (merged[c]) {
-    const arr = [], del = {};
-    for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
-    if (c === 'moods') for (const x of db.moods) if (!merged.moods[x.id] && Date.now() - x.at < 5 * 60000) arr.push(x); // vừa nhận qua thông báo
+    let arr = [], del = {};
+    if (merged.delta) { // chỉ nhận phần thay đổi → gộp vào bản trên máy
+      const cur = {}; for (const x of db[c]) cur[x.id] = x; del = Object.assign({}, db.del[c] || {});
+      for (const [id, x] of Object.entries(merged[c])) { const lu = cur[id] ? (+cur[id].updated || 0) : (+del[id] || 0); if ((+x.updated || 0) < lu) continue; if (x.deleted) { delete cur[id]; del[id] = x.updated; } else { cur[id] = x; delete del[id]; } }
+      const old = Date.now() - 60 * 864e5; for (const id of Object.keys(del)) if (del[id] < old) delete del[id];
+      if (!Object.keys(merged[c]).length) continue;
+      const kept = new Set(); for (const x of db[c]) if (cur[x.id]) { arr.push(cur[x.id]); kept.add(x.id); } // giữ thứ tự cũ
+      for (const [id, x] of Object.entries(cur)) if (!kept.has(id)) arr.push(x);
+    } else {
+      for (const x of Object.values(merged[c])) { if (x.deleted) del[x.id] = x.updated; else arr.push(x); }
+      if (c === 'moods') for (const x of db.moods) if (!merged.moods[x.id] && Date.now() - x.at < 5 * 60000) arr.push(x); // vừa nhận qua thông báo
+    }
     if (c === 'moods') setTimeout(() => { playIncomingTouch(db.moods); checkGifts(); }, 0);
     db[c] = c === 'moods' ? arr.sort((a, b) => a.at - b.at).slice(-HIST_MAX) : arr; db.del[c] = del;
   }
@@ -1256,12 +1267,15 @@ async function syncRoom(){
   if (roomBusy) return false;
   roomBusy = true;
   try {
-    const body = roomBody();
+    const mark = Date.now(), full = !state.fullAt || mark - state.fullAt > 10 * 60000 || !state.rs || state.rsRoom !== sync.room;
+    const body = roomBody(full);
     const r = await fetch(`${syncBase()}/room/${sync.room}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const merged = await r.json();
     afterAnnounce(body.announce, merged);
     sync.sv = +merged.sv || 0;
+    if (full) state.fullAt = mark; state.upMark = mark; state.rs = +merged.now || 0; state.rsRoom = sync.room;
+    if (merged.arcs) db.arcs = merged.arcs;
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
     if (applyRoom(merged)) softRender();
     else if (state.tab === 'more' && !sheetOpen()) render();
@@ -2194,7 +2208,8 @@ async function sendChat(){
 function viewHistory(){
   const me = ensureDevice(), myName = norm(sync.me);
   const isMine = isMineH;
-  const list = db.moods.slice().sort((a, b) => a.at - b.at);
+  const ids = new Set(db.moods.map(x => x.id));
+  const list = db.moods.concat((state.arcItems || []).filter(x => !ids.has(x.id))).sort((a, b) => a.at - b.at);
   db.chatSeen = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
   const lastPeerAt = Math.max(0, ...list.filter(x => !isMine(x)).map(x => x.at));
   if (lastPeerAt > (db.mine.seenAt || 0)) { db.mine.seenAt = lastPeerAt; setTimeout(() => syncRoom(), 300); } // báo "đã xem" cho người kia
@@ -2218,6 +2233,7 @@ function viewHistory(){
   if (!list.length) return h + `<div class="hist"><div class="chatempty">💌<br>Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
   let shown = state.histAll ? list : list.slice(-60);
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
+  else if (arcLeft().length) h += `<button class="btn ghost" data-act="arcMore">${state.arcLoading ? 'Đang tải tin cũ…' : `📜 Xem tin cũ hơn · ${arcLabel(arcLeft().pop())}`}</button>`;
   let lastDay = '';
   h += `<div class="hist">`;
   const BK = new Set(['msg', 'mood', 'touch', 'gift']);
@@ -2227,7 +2243,8 @@ function viewHistory(){
     const k = keyOf(new Date(x.at)), nx = shown[i + 1], pv = shown[i - 1];
     if (k !== lastDay) { lastDay = k; const dd = diffDays(k, tk); h += `<div class="hday">${dd === 0 ? 'Hôm nay' : dd === 1 ? 'Hôm qua' : fmtLong(k)}</div>`; }
     const same = (a, b) => a && b && BK.has(a.kind) && BK.has(b.kind) && isMine(a) === isMine(b) && keyOf(new Date(a.at)) === keyOf(new Date(b.at)) && Math.abs(b.at - a.at) < 5 * 60e3;
-    h += histItem(x, isMine(x), !same(x, nx), !same(pv, x));
+    const hi = histItem(x, isMine(x), !same(x, nx), !same(pv, x));
+    h += x._arc ? hi.replace(/ data-mid=/g, ' data-arc=') : hi;
   });
   const pm = peerMain(), lastPeer = Math.max(0, ...list.filter(x => !isMine(x)).map(x => x.at));
   state.typingShown = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > lastPeer);
@@ -2631,13 +2648,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 6))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 7))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
-      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 6 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 7 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2678,7 +2695,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.3</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.4</p>`;
 }
 
 function viewCycle(){
@@ -2785,6 +2802,21 @@ function softRender(){ // làm mới nền: không phá chữ đang gõ
   if (sheetOpen()) { pendingRender = true; return; }
   if (typing()) { if (document.activeElement && document.activeElement.id === 'chatIn' && patchChat()) return; softPending = true; return; }
   render();
+}
+const arcLeft = () => (db.arcs || []).filter(a => !(state.arcLoaded || {})[a.k]);
+const arcLabel = a => { const [y, m] = a.m.split('-'); return `tháng ${+m}/${y}`; };
+async function loadArc(){ // tải thêm một phần chat cũ (mới nhất trước)
+  const next = arcLeft().pop(); if (!next || state.arcLoading || !sync.room) return;
+  state.arcLoading = true; patchChat() || render();
+  try {
+    const r = await fetch(`${syncBase()}/room/${sync.room}/arc/${next.k}`); if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    state.arcItems = (state.arcItems || []).concat((j.items || []).map(x => Object.assign({}, x, { _arc: 1 })));
+    state.arcLoaded = Object.assign({}, state.arcLoaded, { [next.k]: 1 }); state.histAll = true;
+  } catch (e) { toast('Chưa tải được tin cũ, thử lại nha'); }
+  state.arcLoading = false;
+  const m = $('#main'), h0 = m.scrollHeight, t0 = m.scrollTop;
+  patchChat() || render(); m.scrollTop = t0 + (m.scrollHeight - h0);
 }
 function patchChat(){ // Chat: chỉ vẽ lại phần tin nhắn, giữ nguyên ô nhập (bàn phím không bị đóng)
   if (!(state.tab === 'us' && state.usp === 'moods')) return false;
@@ -3266,7 +3298,7 @@ const whoKey = () => norm(sync.me) || ensureDevice();
 function markDay(){
   const k = todayKey(), id = `${k}|${whoKey()}`;
   if (db.days.some(d => d.id === id)) return;
-  db.days = db.days.concat([{ id, date: k, name: sync.me || '', dev: ensureDevice(), at: Date.now(), updated: Date.now() }]).slice(-500);
+  db.days = db.days.concat([{ id, date: k, name: sync.me || '', dev: ensureDevice(), at: Date.now(), updated: Date.now() }]).slice(-2000);
 }
 function streakInfo(){
   const by = {};
@@ -3780,6 +3812,7 @@ $('#main').addEventListener('click', async e => {
     case 'histAll': state.histAll = true; render(); break;
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
+    case 'arcMore': loadArc(); break;
     case 'giftNew': state.chatPanel = false; openGift(); break;
     case 'giftView': { const g = db.moods.find(x => x.id === id); if (g) showGift(Object.assign({}, g, { _replay: true })); break; }
     case 'chatPhoto': state.chatPanel = false; sendChatPhotos(); break;
