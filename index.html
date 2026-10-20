@@ -552,7 +552,8 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 @keyframes gpop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes gfall{to{transform:translateY(110vh) rotate(360deg)}}
 .aiav{display:inline-grid;place-items:center;background:#e6ecff;font-size:12px;vertical-align:middle}
-.hb.aimsg .bub.msg{background:#eef2ff;color:#2b2f55;border:1.5px dashed #b7c3f3}
+.hb.aimsg .bub.msg{background:#eef2ff;color:#2b2f55;border:1px solid #d3dbfa;box-shadow:0 1px 2px rgba(60,70,140,.1)}
+.hb.aimsg .quote{background:rgba(60,70,140,.07);border-left-color:#8fa0e6;color:#4b5288}
 @media (prefers-color-scheme:dark){.hb.aimsg .bub.msg{background:#262a44;color:#e6e9ff;border-color:#4a5490}.aiav{background:#33395c}}
 .navb{position:absolute;top:4px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:var(--red);color:#fff;font:700 11px/17px -apple-system,sans-serif;font-style:normal;text-align:center}
 nav button{position:relative}
@@ -602,8 +603,9 @@ main.chatmode.wp-night .bub.msg.recalled,main.chatmode.wp-photo .bub.msg.recalle
 main.chatmode.wp-photo{--wpov:rgba(255,255,255,.3);background-size:cover;background-position:center}
 main.chatmode.wp-night .hist .ht,main.chatmode.wp-photo .hist .ht{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 @media (prefers-color-scheme:dark){.wps-pink,main.chatmode.wp-pink{background:linear-gradient(180deg,#2a1820,#3a1f2b)}.wps-hearts,main.chatmode.wp-hearts{background-color:#1f1418}.wps-grid,main.chatmode.wp-grid{background-color:#16181d;background-image:linear-gradient(#262b35 1px,transparent 1px),linear-gradient(90deg,#262b35 1px,transparent 1px)}main.chatmode.wp-photo{--wpov:rgba(0,0,0,.45)}}
-.chatbar .stkbtn{width:40px;height:44px;border-radius:50%;background:transparent;color:var(--accent);display:grid;place-items:center;flex:none;margin:0 -6px}
-.chatbar .stkbtn.on{background:var(--accent-soft)}
+.chatbar button.plus,.chatbar button.cam,.chatbar button.stkbtn{width:40px;height:40px}
+.chatbar .stkbtn{border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.chatbar .stkbtn.on{background:var(--accent);color:#fff}
 .stkpanel{padding:8px 8px 10px}
 .stktabs{display:flex;gap:6px;align-items:center;margin:0 2px 8px}
 .stktabs button{width:auto;height:auto;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:700;background:var(--bg);color:var(--sub)}
@@ -641,7 +643,7 @@ main.chatmode .week{margin-top:10px}
 .hb.mid .bub{border-top-left-radius:6px}
 .hb.me.mid .bub{border-top-left-radius:18px;border-top-right-radius:6px}
 .bub.msg{box-shadow:0 1px 2px rgba(125,35,65,.12)}
-.chatbar{display:flex;gap:8px;align-items:center}
+.chatbar{display:flex;gap:6px;align-items:center}
 .chatbar .plus{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:24px;font-weight:700;flex:none;display:grid;place-items:center;transition:transform .2s}
 .chatbar .plus.on{transform:rotate(45deg)}
 .qpanel{background:var(--card);border-radius:20px;padding:10px 12px 12px;margin-bottom:10px;box-shadow:0 6px 18px rgba(125,35,65,.14)}
@@ -689,6 +691,7 @@ main.chatmode .week{margin-top:10px}
 .duo .pairhint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font-size:14px;color:var(--sub)}
 .backbtn{color:var(--accent);font-weight:700;font-size:16px;padding:8px 14px 8px 0;min-height:44px}
 .sbrow{position:relative}
+.subbar .sbrow{min-height:44px}
 .subbar .sbt{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:700;font-size:16px;display:flex;align-items:center;gap:4px;white-space:nowrap}
 :root[data-theme=paper] .subbar .sbt{font-family:var(--hand);font-weight:400;font-size:22px}
 .subbar{position:sticky;top:-8px;z-index:30;margin:-8px -16px 0;padding:8px 16px 0;background:var(--bg);box-shadow:0 6px 8px -6px rgba(125,35,65,.18)}
