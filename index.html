@@ -1183,6 +1183,7 @@ function roomBody(full = true){ // full=false: chỉ gửi những mục sửa t
   for (const x of db.us.specials) specials[x.id] = { id: x.id, name: x.name, date: x.date, yearly: x.yearly !== false, repeat: spRepeat(x), updated: x.updated || 1 };
   for (const [id, ts] of Object.entries(db.us.delSp)) if (!specials[id]) specials[id] = { id, deleted: true, updated: ts };
   const meta = db.us.startAt ? { start: { v: db.us.start || '', updated: db.us.startAt } } : {};
+  if (db.us.aiAt) meta.ai = { v: db.us.ai || {}, updated: db.us.aiAt };
   const me = Object.assign({ name: sync.me || '', at: Date.now() }, db.mine);
   const out = { events: roomMap(), specials, meta, people: { [ensureDevice()]: me }, device: ensureDevice(), name: sync.me || '' };
   const mark = full ? 0 : (state.upMark || 0) - 5000;
@@ -1229,6 +1230,8 @@ function applyRoom(merged){
   }
   const st = merged.meta && merged.meta.start;
   if (st && (+st.updated || 0) >= (db.us.startAt || 0)) { db.us.start = st.v || ''; db.us.startAt = st.updated; }
+  const ai = merged.meta && merged.meta.ai;
+  if (ai && ai.v && (+ai.updated || 0) > (db.us.aiAt || 0)) { db.us.ai = { name: String(ai.v.name || AI_DEF).slice(0, 40), emo: String(ai.v.emo || '💞').slice(0, 8) }; db.us.aiAt = +ai.updated; }
   if (merged.people) { // gộp theo từng mục, giữ cái mới hơn (dữ liệu nhận qua thông báo có thể mới hơn máy chủ)
     const me = ensureDevice(), pp = {};
     for (const [id, x] of Object.entries(merged.people)) {
@@ -2140,7 +2143,7 @@ function mountMap(){
 function histItem(x, mine, tail = true, head = true){
   const gc = `${tail ? '' : ' cont'}${head ? '' : ' mid'}`;
   const m = x.kind === 'mood' && moodOf(x.v);
-  const who = mine ? '' : x.ai ? '<span class="av aiav mini">🤖</span>AI · ' : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
+  const who = mine ? '' : x.ai ? `<span class="av aiav mini">${aiEmo()}</span>${esc(aiName())} · ` : avSpan(norm(x.name) === norm(db.love.nameFrom) ? 'h' : 'q', x.name || '?', 'mini') + esc(x.name || 'Người ấy') + ' · ';
   const rx = Object.values(x.react || {}).filter(Boolean), rxH = rx.length ? `<span class="rx">${rx.join('')}${rx.length > 1 ? `<i>${rx.length}</i>` : ''}</span>` : '';
   const meta = tail || x.pinned ? `<div class="ht">${x.pinned ? '📌 ' : ''}${who}${hm(x.at)}${x._seen ? ` · <b class="seen">${x._seen}</b>` : ''}</div>` : '';
   if (x.kind === 'msg') {
@@ -2234,7 +2237,25 @@ async function sendChatPhotos(){
     } catch (e) { toast('Gửi ảnh lỗi, thử lại nha'); }
   });
 }
-const AI_RE = /(^|\s)@ai\b/i;
+const AI_DEF = 'Trợ lý tình yêu của HoPu và QiGa';
+const aiName = () => (db.us.ai && db.us.ai.name) || AI_DEF, aiEmo = () => (db.us.ai && db.us.ai.emo) || '💞';
+const aiRe = () => new RegExp(`(^|\\s)@(ai|${aiName().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?=$|[\\s,:!?.])`, 'i');
+const AI_RE = { test: t => /^\s*@/.test(t) || aiRe().test(t) }; // bắt đầu bằng @ là gọi AI
+const AI_EMOS = ['💞', '🤖', '🐱', '🐶', '🐰', '🐻', '🦊', '🐼', '🐥', '🐧', '☁️', '🌙', '⭐', '🍀', '🧸'];
+function openAiSetup(){
+  let emo = aiEmo();
+  openSheet('Bạn AI trong chat', `<div class="card"><label class="f"><span>Tên</span><input id="aiNm" maxlength="40" value="${esc(aiName())}" placeholder="VD: Bé Mây"></label></div>
+    <div class="qlab" style="margin:4px 0 6px">Hình đại diện</div><div class="emorow" id="aiEm" style="flex-wrap:wrap">${AI_EMOS.map(e => `<button type="button" data-e="${e}" class="${e === emo ? 'on' : ''}">${e}</button>`).join('')}</div>
+    <p class="subtitle" style="margin:10px 0">Gõ <b>@</b> ở đầu tin là gọi được. Đổi tên thì máy ${esc(peerName(peerMain()))} cũng đổi theo.</p>
+    <button class="btn" id="aiSave">Lưu</button>`, () => {
+    $('#aiEm').onclick = e => { const b = e.target.closest('[data-e]'); if (!b) return; emo = b.dataset.e; $('#aiEm').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+    $('#aiSave').onclick = async () => {
+      const name = $('#aiNm').value.trim().replace(/^@+/, '').slice(0, 40) || AI_DEF;
+      db.us.ai = { name, emo }; db.us.aiAt = Date.now(); save(); closeSheet(); render(); toast(`Đã đổi thành ${emo} ${name}`);
+      await syncRoom();
+    };
+  });
+}
 async function askAI(q, qid){ // gõ @AI trong chat → AI trả lời vào chat chung
   if (!sync.room) return toast('Ghép đôi ở tab Khác để dùng AI nha');
   if ((sync.sv || 0) < 9) return toast('Cần up worker.js bản mới để dùng AI');
@@ -2242,9 +2263,9 @@ async function askAI(q, qid){ // gõ @AI trong chat → AI trả lời vào chat
   try {
     const r = await fetch(`${syncBase()}/room/${sync.room}/ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q, qid, name: sync.me || '' }) });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) toast(j.error === 'limit' ? 'Hôm nay AI nói nhiều quá rồi, mai nói tiếp nha 😴' : j.error === 'noai' ? 'Máy chủ chưa bật AI (cần up wrangler.jsonc mới)' : 'AI đang lag, thử lại nha');
+    if (!r.ok) toast(j.error === 'limit' ? `Hôm nay ${aiName()} nói nhiều quá rồi, mai nói tiếp nha 😴` : j.error === 'noai' ? 'Máy chủ chưa bật AI (cần up wrangler.jsonc mới)' : `${aiName()} đang lag, thử lại nha`);
     else if (j.item && !db.moods.some(x => x.id === j.item.id)) { db.moods = db.moods.concat([j.item]).sort((a, b) => a.at - b.at).slice(-HIST_MAX); save(); }
-  } catch (e) { toast('AI đang lag, thử lại nha'); }
+  } catch (e) { toast(`${aiName()} đang lag, thử lại nha`); }
   state.aiThinking = false; state.histAtEnd = true; patchChat() || render(); chatToEnd();
 }
 async function sendChat(){
@@ -2274,10 +2295,11 @@ function viewHistory(){
   const pn = peerName(peerMain());
   h += `<div class="card week"><div class="wk-row hd"><span></span>${days.map(k => `<span>${k === tk ? 'Nay' : WD_SHORT[parseKey(k).getDay()]}</span>`).join('')}</div>
     ${[[pn, false], [sync.me || 'Mình', true]].map(([n, mine]) => `<div class="wk-row"><span class="wn">${esc(n)}</span>${days.map(k => { const m = lastOn(k, mine); return `<span>${m ? `<i class="wf">${m.svg}</i>` : '<i class="wd"></i>'}</span>`; }).join('')}</div>`).join('')}</div>`;
-  const pr = partnerPron(), QA = [['aiAsk', '🤖', 'Hỏi AI'], ['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
+  const pr = partnerPron(), QA = [['aiAsk', aiEmo(), aiName().length > 12 ? 'Hỏi trợ lý' : 'Hỏi ' + aiName()], ['giftNew', '💐', 'Tặng hoa'], ['chatPhoto', '📷', 'Gửi ảnh'], ['sendLoc', '📍', 'Gửi vị trí'], ['sendHome', '🏠', 'Về tới nhà'], ['askLoc', '🙋', 'Hỏi đang ở đâu'], ['foodAdd', '🍜', 'Chụp món ăn'], ['dateNew', '💌', 'Hẹn mới'], ['jarQuick', '🫙', 'Bỏ vào hũ'], ['touchHeart', '💗', 'Gửi tim'], ['spin', '🎲', 'Ăn gì?'], ['letterNew', '✉️', 'Thư hẹn giờ'], ['couponNew', '🎟️', 'Tặng phiếu']];
   const panel = state.chatPanel ? `<div class="qpanel">
     <div class="qlab">Cảm xúc</div><div class="moods">${MOODS.map(m => `<button data-act="mood" data-id="${m.v}" style="background:${m.bg}" aria-label="${m.l}">${m.svg}<span>${m.l}</span></button>`).join('')}</div>
     <div class="qlab">Tác vụ nhanh</div><div class="qgrid">${QA.map(([a, i, l]) => `<button data-act="${a}"><span>${i}</span>${l}</button>`).join('')}</div>
+    <div class="qlab">Bạn AI <button class="linkbtn" data-act="aiSetup" style="font-size:12px;float:right">✏️ Đổi tên</button></div>
     <div class="qlab">Nhắn nhanh <button class="linkbtn" data-act="quickEdit" style="font-size:12px;float:right">✏️ Sửa</button></div><div class="chips qph">${quickPhrases().map((t, i) => `<button data-act="chatQuick" data-id="${i}">${esc(t)}</button>`).join('')}</div></div>` : '';
   const rpx = state.replyTo && db.moods.find(x => x.id === state.replyTo);
   const replyBar = rpx ? `<div class="replybar"><span class="rb">↩ Trả lời <b>${esc(isMineH(rpx) ? 'chính mình' : (rpx.name || 'Người ấy'))}</b><span>${esc(msgShort(rpx))}</span></span><button data-act="replyCancel" aria-label="Bỏ trả lời">×</button></div>` : '';
@@ -2289,7 +2311,7 @@ function viewHistory(){
   let lastDay = '';
   h += `<div class="hist">`;
   const BK = new Set(['msg', 'mood', 'touch', 'gift']);
-  const lastMine = [...shown].reverse().find(x => BK.has(x.kind)), pSeen = (peerMain() || {}).seenAt || 0;
+  const lastMine = [...shown].reverse().find(x => BK.has(x.kind) && !x.ai), pSeen = (peerMain() || {}).seenAt || 0;
   if (lastMine && isMine(lastMine)) shown = shown.map(x => x === lastMine ? Object.assign({}, x, { _seen: pSeen >= x.at ? 'Đã xem' : 'Đã gửi' }) : x);
   shown.forEach((x, i) => {
     const k = keyOf(new Date(x.at)), nx = shown[i + 1], pv = shown[i - 1];
@@ -2301,7 +2323,7 @@ function viewHistory(){
   });
   const pm = peerMain(), lastPeer = Math.max(0, ...list.filter(x => !isMine(x) && !x.ai).map(x => x.at));
   state.typingShown = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > lastPeer);
-  if (state.aiThinking) h += `<div class="hb typing aimsg"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht"><span class="av aiav mini">🤖</span>AI đang nghĩ…</div></div>`;
+  if (state.aiThinking) h += `<div class="hb typing aimsg"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht"><span class="av aiav mini">${aiEmo()}</span>${esc(aiName())} đang nghĩ…</div></div>`;
   if (state.typingShown) h += `<div class="hb typing"><div class="bub msg"><span class="dots"><i></i><i></i><i></i></span></div><div class="ht">${esc(peerName(pm))} đang nhập…</div></div>`;
   h += `</div><div id="histEnd"></div>` + composer;
   return h;
@@ -2749,7 +2771,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.7</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.8</p>`;
 }
 
 function viewCycle(){
@@ -3870,7 +3892,7 @@ $('#main').addEventListener('click', async e => {
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': await sendChat(); break;
     case 'arcMore': loadArc(); break;
-    case 'aiAsk': { state.chatPanel = false; if (!patchChat()) render(); const i = $('#chatIn'); if (i) { if (!AI_RE.test(i.value)) i.value = '@AI ' + i.value; i.focus(); i.setSelectionRange(i.value.length, i.value.length); } break; }
+    case 'aiAsk': { state.chatPanel = false; if (!patchChat()) render(); const i = $('#chatIn'); if (i) { if (!AI_RE.test(i.value)) i.value = '@ ' + i.value; i.focus(); i.setSelectionRange(i.value.length, i.value.length); } break; }
     case 'giftNew': state.chatPanel = false; openGift(); break;
     case 'giftView': { const g = db.moods.find(x => x.id === id); if (g) showGift(Object.assign({}, g, { _replay: true })); break; }
     case 'chatPhoto': state.chatPanel = false; sendChatPhotos(); break;
@@ -3880,6 +3902,7 @@ $('#main').addEventListener('click', async e => {
     case 'qmSend': { const qi = $('#qmIn'), t = (qi && qi.value || '').trim(); if (!t) { if (qi) qi.focus(); return; } qi.value = ''; await sendQuick(t.slice(0, 300)); break; }
     case 'moodPick': openMoodPick(); break;
     case 'quickEdit': state.chatPanel = false; openQuickEdit(); break;
+    case 'aiSetup': state.chatPanel = false; openAiSetup(); break;
     case 'loveToggle': state.loveOpen = !state.loveOpen; render(); break;
     case 'avatarSet': setAvatar(); break;
     case 'avatarDel': if (db.mine.avatar) fetch(photoUrl(db.mine.avatar), { method: 'DELETE' }).catch(() => {}); db.mine.avatar = ''; db.mine.avatarAt = Date.now(); save(); render(); syncRoom(); break;

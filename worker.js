@@ -507,12 +507,15 @@ async function askAI(env, messages) {
   }
   return '';
 }
+const aiConf = room => { const a = room && room.meta && room.meta.ai && room.meta.ai.v; return { name: cleanStr(a && a.name, 40).trim() || 'Trợ lý tình yêu của HoPu và QiGa', emo: cleanStr(a && a.emo, 8) || '💞' }; };
+const reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 function aiPrompt(room, asker) {
+  const me = aiConf(room).name;
   const names = [...new Set(Object.values(room.people || {}).map(p => p && p.name).filter(Boolean))].slice(0, 2);
   const now = new Date(Date.now() + 7 * 3600e3), WD = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
   const hist = Object.values(room.moods || {}).filter(x => x && !x.deleted && x.kind === 'msg' && x.note).sort((a, b) => a.at - b.at).slice(-12)
-    .map(x => `${x.ai ? 'AI' : (x.name || 'Ai đó')}: ${clip(x.note, 200)}`).join('\n');
-  return `Bạn là "AI" — một người bạn nhỏ vui tính sống trong app chat riêng của cặp đôi ${names.join(' và ') || 'hai bạn'}. ` +
+    .map(x => `${x.ai ? me : (x.name || 'Ai đó')}: ${clip(x.note, 200)}`).join('\n');
+  return `Bạn tên là "${me}" — một người bạn nhỏ vui tính sống trong app chat riêng của cặp đôi ${names.join(' và ') || 'hai bạn'}. ` +
     `Hôm nay là ${WD[now.getUTCDay()]}, ${now.getUTCDate()}/${now.getUTCMonth() + 1}/${now.getUTCFullYear()}, giờ Việt Nam ${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}. ` +
     `Trả lời bằng tiếng Việt tự nhiên như người Việt nói chuyện, thân thiện, hài hước nhẹ nhàng, ngắn gọn (thường 1–3 câu, không quá khoảng 80 chữ), dùng emoji vừa phải. ` +
     `Xưng "mình", gọi người hỏi bằng tên (${asker || 'bạn'}). Không viết tiêu đề hay gạch đầu dòng trừ khi được nhờ liệt kê. ` +
@@ -577,7 +580,8 @@ export class Room extends DurableObject {
       const H = { ...CORS, 'Content-Type': 'application/json' }, bad = (e, st) => new Response(JSON.stringify({ error: e }), { status: st, headers: H });
       if (!env.AI) return bad('noai', 501);
       let b; try { b = await req.json(); } catch (e) { return bad('format', 400); }
-      const q = cleanStr(b.q, 400).replace(/(^|\s)@ai\b[:,]?/ig, ' ').trim(), asker = cleanStr(b.name, 40);
+      const cfg = aiConf(await store.get()), asker = cleanStr(b.name, 40);
+      const q = cleanStr(b.q, 400).replace(new RegExp(`(^|\\s)@(ai|${reEsc(cfg.name)})(?=$|[\\s,:!?.])[:,]?`, 'ig'), ' ').replace(/^\s*@+\s*/, '').trim();
       if (!q) return bad('empty', 400);
       const day = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10), cnt = (await storage.get('aiCount')) || {};
       if (cnt.d !== day) { cnt.d = day; cnt.n = 0; }
@@ -585,7 +589,7 @@ export class Room extends DurableObject {
       cnt.n++; await storage.put('aiCount', cnt);
       const text = await askAI(env, [{ role: 'system', content: aiPrompt((await store.get()) || {}, asker) }, { role: 'user', content: `${asker || 'Bạn'}: ${q}` }]);
       if (!text) return bad('ai', 502);
-      const now = Date.now(), item = Object.assign({ id: 'ai' + now.toString(36) + Math.random().toString(36).slice(2, 6), kind: 'msg', ai: true, dev: 'ai', name: 'AI', note: text.slice(0, 800), at: now, updated: now },
+      const now = Date.now(), item = Object.assign({ id: 'ai' + now.toString(36) + Math.random().toString(36).slice(2, 6), kind: 'msg', ai: true, dev: 'ai', name: cfg.name, note: text.slice(0, 800), at: now, updated: now },
         b.qid ? { reply: { id: cleanStr(b.qid, 40), name: asker, text: clip(q, 80) } } : {});
       const room = (await store.get()) || { events: {} }; room.moods = room.moods || {}; // đọc lại sau khi AI trả lời (trong lúc chờ có thể có tin mới)
       room.moods[item.id] = Object.assign({}, item, { _s: now }); await store.put(room); store.broadcast('');
