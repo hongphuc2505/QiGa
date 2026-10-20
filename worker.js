@@ -457,7 +457,7 @@ async function roomRequest(env, code, req, store) {
     const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'gift') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
     for (const x of chats) jobs.push(sendToRoom(env, code, dev, x.kind === 'gift'
       ? { title: `💐 ${who || 'Người ấy'} tặng một bó hoa!`, body: x.note ? clip(x.note, 160) : 'Mở app nhận quà nha 🎁', tab: 'us', usp: 'moods',
-          hist: [{ id: cleanStr(x.id, 40), kind: 'gift', flower: cleanStr(x.flower, 12), note: cleanStr(x.note, 200), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }
+          hist: [Object.assign({ id: cleanStr(x.id, 40), kind: 'gift', flower: cleanStr(x.flower, 12), note: cleanStr(x.note, 200), dev, name: who, at: +x.at, updated: +x.updated || +x.at }, x.photo ? { photo: cleanStr(x.photo, 40) } : {})] }
       : x.kind === 'touch'
       ? { title: `${x.t === 'hug' ? '🤗' : '💗'} ${who || 'Người ấy'} ${clip(x.text, 60)}`, body: 'Mở app nhận nha', tab: 'today',
           hist: [{ id: cleanStr(x.id, 40), kind: 'touch', t: cleanStr(x.t, 8), sec: +x.sec || 0, text: cleanStr(x.text, 80), dev, name: who, at: +x.at, updated: +x.updated || +x.at }] }

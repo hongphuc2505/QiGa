@@ -506,6 +506,9 @@ textarea{width:100%;background:transparent;border:0;font:inherit;color:var(--tex
 .qc.gift{background:#ffe0ea;color:#b5385f}
 .qc.gift.hot{background:linear-gradient(90deg,#ff6f9b,#ff9a62);color:#fff;animation:glow 1.6s ease-in-out infinite}
 .gpreview{display:grid;place-items:center;margin:0 0 6px}
+.gphoto{display:block;width:200px;max-height:260px;object-fit:cover;border-radius:16px;box-shadow:0 8px 20px rgba(125,35,65,.2)}
+.gphoto.big{width:min(78vw,300px);max-height:44vh;border:6px solid #fff;transform:rotate(-2deg)}
+.gphoto.sm{width:84px;height:100px;border-radius:10px;box-shadow:none}
 .gpick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:0 16px}
 .gpick::-webkit-scrollbar{display:none}
 .gpick button{flex:none;display:flex;align-items:center;gap:6px;background:var(--card);border:2px solid transparent;border-radius:99px;padding:6px 12px;font-weight:600;font-size:14px;color:var(--text)}
@@ -2094,7 +2097,7 @@ function histItem(x, mine, tail = true, head = true){
     const ps = Array.isArray(x.photos) ? x.photos : [], ph = ps.length && sync.room ? `<span class="cph n${Math.min(ps.length, 4)}">${ps.slice(0, 4).map((pid, i) => `<span class="cpi"><img src="${photoUrl(pid)}" alt="" loading="lazy" data-view="c${x.id}">${i === 3 && ps.length > 4 ? `<i>+${ps.length - 4}</i>` : ''}</span>`).join('')}</span>` : '';
     return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub msg ${ph && !x.note ? 'onlyph' : ''}">${quote}${ph}${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div>${rxH}${meta}</div>`;
   }
-  if (x.kind === 'gift') return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><button class="bub giftb" data-act="giftView" data-id="${x.id}"><span class="gsv">${bouquetSVG(x.flower, 92)}</span><span class="gtx"><b>💐 ${mine ? 'Đã tặng hoa' : 'Tặng ' + esc(sync.me || 'bạn') + ' bó hoa'}</b>${x.note ? `<span>${esc(x.note)}</span>` : ''}<small>bấm để xem</small></span></button>${rxH}${meta}</div>`;
+  if (x.kind === 'gift') return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><button class="bub giftb" data-act="giftView" data-id="${x.id}"><span class="gsv">${x.photo && sync.room ? `<img class="gphoto sm" src="${photoUrl(x.photo)}" alt="">` : bouquetSVG(x.flower, 92)}</span><span class="gtx"><b>💐 ${mine ? 'Đã tặng hoa' : 'Tặng ' + esc(sync.me || 'bạn') + ' bó hoa'}</b>${x.note ? `<span>${esc(x.note)}</span>` : ''}<small>bấm để xem</small></span></button>${rxH}${meta}</div>`;
   if (x.kind === 'touch') return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub touch"><span class="tbig">${x.t === 'hug' ? '🤗' : '💗'}</span><div class="bt">${esc(x.text || '')}</div></div>${rxH}${meta}</div>`;
   if (x.kind === 'act' || x.kind === 'home' || x.kind === 'loc') {
     const t = x.kind === 'home' ? '🏠 về tới nhà rồi' : x.kind === 'loc' ? '📍 đã gửi vị trí' : `${x.icon || '•'} ${esc(x.text)}`;
@@ -2675,7 +2678,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.2</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.3</p>`;
 }
 
 function viewCycle(){
@@ -3462,6 +3465,7 @@ function seedDays(){ // lần đầu: dựng chuỗi ngày từ lịch sử chat
 
 /* ---------- tặng hoa ---------- */
 const BOUQUETS = [
+  { id: 'always', name: 'Always with you', wrap: '#cfe0f6', ribbon: '#8fb3e6', fall: '🌻' },
   { id: 'qiga', name: 'Bó QiGa thích', wrap: '#fff1e6', ribbon: '#ff6f9b', fall: '🌸' },
   { id: 'prose', name: 'Hồng phấn', wrap: '#fff7f0', ribbon: '#ff6f9b', fall: '🌸' },
   { id: 'sun', name: 'Hướng dương', wrap: '#eef5e3', ribbon: '#e0a800', fall: '🌻' },
@@ -3491,7 +3495,30 @@ function daisySVG(cx, cy, r){ // cúc li ti: hoa trắng nhỏ, nhụy vàng
     g += `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(r * .45)}" ry="${f1(r * .2)}" fill="#ffffff" stroke="#e6dff0" stroke-width=".6" transform="rotate(${f1(a * 180 / Math.PI)} ${f1(x)} ${f1(y)})"/>`; }
   return g + `<circle cx="${cx}" cy="${cy}" r="${f1(r * .3)}" fill="#ffcf33"/>`;
 }
+function alwaysSVG(size){ // bó trong ảnh: giấy xanh nhạt, hướng dương, hồng phấn, baby trắng, lá bạc
+  const PINK = ['#f7a8c4', '#d9658f'];
+  let baby = ''; const seed = [17, 41, 73, 109, 151, 197, 233, 271, 313, 359];
+  for (let i = 0; i < 70; i++) { const a = i * 2.39996, rr = 14 + Math.sqrt(i) * 8.2, x = 100 + Math.cos(a) * rr * 1.05, y = 98 + Math.sin(a) * rr * .78; if (Math.hypot(x - 100, y - 98) < 30 && i % 3) continue;
+    baby += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${(2.2 + (seed[i % 10] % 5) * .35).toFixed(1)}" fill="#fff" stroke="#e8e2d6" stroke-width=".5"/>`; }
+  let euc = ''; const sprig = (x0, y0, x1, y1) => { euc += `<path d="M${x0} ${y0} Q${(x0 + x1) / 2} ${(y0 + y1) / 2 - 6} ${x1} ${y1}" stroke="#6f8f78" stroke-width="1.6" fill="none"/>`; for (let t = .15; t < 1; t += .17) { const x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t - 6 * Math.sin(Math.PI * t); euc += `<circle cx="${f1(x - 4)}" cy="${f1(y)}" r="3.6" fill="#8fae98"/><circle cx="${f1(x + 4)}" cy="${f1(y - 1)}" r="3.4" fill="#7fa08a"/>`; } };
+  sprig(100, 70, 104, 14); sprig(62, 86, 30, 46); sprig(140, 84, 170, 40); sprig(48, 110, 18, 96); sprig(154, 108, 184, 92);
+  const front = baby.split('/>').filter((_, i) => i % 4 === 0 && _).map(x => x + '/>').join('');
+  return `<svg viewBox="0 0 200 240" width="${size}" height="${Math.round(size * 1.2)}" aria-hidden="true">
+    <path d="M14 76 Q40 20 100 30 Q160 20 186 76 L156 168 L44 168z" fill="#d6e6fa" stroke="#bcd3f2" stroke-width="1.5"/>
+    <path d="M30 70 Q60 34 100 40 L100 160 L52 160z" fill="#fff" opacity=".35"/>
+    ${euc}${baby}
+    ${roseSVG(118, 70, 15, ...PINK)}${roseSVG(64, 96, 15, ...PINK)}${sunSVG(84, 84, 24)}${roseSVG(138, 92, 14, ...PINK)}${sunSVG(130, 114, 22)}${roseSVG(104, 116, 16, ...PINK)}${sunSVG(72, 126, 21)}${roseSVG(112, 140, 14, ...PINK)}
+    ${front}
+    <path d="M26 146 Q46 132 66 150 Q86 134 100 152 Q116 134 134 150 Q154 132 174 146 L150 214 L50 214z" fill="#bfd6f5" stroke="#a9c5ee" stroke-width="1.5"/>
+    <path d="M40 160 Q70 150 100 166 Q130 150 160 160" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>
+    <path d="M100 196 q-30 -22 -36 -6 q-2 14 36 6z M100 196 q30 -22 36 -6 q2 14 -36 6z" fill="#9dbdea" stroke="#7fa6dc" stroke-width="1.2"/>
+    <path d="M100 196 q-10 18 -20 40 M100 196 q8 18 14 40" stroke="#9dbdea" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="100" cy="196" r="5" fill="#8fb3e6"/>
+    <g transform="rotate(-8 128 212)"><line x1="104" y1="198" x2="122" y2="200" stroke="#c9b9a6" stroke-width="1"/><rect x="120" y="194" width="36" height="40" rx="3" fill="#fff" stroke="#ddd"/><text x="138" y="208" text-anchor="middle" font-size="6.5" font-style="italic" fill="#555" font-family="Georgia,serif">Always</text><text x="138" y="217" text-anchor="middle" font-size="6.5" font-style="italic" fill="#555" font-family="Georgia,serif">with you</text><text x="138" y="227" text-anchor="middle" font-size="7" fill="#555">♡</text></g>
+  </svg>`;
+}
 function bouquetSVG(id, size){
+  if (id === 'always') return alwaysSVG(size);
   const b = bq(id), PINK = ['#ff9fbf', '#d9567f'], PINK2 = ['#ffc2d6', '#e0789a'], RED = ['#e23a5a', '#8f1530'];
   const tiny = (pts, r) => pts.map(([x, y]) => daisySVG(x, y, r)).join('');
   const fillers = tiny([[52, 70], [148, 72], [64, 46], [136, 44], [100, 34], [44, 96], [156, 98], [82, 30], [120, 28], [58, 108], [142, 108]], 7);
@@ -3517,15 +3544,19 @@ const giftDefault = () => { const p = partnerPron() || 'em', n = (peerName(peerM
   return `Tặng ${p} bó hoa này, thương ${p} nhiều lắm 💕`; };
 function openGift(){
   if (!sync.room) return toast('Ghép đôi ở tab Khác để tặng hoa nha');
-  let pick = state.giftPick || 'qiga';
+  let pick = state.giftPick || 'always', gphoto = null;
   openSheet('Tặng hoa 💐', `<div class="gpreview" id="gPrev">${bouquetSVG(pick, 170)}</div>
-    <div class="gpick" id="gPick">${BOUQUETS.map(b => `<button type="button" data-g="${b.id}" class="${b.id === pick ? 'on' : ''}"><span class="gdot" style="background:${{ qiga: 'linear-gradient(135deg,#ff9fbf 50%,#ffc107 50%)', prose: '#ff9fbf', sun: '#ffc107', daisy: '#fff;border:1px solid #ddd', rose: '#e23a5a' }[b.id]}"></span>${b.name}</button>`).join('')}</div>
+    <div class="gpick" id="gPick">${BOUQUETS.map(b => `<button type="button" data-g="${b.id}" class="${b.id === pick ? 'on' : ''}"><span class="gdot" style="background:${{ always: 'linear-gradient(135deg,#bfd6f5 50%,#ffc107 50%)', qiga: 'linear-gradient(135deg,#ff9fbf 50%,#ffc107 50%)', prose: '#ff9fbf', sun: '#ffc107', daisy: '#fff;border:1px solid #ddd', rose: '#e23a5a' }[b.id]}"></span>${b.name}</button>`).join('')}</div>
+    <button class="btn ghost" id="gPhoto">📷 Gửi kèm ảnh bó hoa thật</button>
     <div class="card"><label class="f"><span>Lời chúc</span><textarea id="gNote" rows="3" maxlength="200">${esc(giftDefault())}</textarea></label></div>
     <button class="btn" id="gSend">💐 Tặng ${esc(peerName(peerMain()))}</button>`, () => {
-    $('#gPick').onclick = e => { const b = e.target.closest('[data-g]'); if (!b) return; pick = state.giftPick = b.dataset.g; $('#gPick').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); $('#gPrev').innerHTML = bouquetSVG(pick, 170); };
+    $('#gPick').onclick = e => { const b = e.target.closest('[data-g]'); if (!b) return; pick = state.giftPick = b.dataset.g; gphoto = null; $('#gPhoto').textContent = '📷 Gửi kèm ảnh bó hoa thật'; $('#gPick').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); $('#gPrev').innerHTML = bouquetSVG(pick, 170); };
+    $('#gPhoto').onclick = () => pickPhoto(fs => { gphoto = fs[0]; $('#gPrev').innerHTML = `<img class="gphoto" src="${URL.createObjectURL(gphoto)}" alt="">`; $('#gPhoto').textContent = '📷 Đổi ảnh khác'; });
     $('#gSend').onclick = async () => {
-      const note = $('#gNote').value.trim();
-      logHistory('gift', { flower: pick, note }); db.chatSeen = Date.now(); save(); closeSheet(); render();
+      const note = $('#gNote').value.trim(), btn = $('#gSend');
+      let photo = '';
+      if (gphoto) { btn.disabled = true; btn.textContent = 'Đang tải ảnh hoa…'; try { photo = await uploadPhoto(gphoto); } catch (e) { btn.disabled = false; btn.textContent = '💐 Tặng'; return toast('Tải ảnh lỗi, thử lại nha'); } }
+      logHistory('gift', Object.assign({ flower: pick, note }, photo ? { photo } : {})); db.chatSeen = Date.now(); save(); closeSheet(); render();
       bigHearts(bq(pick).fall, 'Đã gửi hoa 💐');
       const ok = await syncRoom(); toast(ok ? sentTo() + ' 💐' : 'Chưa gửi được, sẽ tự thử lại');
     };
@@ -3536,7 +3567,7 @@ function showGift(x){ // màn mở quà cho người nhận
   const b = bq(x.flower), from = x.name || 'Người ấy';
   const v = document.createElement('div'); v.className = 'giftfx';
   v.innerHTML = `<div class="gbox" id="gBox"><div class="glid"></div><div class="gbody"></div><div class="gtxt">${esc(from)} gửi quà cho ${esc(sync.me || 'bạn')} 🎁<br><small>Chạm để mở</small></div></div>
-    <div class="gopen"><div class="gflower">${bouquetSVG(x.flower, 220)}</div><div class="gfcard"><div class="gmsg">${esc(x.note || '')}</div><div class="gsig">— ${esc(from)}</div></div>
+    <div class="gopen"><div class="gflower">${x.photo && sync.room ? `<img class="gphoto big" src="${photoUrl(x.photo)}" alt="">` : bouquetSVG(x.flower, 220)}</div><div class="gfcard"><div class="gmsg">${esc(x.note || '')}</div><div class="gsig">— ${esc(from)}</div></div>
     <div class="gbtns"><button class="gthanks">💕 Cảm ơn ${esc(from)}</button><button class="gclose">Đóng</button></div></div>`;
   document.body.appendChild(v);
   const fall = () => { for (let i = 0; i < 26; i++) { const s = document.createElement('span'); s.className = 'gpetal'; s.textContent = b.fall; s.style.left = Math.random() * 100 + 'vw'; s.style.animationDelay = (Math.random() * 2.5) + 's'; s.style.fontSize = (16 + Math.random() * 20) + 'px'; v.appendChild(s); } };
@@ -3559,7 +3590,7 @@ function allPhotos(){
   const out = [];
   for (const d of db.dates) for (const id of photoIds(d)) out.push({ id, name: d.title, at: parseKey(d.date).getTime() });
   for (const f of db.foods) for (const id of photoIds(f)) out.push({ id, name: f.name, at: f.at || 0 });
-  for (const x of db.moods) for (const id of (Array.isArray(x.photos) ? x.photos : [])) out.push({ id, name: 'chat', at: x.at || 0 });
+  for (const x of db.moods) for (const id of (Array.isArray(x.photos) ? x.photos : []).concat(x.kind === 'gift' && x.photo ? [x.photo] : [])) out.push({ id, name: x.kind === 'gift' ? 'hoa' : 'chat', at: x.at || 0 });
   const seen = new Set(); return out.filter(x => !seen.has(x.id) && seen.add(x.id)).sort((a, b) => b.at - a.at);
 }
 let photoSyncing = false;
