@@ -1611,7 +1611,7 @@ function distKm(a, b){
   return 2 * 6371 * Math.asin(Math.sqrt(h));
 }
 const fmtKm = d => d < 1 ? `${Math.max(10, Math.round(d * 100) * 10)} m` : `${d < 10 ? d.toFixed(1).replace('.', ',') : Math.round(d)} km`;
-const mapLink = (loc, name) => `https://maps.apple.com/?ll=${loc.lat},${loc.lng}&q=${encodeURIComponent(name)}`;
+const mapLink = (loc, name) => `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`; // mở app Google Maps (chỉ đường)
 const isToday = ms => !!ms && keyOf(new Date(ms)) === todayKey();
 function peerDistance(p){
   const st = locState(p), my = myLoc();
@@ -2084,6 +2084,18 @@ function setPlace(){
     db.mine.place = { lat: pos.coords.latitude, lng: pos.coords.longitude, at: Date.now() }; save(); render(); toast('Đã lưu vị trí nhà 🏠');
   }, err => toast(err.code === 1 ? 'Chưa cho phép vị trí' : 'Không lấy được vị trí, thử lại nha'), { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
 }
+function baseTiles(map){ // nền bản đồ: CARTO (đường xá rõ, giống Google) → lỗi thì đổi sang OpenStreetMap
+  const SRC = [
+    ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 20, attribution: '© OpenStreetMap © CARTO' }],
+    ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }]
+  ];
+  let i = 0, layer = null, ok = 0, bad = 0;
+  const use = () => { if (layer) map.removeLayer(layer); ok = bad = 0;
+    layer = L.tileLayer(SRC[i][0], SRC[i][1]).addTo(map);
+    layer.on('tileload', () => { ok++; });
+    layer.on('tileerror', () => { bad++; if (!ok && bad >= 3 && i < SRC.length - 1) { i++; use(); } }); };
+  use();
+}
 let leafletP = null, mapEl = null, mapObj = null, mapLayer = null, mapSig = '';
 function loadLeaflet(){
   if (window.L) return Promise.resolve();
@@ -2108,7 +2120,7 @@ function mountMap(){
     if (!mapEl) {
       mapEl = document.createElement('div'); mapEl.className = 'mapbox'; slot.appendChild(mapEl);
       mapObj = L.map(mapEl, { zoomControl: false, attributionControl: true });
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapObj);
+      baseTiles(mapObj);
       mapLayer = L.layerGroup().addTo(mapObj);
     } else slot.appendChild(mapEl);
     mapObj.invalidateSize();
@@ -2717,7 +2729,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.5</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.6</p>`;
 }
 
 function viewCycle(){
@@ -3451,7 +3463,7 @@ function mountMemMap(){
     if (!memMapEl) {
       memMapEl = document.createElement('div'); memMapEl.className = 'mapbox'; slot.appendChild(memMapEl);
       memMapObj = L.map(memMapEl, { zoomControl: false });
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(memMapObj);
+      baseTiles(memMapObj);
       memLayer = L.layerGroup().addTo(memMapObj);
     } else slot.appendChild(memMapEl);
     memMapObj.invalidateSize();
