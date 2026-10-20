@@ -625,6 +625,12 @@ main.chatmode.wp-night .hist .ht,main.chatmode.wp-photo .hist .ht{color:#fff;tex
 .stkmsg .stksvg{display:block;filter:drop-shadow(0 2px 3px rgba(125,35,65,.18));animation:stkpop .35s cubic-bezier(.2,1.5,.5,1)}
 @keyframes stkpop{from{transform:scale(.6)}to{transform:none}}
 .stkimg{display:block;object-fit:cover;border-radius:24px;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.18);background:#fff}
+.locauto{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin-top:10px;color:var(--text)}
+.locauto .la-ic{font-size:26px}
+.locauto .main{flex:1;min-width:0}
+.locauto .chev{color:var(--sub);font-size:20px}
+.lklink{font:12px/1.4 ui-monospace,Menlo,monospace;word-break:break-all;background:var(--bg);border-radius:8px;padding:8px;color:var(--text);user-select:all;-webkit-user-select:all}
+.lasteps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.4}
 .hact small{display:block;font-size:10px;opacity:.8}
 .bub.msg{background:var(--card);color:var(--text);padding:9px 14px}
 .hb.me .bub.msg{background:var(--mybub,var(--accent));color:#fff}
@@ -1318,7 +1324,7 @@ function applyRoom(merged){
   if (merged.people) { // gộp theo từng mục, giữ cái mới hơn (dữ liệu nhận qua thông báo có thể mới hơn máy chủ)
     const me = ensureDevice(), pp = {};
     for (const [id, x] of Object.entries(merged.people)) {
-      if (id === me) continue;
+      if (id === me) { if (x.loc && isFinite(x.loc.lat) && x.loc.via === 'shortcut' && (+x.loc.at || 0) > ((db.mine.loc && db.mine.loc.at) || 0)) db.mine.loc = x.loc; continue; }
       const o = db.peers[id] || {}, n = Object.assign({}, x);
       for (const f of ['mood', 'loc', 'home', 'place']) if (o[f] && (!x[f] || (o[f].at || 0) > (x[f].at || 0))) n[f] = o[f];
       if ((o.seenAt || 0) > (x.seenAt || 0)) n.seenAt = o.seenAt;
@@ -2143,6 +2149,7 @@ function viewLoc(){
     <div class="prow">${avSpan(mav, me)}<span class="main"><div class="t">${esc(me)} · ${ml1}</div>${ml2 ? `<div class="s">${ml2}</div>` : ''}</span></div></div>`;
   h += `<div class="locbtns"><button data-act="sendLoc" ${locBusy || !share ? 'disabled' : ''}>📍 ${locBusy ? 'Đang lấy…' : 'Gửi vị trí'}</button><button data-act="sendHome">🏠 Về tới nhà rồi</button></div>
     <button class="btn ghost" data-act="askLoc" style="margin-top:8px">🙋 Hỏi ${esc(pn)} đang ở đâu</button>`;
+  if (sync.room && share) h += `<button class="card locauto" data-act="locAuto"><span class="la-ic">📲</span><span class="main"><div class="t">Tự cập nhật khi không mở app</div><div class="s">${db.mine.locTok ? 'Đã tạo link cho Phím tắt iPhone · bấm để xem lại' : 'Dùng app Phím tắt của iPhone, gửi vị trí theo giờ hoặc khi tới/rời một nơi'}</div></span><span class="chev">›</span></button>`;
   h += `<div class="section-title"><span>Riêng tư</span></div><div class="card">
     <label class="frow"><span class="lbl">Chia sẻ vị trí với ${esc(pn)}<div class="s">Tắt lúc nào cũng được</div></span><input type="checkbox" class="switch" id="shareSw" ${share ? 'checked' : ''}></label>
     ${share ? `<label class="frow"><span class="lbl">Tự cập nhật khi mở app<div class="s">Mở app là bản đồ có vị trí mới, ${esc(pn)} không nhận thông báo. Tắt thì chỉ gửi khi bấm nút.</div></span><input type="checkbox" class="switch" id="autoLocSw" ${db.mine.autoLoc !== false ? 'checked' : ''}></label>` : ''}
@@ -2250,7 +2257,7 @@ function histItem(x, mine, tail = true, head = true){
   if (!m) return '';
   return `<div class="hb ${mine ? 'me' : ''}${gc}" data-mid="${x.id}"><div class="bub" style="--mb:${m.bg}"><span class="mf">${m.svg}</span><div style="min-width:0"><div class="bt">${esc(x.label || m.l)}</div>${x.note ? `<div class="bn">${esc(x.note)}</div>` : ''}</div></div>${rxH}${meta}</div>`;
 }
-function openChat(){ if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
+function openChat(){ state.histN = 60; state.histAll = false; if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; render(); }
 function chatToEnd(){ const m = $('#main'); if (m) m.scrollTop = m.scrollHeight; }
 const isMineH = x => x.dev === ensureDevice() || (sync.me && norm(x.name) === norm(sync.me));
 function unreadChat(){ const seen = db.chatSeen || 0; return db.moods.filter(x => x.at > seen && !isMineH(x)).length; }
@@ -2404,7 +2411,7 @@ function viewHistory(){
   const replyBar = exm ? `<div class="replybar editbar"><span class="rb">✏️ <b>Đang sửa tin</b><span>${esc(msgShort(exm))}</span></span><button data-act="editCancel" aria-label="Huỷ sửa">×</button></div>` : rpx ? `<div class="replybar"><span class="rb">↩ Trả lời <b>${esc(isMineH(rpx) ? 'chính mình' : (rpx.name || 'Người ấy'))}</b><span>${esc(msgShort(rpx))}</span></span><button data-act="replyCancel" aria-label="Bỏ trả lời">×</button></div>` : '';
   const composer = `<div class="chatdock">${panel}${state.stkPanel ? stkPanel() : ''}${replyBar}<div class="chatbar"><button class="plus ${state.chatPanel ? 'on' : ''}" data-act="chatPlus" aria-label="Tác vụ nhanh">＋</button><button class="cam" data-act="chatPhoto" aria-label="Gửi ảnh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><button class="stkbtn ${state.stkPanel ? 'on' : ''}" data-act="stkToggle" aria-label="Sticker"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12.5V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h5.5z"/><path d="M20 12.5 12.5 20v-4.5a3 3 0 0 1 3-3z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="14.5" cy="10" r="1" fill="currentColor"/></svg></button><input id="chatIn" maxlength="300" placeholder="Nhắn cho ${esc(pn)}…" autocomplete="off" enterkeyhint="send"><button data-act="chatSend" aria-label="Gửi (giữ để chọn hiệu ứng)" class="${state.fxPick ? 'fxon' : ''}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.7 2-12.7 2z"/></svg></button></div></div>`;
   if (!list.length) return h + `<div class="hist"><div class="chatempty">💌<br>Chưa có gì. Nhắn một câu, gửi cảm xúc, thêm hẹn hò… tất cả sẽ hiện ở đây</div></div>` + composer;
-  let shown = state.histAll ? list : list.slice(-60);
+  let shown = state.histAll ? list : list.slice(-(state.histN || 60));
   if (list.length > shown.length) h += `<button class="btn ghost" data-act="histAll">Xem cũ hơn (${list.length - shown.length})</button>`;
   else if (arcLeft().length) h += `<button class="btn ghost" data-act="arcMore">${state.arcLoading ? 'Đang tải tin cũ…' : `📜 Xem tin cũ hơn · ${arcLabel(arcLeft().pop())}`}</button>`;
   let lastDay = '';
@@ -2641,7 +2648,6 @@ function viewUs(){
   const BADGE = { mood: un || '', letters: rdy || (wait ? '🔒' : ''), coupons: db.coupons.filter(c => !couponMine(c) && cpLeft(c)).length || '', jar: newJ || '', dates: nd && diffDays(tk, nd.date) <= 7 ? '•' : '' };
   const T = (s2, ic, bg, fg, t) => `<button class="app" data-act="usp" data-s="${s2 === 'mood' ? 'moods' : s2}" aria-label="${t}"><span class="ic" style="background:${bg}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${BADGE[s2] ? `<i class="bdg">${BADGE[s2]}</i>` : ''}</span><span class="an">${SHORT[s2]}</span></button>`;
   const appsH = `<div class="apps">
-    ${T('mood', '<path d="M4 5h16v11H9l-5 4z"/>', '#efe7fb', '#6b4fb3', 'Chat &amp; tâm trạng', moodSub)}
     ${T('dates', '<path d="M3 9a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 0 0-4V5H3z"/><path d="M13 5v2M13 11v2M13 17v1"/>', '#fbe3eb', '#b5385f', 'Hẹn hò &amp; kỷ niệm', dateSub)}
     ${T('jar', '<path d="M8 3h8v3H8zM7 6h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M9 14h6"/>', '#fff3cf', '#9a6b00', 'Hũ điều em thích', jarSub)}
     ${T('foods', '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/>', '#ffe6dc', '#b0461f', 'Món ngon', db.foods.length ? `${db.foods.length} món · ${esc(db.foods.slice().sort((a, b) => b.at - a.at)[0].name)}` : 'chụp món ăn cùng nhau')}
@@ -2823,13 +2829,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 11))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 12))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
-      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 11 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 12 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2870,7 +2876,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 7.1</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 7.2</p>`;
 }
 
 function viewCycle(){
@@ -3225,6 +3231,41 @@ function addStickers(){
   });
 }
 
+async function openLocAuto(){ // Phím tắt iPhone: tự gửi vị trí khi không mở app
+  if (!sync.room) return toast('Ghép đôi ở tab Khác trước nha');
+  if ((sync.sv || 0) < 12) return toast('Cần up worker.js bản mới để dùng cái này');
+  if (!db.mine.locTok) {
+    const a = new Uint8Array(18); crypto.getRandomValues(a); const tok = btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    try { const r = await fetch(`${syncBase()}/room/${sync.room}/loctok`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dev: ensureDevice(), tok }) }); if (!r.ok) throw new Error(); db.mine.locTok = tok; save(); }
+    catch (e) { return toast('Chưa tạo được link, kiểm tra mạng rồi thử lại'); }
+  }
+  const link = `${syncBase()}/loc/${sync.room}/${ensureDevice()}/${db.mine.locTok}`;
+  openSheet('Tự cập nhật vị trí 📲', `<p class="subtitle" style="margin:0 0 10px">iPhone không cho app web lấy vị trí khi đang tắt, nên mình nhờ app <b>Phím tắt</b> (Shortcuts) có sẵn gửi giúp. Làm một lần là xong.</p>
+    <div class="card" style="padding:10px 12px"><div class="s" style="margin-bottom:6px">Link riêng của máy này (đừng gửi cho ai khác nha):</div><div class="lklink">${esc(link)}</div>
+      <button class="btn" id="laCopy" style="margin-top:8px">📋 Sao chép link</button></div>
+    <div class="qlab" style="margin:14px 0 6px">1 · Tạo phím tắt</div>
+    <ol class="lasteps"><li>Mở app <b>Phím tắt</b> → tab <b>Phím tắt</b> → bấm <b>＋</b>.</li>
+      <li>Thêm tác vụ <b>Lấy vị trí hiện tại</b>.</li>
+      <li>Thêm tác vụ <b>Lấy nội dung của URL</b> → dán link vừa sao chép.</li>
+      <li>Bấm mũi tên <b>›</b> của tác vụ đó: Phương thức = <b>POST</b>, Phần thân yêu cầu = <b>JSON</b>.</li>
+      <li>Thêm trường <b>lat</b> (Số) → chọn biến <b>Vị trí hiện tại</b> → <b>Vĩ độ</b>. Thêm trường <b>lng</b> (Số) → <b>Vị trí hiện tại</b> → <b>Kinh độ</b>.</li>
+      <li>Đặt tên "Gửi vị trí Sổ Tay", bấm ▶︎ chạy thử một lần (cho phép Phím tắt dùng vị trí).</li></ol>
+    <div class="qlab" style="margin:14px 0 6px">2 · Cho nó tự chạy</div>
+    <ol class="lasteps"><li>Tab <b>Tự động hoá</b> → <b>＋</b> → chọn <b>Thời gian trong ngày</b> (VD 8:00, 12:00, 18:00, 22:00) hoặc <b>Đến nơi / Rời khỏi</b> (nhà, công ty…).</li>
+      <li>Chọn <b>Chạy ngay lập tức</b> và tắt <b>Thông báo khi chạy</b>.</li>
+      <li>Chọn phím tắt "Gửi vị trí Sổ Tay". Muốn nhiều mốc giờ thì tạo thêm vài cái.</li></ol>
+    <p class="subtitle" style="margin:10px 0">Tắt chia sẻ hoặc tạm ẩn vị trí trong app thì link tự ngưng gửi. ${esc(peerName(peerMain()))} không nhận thông báo mỗi lần cập nhật.</p>
+    <button class="btn ghost" id="laTest">🧪 Thử gửi vị trí hiện tại qua link</button>
+    <button class="btn ghost" id="laNew" style="color:var(--red)">🔄 Đổi link mới (link cũ hết tác dụng)</button>`, () => {
+    $('#laCopy').onclick = async () => { try { await navigator.clipboard.writeText(link); toast('Đã sao chép link'); } catch (e) { toast('Giữ vào link để sao chép nha'); } };
+    $('#laTest').onclick = () => { if (!navigator.geolocation) return toast('Máy không lấy được vị trí');
+      toast('Đang lấy vị trí…');
+      navigator.geolocation.getCurrentPosition(async pos => {
+        try { const r = await fetch(link, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }) }); toast(await r.text()); syncRoom(); }
+        catch (e) { toast('Gửi lỗi, thử lại nha'); } }, () => toast('Chưa cho phép lấy vị trí'), { enableHighAccuracy: true, timeout: 15000 }); };
+    $('#laNew').onclick = () => { db.mine.locTok = ''; save(); closeSheet(); setTimeout(openLocAuto, 250); };
+  });
+}
 function patchChat(){ // Chat: chỉ vẽ lại phần tin nhắn, giữ nguyên ô nhập (bàn phím không bị đóng)
   if (!(state.tab === 'us' && state.usp === 'moods')) return false;
   const m = $('#main'), dock = m.querySelector('.chatdock'); if (!dock) return false;
@@ -4090,7 +4131,7 @@ function navBadge(){ const e = document.getElementById('navChatB'); if (!e) retu
 $('#nav').onclick = e => {
   state.back = null;
   const b = e.target.closest('button'); if (!b) return;
-  if (b.dataset.tab === 'chat') { state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; state.loveAdmin = false; render(); return; }
+  if (b.dataset.tab === 'chat') { state.histN = 60; state.histAll = false; state.tab = 'us'; state.usp = 'moods'; state.histScrolled = false; state.histAtEnd = true; state.chatPanel = false; state.loveAdmin = false; render(); return; }
   state.tab = b.dataset.tab; state.usp = "";
   state.loveAdmin = false;
   if (state.tab === 'cal') { /* giữ ngày đang chọn */ }
@@ -4235,10 +4276,14 @@ $('#main').addEventListener('click', async e => {
     case 'wxSet': openWeather(); break;
     case 'goMeds': state.tab = 'health'; state.hseg = 'meds'; ($('#main').scrollTop = 0); render(); break;
     case 'goTab': state.tab = b.dataset.t; state.usp = ''; ($('#main').scrollTop = 0); render(); break;
-    case 'histAll': state.histAll = true; render(); break;
+    case 'histAll': { // tải thêm 60 tin cũ, giữ nguyên chỗ đang xem
+      const m = $('#main'), h0 = m.scrollHeight, t0 = m.scrollTop;
+      state.histN = (state.histN || 60) + 60; state.histScrolled = true; state.histAtEnd = false; render();
+      m.scrollTop = t0 + (m.scrollHeight - h0); break; }
     case 'goLoc': if (state.tab !== 'us') state.back = state.tab; state.tab = 'us'; state.usp = 'loc'; ($('#main').scrollTop = 0); render(); break;
     case 'chatSend': if (sendLpFired) { sendLpFired = false; break; } await sendChat(); break;
     case 'arcMore': loadArc(); break;
+    case 'locAuto': openLocAuto(); break;
     case 'fxPick': state.chatPanel = false; render(); openFxPick(false); break;
     case 'fxReplay': { const x = db.moods.concat(state.arcItems || []).find(m => m.id === id); if (x) { fxBusy = 0; playFx(fxOf(x)); } break; }
     case 'editCancel': { state.editId = null; const i = $('#chatIn'); if (i) i.value = ''; render(); break; }

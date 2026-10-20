@@ -5,7 +5,7 @@
 
 // File lời chúc trên GitHub (mỗi dòng một câu). Sửa file này là lời chúc đổi theo.
 import { DurableObject } from 'cloudflare:workers';
-const SERVER_V = 11; // phiên bản máy chủ, app hiện ở tab Khác
+const SERVER_V = 12; // phiên bản máy chủ, app hiện ở tab Khác
 
 const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
@@ -147,6 +147,7 @@ function mergeRoom(cur, inc) {
     for (const f of ['mood', 'loc', 'home', 'place']) { const v = newer(o[f], c[f]); if (v) m[f] = v; }
     if (c.seenAt || o.seenAt) m.seenAt = Math.max(c.seenAt || 0, o.seenAt || 0);
     if (c.typingAt || o.typingAt) m.typingAt = Math.max(c.typingAt || 0, o.typingAt || 0);
+    if (p.share === false) m.share = false;
     if (c.avatar !== undefined && (c.avatarAt || 0) >= (o.avatarAt || 0)) { m.avatar = c.avatar; m.avatarAt = c.avatarAt; } else if (o.avatar !== undefined) { m.avatar = o.avatar; m.avatarAt = o.avatarAt; }
     people[dev] = m;
   }
@@ -576,6 +577,28 @@ export class Room extends DurableObject {
       pair[1].serializeAttachment({ dev, chat: url.searchParams.get('chat') === '1', vis: true, at: Date.now() });
       return new Response(null, { status: 101, webSocket: pair[0] });
     }
+    if (op === 'loctok' && req.method === 'POST') { // mã bí mật cho Phím tắt iPhone gửi vị trí
+      let b; try { b = await req.json(); } catch (e) { return new Response('Sai định dạng', { status: 400, headers: CORS }); }
+      const dev = String(b.dev || ''), tok = String(b.tok || '');
+      if (!/^[A-Za-z0-9_-]{8,64}$/.test(dev) || !/^[A-Za-z0-9_-]{16,64}$/.test(tok)) return new Response('Sai mã', { status: 400, headers: CORS });
+      await storage.put('loctok:' + dev, tok); return new Response('ok', { headers: CORS });
+    }
+    if (op === 'loc') { // Phím tắt iPhone gửi vị trí khi không mở app
+      const [, , , dev, tok] = url.pathname.split('/'), T = (t, st = 200) => new Response(t, { status: st, headers: { ...CORS, 'Content-Type': 'text/plain; charset=utf-8' } });
+      const want = await storage.get('loctok:' + dev); if (!want || want !== tok) return T('Link không đúng, mở app tạo lại nha', 403);
+      let q = Object.fromEntries(url.searchParams);
+      if (req.method === 'POST') { const raw = await req.text(); try { q = Object.assign(q, JSON.parse(raw)); } catch (e) { q = Object.assign(q, Object.fromEntries(new URLSearchParams(raw))); } }
+      const num = v => parseFloat(String(v == null ? '' : v).replace(',', '.'));
+      const lat = num(q.lat ?? q.latitude), lng = num(q.lng ?? q.lon ?? q.longitude);
+      if (!isFinite(lat) || !isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180 || (lat === 0 && lng === 0)) return T('Thiếu vĩ độ/kinh độ', 400);
+      const room = (await store.get()) || { events: {} }, pp = Object.assign({}, room.people || {}), p = pp[dev];
+      if (!p) return T('Máy này chưa ghép đôi', 404);
+      if (p.share === false) return T('Đang tắt chia sẻ vị trí trong app', 200);
+      if (p.loc && p.loc.hidden && (!p.loc.until || +p.loc.until > Date.now())) return T('Đang tạm ẩn vị trí', 200);
+      pp[dev] = Object.assign({}, p, { loc: { lat: +lat.toFixed(5), lng: +lng.toFixed(5), acc: Math.round(num(q.acc) || 0), at: Date.now(), auto: true, via: 'shortcut' } });
+      room.people = pp; await store.put(room); store.broadcast(dev);
+      return T('Đã cập nhật vị trí ✓');
+    }
     if (op === 'ai' && req.method === 'POST') { // hỏi AI: trả lời rồi thêm vào chat chung
       const H = { ...CORS, 'Content-Type': 'application/json' }, bad = (e, st) => new Response(JSON.stringify({ error: e }), { status: st, headers: H });
       if (!env.AI) return bad('noai', 501);
@@ -664,6 +687,16 @@ export default {
       }
       if (req.method === 'DELETE') { delete reg.devices[pm[2]]; await env.SOTAY.put(pkey, JSON.stringify(reg)); return json({ ok: true }); }
       return json({ devices: Object.keys(reg.devices).length });
+    }
+    const rl = url.pathname.match(/^\/loc\/([A-Za-z0-9_-]{8,64})\/([A-Za-z0-9_-]{8,64})\/([A-Za-z0-9_-]{16,64})$/);
+    if (rl) {
+      if (!env.ROOM) return new Response('Chưa có Durable Object', { status: 501, headers: CORS });
+      return roomStub(env, rl[1]).fetch(`https://room/loc/${rl[1]}/${rl[2]}/${rl[3]}${url.search}`, { method: req.method === 'POST' ? 'POST' : 'GET', body: req.method === 'POST' ? await req.text() : undefined });
+    }
+    const rlt = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/loctok$/);
+    if (rlt && req.method === 'POST') {
+      if (!env.ROOM) return new Response('Chưa có Durable Object', { status: 501, headers: CORS });
+      return roomStub(env, rlt[1]).fetch(`https://room/loctok/${rlt[1]}`, { method: 'POST', body: await req.text() });
     }
     const rai = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/ai$/);
     if (rai && req.method === 'POST') {
