@@ -1261,6 +1261,26 @@ function applyRoom(merged){
   return false;
 }
 let roomBusy = false, pendingRender = false;
+/* ---------- realtime: WebSocket tới phòng (khi app đang mở) ---------- */
+let ws = null, wsTimer = null, wsPing = null, wsBack = 2000, wsSent = '';
+const wsLive = () => !!ws && ws.readyState === 1;
+const inChatView = () => state.tab === 'us' && state.usp === 'moods';
+function wsSendState(force){
+  if (!wsLive()) return;
+  const st = JSON.stringify({ t: 'state', chat: inChatView(), vis: !document.hidden });
+  if (force || st !== wsSent) { try { ws.send(st); wsSent = st; } catch (e) {} }
+}
+function wsConnect(){
+  if (!sync.room || !syncBase() || document.hidden || (sync.sv || 0) < 8 || !('WebSocket' in window)) return;
+  if (ws && ws.readyState <= 1) return;
+  clearTimeout(wsTimer);
+  let s; try { s = new WebSocket(`${syncBase().replace(/^http/, 'ws')}/room/${sync.room}/ws?dev=${ensureDevice()}&chat=${inChatView() ? 1 : 0}`); } catch (e) { return; }
+  ws = s; wsSent = '';
+  s.onopen = () => { wsBack = 2000; wsSendState(true); clearInterval(wsPing); wsPing = setInterval(() => { if (s.readyState === 1) try { s.send('ping'); } catch (e) {} }, 10000); syncRoom(); };
+  s.onmessage = e => { if (e.data === 'pong') return; let m; try { m = JSON.parse(e.data); } catch (_) { return; } if (m.t === 'changed') syncRoom(); };
+  s.onclose = () => { if (ws !== s) return; ws = null; clearInterval(wsPing); if (!document.hidden) { wsTimer = setTimeout(wsConnect, wsBack); wsBack = Math.min(wsBack * 2, 30000); } };
+}
+function wsDrop(){ if (!ws) return; const s = ws; try { if (s.readyState === 1) s.send(JSON.stringify({ t: 'state', chat: false, vis: false })); } catch (e) {} ws = null; clearInterval(wsPing); clearTimeout(wsTimer); try { s.close(1000, 'hidden'); } catch (e) {} }
 async function syncRoom(){
   if (!syncBase() || !sync.room) return false;
   for (let i = 0; roomBusy && i < 100; i++) await new Promise(r => setTimeout(r, 100)); // chờ lượt trước xong
@@ -1276,8 +1296,10 @@ async function syncRoom(){
     sync.sv = +merged.sv || 0;
     if (full) state.fullAt = mark; state.upMark = mark; state.rs = +merged.now || 0; state.rsRoom = sync.room;
     if (merged.arcs) db.arcs = merged.arcs;
+    if (!ws && sync.sv >= 8) setTimeout(wsConnect, 0);
     sync.roomLast = Date.now(); sync.roomErr = ''; saveSync();
     if (applyRoom(merged)) softRender();
+    if (inChatView() && !document.hidden) typingCheck(); // realtime: hiện "đang nhập…" ngay
     else if (state.tab === 'more' && !sheetOpen()) render();
     setTimeout(syncPhotos, 1500);
     return true;
@@ -2261,7 +2283,7 @@ function afterRender(){
       document.querySelectorAll('.hist img').forEach(i => { if (!i.complete) i.addEventListener('load', () => { if (state.histAtEnd) chatToEnd(); }, { once: true }); }); }
     state.histScrolled = true;
   }
-  if (state.usp !== 'moods') state.histScrolled = false; if (state.tab === 'us' && state.usp === 'loc') mountMap(); }
+  if (state.usp !== 'moods') state.histScrolled = false; if (state.tab === 'us' && state.usp === 'loc') mountMap(); wsSendState(); }
 function viewToday(){
   const k = todayKey();
   const ds = dosesOn(k);
@@ -2648,13 +2670,13 @@ function viewMore(){
     ${sync.push ? `<label class="frow"><span class="lbl">💊 Nhắc uống thuốc<div class="s">Báo đúng giờ, nhắc lại sau 15 và 30 phút nếu chưa tick. Bấm vào để mở app.</div></span><input type="checkbox" class="switch" id="medPushSw" ${sync.medPush !== false ? 'checked' : ''}></label>
     <div class="frow"><span class="lbl">📌 Sự kiện & 💊 tình hình uống thuốc của người kia<div class="s">Báo khi người kia tick thuốc, hoặc quá 1 tiếng chưa tick</div></span><span class="s">${sync.room ? 'Đang bật' : 'Cần ghép đôi bên dưới'}</span></div>` : ''}
   </div>` : ''}
-  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 7))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
+  ${syncBase() ? `<details class="grp" data-g="pair" ${(state.grp['pair'] ?? (!sync.room || !!sync.roomErr || !peerMain() || (sync.roomLast && (sync.sv || 0) < 8))) ? 'open' : ''}><summary>Ghép đôi hai máy <span class="gsub">${sync.room ? (sync.roomErr ? '⚠️ lỗi' : sync.roomLast && (sync.sv || 0) < 6 ? '⚠️ máy chủ cũ' : peerMain() ? '✓ ' + esc(peerName(peerMain())) : 'chưa thấy máy kia') : 'chưa ghép'}</span></summary>
   <div class="card">
     ${sync.room ? `
       <div class="frow"><span class="lbl">Mã ghép đôi</span><b style="font-variant-numeric:tabular-nums;letter-spacing:.5px">${esc(sync.room)}</b></div>
       <label class="f inline"><span>Tên của máy này</span><input id="syMe" value="${esc(sync.me || '')}" placeholder="VD: HoPu" autocomplete="off"></label>
       <div class="frow"><span class="lbl">Trạng thái</span><span class="s" style="text-align:right">${sync.roomErr ? '<span style="color:var(--red)">Lỗi: ' + esc(sync.roomErr) + '</span>' : sync.roomLast ? 'Cập nhật lúc ' + fmtTime(sync.roomLast) : 'Đang chờ…'}</span></div>
-      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 7 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
+      <div class="frow"><span class="lbl">Máy chủ</span><span class="s" style="text-align:right">${(sync.sv || 0) >= 8 ? 'bản ' + sync.sv + ' ✓' : sync.roomLast ? '<span style="color:var(--orange)">bản cũ: cần cập nhật worker.js + wrangler.jsonc trên GitHub</span>' : 'đang kiểm tra…'}</span></div>
       <div class="frow"><span class="lbl">Máy kia</span><span class="s" style="text-align:right">${(() => { const p = peerMain(); return p ? esc(peerName(p)) + ' · mở app ' + ago(p.at || 0) : '<span style="color:var(--orange)">Chưa thấy máy kia. Nhập đúng mã này ở máy kia nha</span>'; })()}</span></div>
       <div class="note">Sự kiện, ngày yêu, ngày đặc biệt, tâm trạng và vị trí đều chung cho hai máy. Nhớ đặt <b>Tên của máy này</b> (VD: HoPu, QiGa) để thông báo hiện đúng tên.</div>
       <div class="pad"><button class="btn ghost" data-act="roomCopy">Sao chép mã</button><button class="btn ghost" data-act="roomNow">Cập nhật ngay</button></div>
@@ -2695,7 +2717,7 @@ function viewMore(){
   <div class="subgrp">Xóa dữ liệu</div>
   <div class="card"><div class="pad" style="padding-top:14px"><button class="btn danger" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>
   </details>
-  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.4</p>`;
+  <p class="subtitle" style="text-align:center;font-size:13px;-webkit-user-select:none;user-select:none" data-act="secret">Sổ Tay · bản 6.5</p>`;
 }
 
 function viewCycle(){
@@ -3724,10 +3746,13 @@ $('#main').addEventListener('input', e => { // báo "đang nhập…" (tối đa
   if (e.target.id !== 'chatIn' || !sync.room || !e.target.value) return;
   if (Date.now() - typingSent < 3000) return; typingSent = Date.now(); db.mine.typingAt = typingSent; syncRoom();
 });
-setInterval(() => { // trong Chat: hỏi máy chủ mỗi 3 giây, ẩn "đang nhập…" khi hết hạn
+const typingCheck = () => { const pm = peerMain(); const show = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > Math.max(0, ...db.moods.filter(x => !isMineH(x)).map(x => x.at)));
+  if (show !== !!state.typingShown) { if (!patchChat()) softRender(); } };
+const wsFresh = () => wsLive() && Date.now() - (sync.roomLast || 0) < 30000; // đang nối realtime → khỏi hỏi liên tục
+setInterval(() => { // trong Chat: hỏi máy chủ mỗi 3 giây (khi chưa có realtime), ẩn "đang nhập…" khi hết hạn
   if (document.hidden || !(state.tab === 'us' && state.usp === 'moods')) return;
-  syncRoom().then(() => { const pm = peerMain(); const show = !!(pm && pm.typingAt && Date.now() - pm.typingAt < 7000 && pm.typingAt > Math.max(0, ...db.moods.filter(x => !isMineH(x)).map(x => x.at)));
-    if (show !== !!state.typingShown) { if (!patchChat()) softRender(); } });
+  if (wsFresh()) return typingCheck();
+  syncRoom().then(typingCheck);
 }, 3000);
 $('#main').addEventListener('keydown', e => { if (e.key !== 'Enter' || e.isComposing) return; if (e.target.id === 'chatIn') { e.preventDefault(); sendChat(); } else if (e.target.id === 'qmIn') { e.preventDefault(); const b = document.querySelector('[data-act=qmSend]'); if (b) b.click(); } else if (e.target.id === 'jarIn') { e.preventDefault(); const b = document.querySelector('[data-act=jarAdd]'); if (b) b.click(); } });
 $('#main').addEventListener('click', async e => {
@@ -3953,6 +3978,8 @@ $('#fileIn').onchange = async () => {
 /* cập nhật trạng thái "quá giờ" và đổi ngày */
 setInterval(() => { if (state.tab !== 'more' && state.tab !== 'meds') softRender(); }, 60000);
 $('#main').addEventListener('focusout', () => setTimeout(() => { if (softPending && !typing() && !sheetOpen()) { softPending = false; render(); } }, 700));
+document.addEventListener('visibilitychange', () => { if (document.hidden) wsDrop(); else wsConnect(); });
+window.addEventListener('pagehide', wsDrop);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { autoLocate(); if (!sheetOpen()) render(); fetchLoveLines(); scheduleSync(500); loadWeather(false); } });
 
 render();
@@ -3968,8 +3995,8 @@ if (sync.push && pushSupported()) navigator.serviceWorker.ready.then(r => r.push
 }).catch(() => {});
 setInterval(() => { const c = document.getElementById('clock'); if (c) { const h = clockHTML(); if (c.innerHTML !== h) c.innerHTML = h; } }, 1000);
 $('#main').addEventListener('scroll', () => { const m = $('#main'); state.histAtEnd = m.scrollTop + m.clientHeight >= m.scrollHeight - 80; }, { passive: true });
-setInterval(() => { if (!document.hidden && (state.tab === 'today' || state.tab === 'us')) syncRoom(); }, 10000); // đang mở Hôm nay / Hai đứa: hỏi máy chủ mỗi 10 giây
-setInterval(() => { if (!document.hidden && state.tab !== 'today' && state.tab !== 'us') syncRoom(); }, 30000);
+setInterval(() => { if (!document.hidden && (state.tab === 'today' || state.tab === 'us') && !wsFresh()) syncRoom(); }, 10000); // đang mở Hôm nay / Hai đứa: hỏi máy chủ mỗi 10 giây
+setInterval(() => { if (!document.hidden && state.tab !== 'today' && state.tab !== 'us' && !wsFresh()) syncRoom(); }, 30000);
 window.addEventListener('pageshow', () => scheduleSync(300));
 window.addEventListener('focus', () => scheduleSync(300));
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { // có thông báo mới → cập nhật liền

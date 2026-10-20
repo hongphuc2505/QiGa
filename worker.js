@@ -5,7 +5,7 @@
 
 // File lời chúc trên GitHub (mỗi dòng một câu). Sửa file này là lời chúc đổi theo.
 import { DurableObject } from 'cloudflare:workers';
-const SERVER_V = 7; // phiên bản máy chủ, app hiện ở tab Khác
+const SERVER_V = 8; // phiên bản máy chủ, app hiện ở tab Khác
 
 const LOVE_URL = 'https://hongphuc2505.github.io/QiGa/loichuc.txt';
 
@@ -370,6 +370,7 @@ function describePeople(cur, merged, dev, name, inc, ann) {
 }
 const fmtEv = e => { if (!e || !e.date) return ''; const [y, m, d] = e.date.split('-'); return `${e.title} · ${+d}/${+m}${e.time ? ' ' + e.time : ''}`; };
 
+const skipDev = (ex, id) => ex instanceof Set ? ex.has(id) : id === ex; // ex: 1 máy hoặc tập máy không cần báo
 async function notifyRoom(env, room, fromDevice, name, changes) {
   const raw = await env.SOTAY.get('push:' + room);
   if (!raw || !changes.length) return;
@@ -380,7 +381,7 @@ async function notifyRoom(env, room, fromDevice, name, changes) {
     : { title: `${who} đã cập nhật ${changes.length} sự kiện`, body: changes.slice(0, 3).map(c => fmtEv(c.e)).join('\n') };
   let dirty = false;
   for (const [id, d] of Object.entries(reg.devices || {})) {
-    if (id === fromDevice || !d.sub) continue;
+    if (skipDev(fromDevice, id) || !d.sub) continue;
     try {
       const r = await sendPush(d.sub, msg, vapid);
       if (r.status === 404 || r.status === 410) { delete reg.devices[id]; dirty = true; }
@@ -403,7 +404,7 @@ async function sendToRoom(env, room, exceptDevice, msg) {
   const reg = JSON.parse(raw), vapid = await getVapid(env);
   let dirty = false;
   for (const [id, d] of Object.entries(reg.devices || {})) {
-    if (id === exceptDevice || !d.sub) continue;
+    if (skipDev(exceptDevice, id) || !d.sub) continue;
     try { const r = await sendPush(d.sub, msg, vapid); if (r.status === 404 || r.status === 410) { delete reg.devices[id]; dirty = true; } } catch (err) {}
   }
   if (dirty) await env.SOTAY.put('push:' + room, JSON.stringify(reg));
@@ -452,18 +453,19 @@ async function roomRequest(env, code, req, store) {
     const merged = mergeRoom(cur, inc), arcItems = merged._arc; delete merged._arc;
     if (arcItems && arcItems.length && store.archive) merged.arcs = await store.archive(arcItems, merged.arcs || []);
     const pplMsgs = describePeople(cur, merged, dev, who, inc, ann);
-    if (JSON.stringify(merged) !== JSON.stringify(cur)) await store.put(merged);
+    if (JSON.stringify(merged) !== JSON.stringify(cur)) { await store.put(merged); if (store.broadcast) store.broadcast(dev); }
+    const skip = new Set([dev].concat(store.liveChat ? [...store.liveChat()] : [])); // máy đang mở màn Chat thì khỏi thông báo
     const jobs = [];
-    if (changes.length) jobs.push(notifyRoom(env, code, dev, who, changes));
-    if (usLines.length) jobs.push(sendToRoom(env, code, dev, { title: `💞 ${who || 'Người ấy'} ${usLines[0]}`, body: usLines.length > 1 ? usLines.slice(1, 4).join('\n') : 'Mở tab Hai đứa xem nha' }));
-    if (collLines.length && collLines.length <= 3) for (const l of collLines) jobs.push(sendToRoom(env, code, dev, { title: `${l.icon} ${who || 'Người ấy'} ${l.text}`, body: 'Bấm để xem trong Chat' }));
-    else if (collLines.length) jobs.push(sendToRoom(env, code, dev, collLines.length === 1
+    if (changes.length) jobs.push(notifyRoom(env, code, skip, who, changes));
+    if (usLines.length) jobs.push(sendToRoom(env, code, skip, { title: `💞 ${who || 'Người ấy'} ${usLines[0]}`, body: usLines.length > 1 ? usLines.slice(1, 4).join('\n') : 'Mở tab Hai đứa xem nha' }));
+    if (collLines.length && collLines.length <= 3) for (const l of collLines) jobs.push(sendToRoom(env, code, skip, { title: `${l.icon} ${who || 'Người ấy'} ${l.text}`, body: 'Bấm để xem trong Chat' }));
+    else if (collLines.length) jobs.push(sendToRoom(env, code, skip, collLines.length === 1
       ? { title: `${collLines[0].icon} ${who || 'Người ấy'} ${collLines[0].text}`, body: 'Mở tab Hai đứa xem nha' }
       : { title: `${collLines[0].icon} ${who || 'Người ấy'} vừa cập nhật ${collLines.length} mục`, body: collLines.slice(0, 4).map(l => l.icon + ' ' + l.text).join('\n') }));
-    for (const m of pplMsgs) jobs.push(sendToRoom(env, code, dev, m));
+    for (const m of pplMsgs) jobs.push(sendToRoom(env, code, skip, m));
     const recentT = Date.now() - 10 * 60000;
     const chats = Object.values(inc.moods || {}).filter(x => x && (x.kind === 'msg' || x.kind === 'touch' || x.kind === 'gift') && !x.deleted && x.dev === dev && (+x.at || 0) >= recentT && (ann ? ann.has(`moods:${x.id}:${x.updated}`) : !(cur.moods || {})[x.id])).sort((a, b) => a.at - b.at).slice(-3);
-    for (const x of chats) jobs.push(sendToRoom(env, code, dev, x.kind === 'gift'
+    for (const x of chats) jobs.push(sendToRoom(env, code, skip, x.kind === 'gift'
       ? { title: `💐 ${who || 'Người ấy'} tặng một bó hoa!`, body: x.note ? clip(x.note, 160) : 'Mở app nhận quà nha 🎁', tab: 'us', usp: 'moods',
           hist: [Object.assign({ id: cleanStr(x.id, 40), kind: 'gift', flower: cleanStr(x.flower, 12), note: cleanStr(x.note, 200), dev, name: who, at: +x.at, updated: +x.updated || +x.at }, x.photo ? { photo: cleanStr(x.photo, 40) } : {})] }
       : x.kind === 'touch'
@@ -504,6 +506,15 @@ async function appendRoom(env, code, item) { // ghi thêm 1 dòng vào chat chun
 
 // Mỗi cặp một Durable Object: ghi tuần tự, không bao giờ đọc phải bản cũ → không mất dữ liệu
 export class Room extends DurableObject {
+  constructor(ctx, env) { super(ctx, env); try { ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong')); } catch (e) {} } // ping/pong không đánh thức DO
+  sockets() { try { return this.ctx.getWebSockets(); } catch (e) { return []; } }
+  async webSocketMessage(ws, msg) {
+    if (typeof msg !== 'string' || msg === 'ping') return;
+    let m; try { m = JSON.parse(msg); } catch (e) { return; }
+    if (m.t === 'state') ws.serializeAttachment(Object.assign(ws.deserializeAttachment() || {}, { chat: !!m.chat, vis: m.vis !== false, at: Date.now() }));
+  }
+  async webSocketClose(ws, code) { try { ws.close(code === 1005 || code === 1006 ? 1000 : code, 'bye'); } catch (e) {} }
+  async webSocketError(ws) { try { ws.close(1011, 'err'); } catch (e) {} }
   async fetch(req) {
     const url = new URL(req.url), [, op, code] = url.pathname.split('/');
     const storage = this.ctx.storage, env = this.env;
@@ -520,13 +531,27 @@ export class Room extends DurableObject {
           arcs[arcs.indexOf(e)] = Object.assign({}, e, { n: Object.keys(obj).length, sz: JSON.stringify(obj).length });
         }
         return arcs.sort((a, b) => a.m.localeCompare(b.m) || (+a.k.split('.')[1]) - (+b.k.split('.')[1]));
-      } };
+      },
+      liveChat: () => { const now = Date.now(), out = new Set(); // máy đang mở màn Chat (còn ping trong 35 giây)
+        for (const ws of this.sockets()) { const a = ws.deserializeAttachment() || {}; let last = +a.at || 0;
+          try { const t = this.ctx.getWebSocketAutoResponseTimestamp(ws); if (t) last = Math.max(last, +t); } catch (e) {}
+          if (a.chat && a.vis && now - last < 35000) out.add(a.dev); }
+        return out; },
+      broadcast: from => { for (const ws of this.sockets()) { const a = ws.deserializeAttachment() || {}; if (a.dev && a.dev === from) continue; try { ws.send('{"t":"changed"}'); } catch (e) {} } } };
+    if (op === 'ws') {
+      if (req.headers.get('Upgrade') !== 'websocket') return new Response('Cần WebSocket', { status: 426 });
+      const dev = url.searchParams.get('dev') || ''; if (!/^[A-Za-z0-9_-]{8,64}$/.test(dev)) return new Response('Sai máy', { status: 400 });
+      for (const old of this.sockets()) { const a = old.deserializeAttachment() || {}; if (a.dev === dev) try { old.close(1000, 'replaced'); } catch (e) {} }
+      const pair = new WebSocketPair(); this.ctx.acceptWebSocket(pair[1]);
+      pair[1].serializeAttachment({ dev, chat: url.searchParams.get('chat') === '1', vis: true, at: Date.now() });
+      return new Response(null, { status: 101, webSocket: pair[0] });
+    }
     if (op === 'arc') { const k = url.pathname.split('/')[3] || '', H = { ...CORS, 'Content-Type': 'application/json' };
       if (!k) { const room = (await store.get()) || {}; return new Response(JSON.stringify({ arcs: room.arcs || [] }), { headers: H }); }
       const obj = (await storage.get('arc:' + k)) || {};
       return new Response(JSON.stringify({ items: Object.values(obj).sort((a, b) => (a.at || 0) - (b.at || 0)) }), { headers: H }); }
     if (op === 'get') return new Response(JSON.stringify((await store.get()) || { events: {} }), { headers: { 'Content-Type': 'application/json' } });
-    if (op === 'append') { const item = await req.json(), room = (await store.get()) || { events: {} }; room.moods = room.moods || {}; if (!room.moods[item.id]) { room.moods[item.id] = item; await store.put(room); } return new Response('ok'); }
+    if (op === 'append') { const item = await req.json(), room = (await store.get()) || { events: {} }; room.moods = room.moods || {}; if (!room.moods[item.id]) { room.moods[item.id] = Object.assign({}, item, { _s: Date.now() }); await store.put(room); store.broadcast(''); } return new Response('ok'); }
     return roomRequest(env, code, req, store);
   }
 }
@@ -590,6 +615,11 @@ export default {
       }
       if (req.method === 'DELETE') { delete reg.devices[pm[2]]; await env.SOTAY.put(pkey, JSON.stringify(reg)); return json({ ok: true }); }
       return json({ devices: Object.keys(reg.devices).length });
+    }
+    const rw = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/ws$/);
+    if (rw) { // kênh realtime: máy mở app nối thẳng vào phòng
+      if (!env.ROOM) return new Response('Chưa có Durable Object', { status: 501, headers: CORS });
+      return roomStub(env, rw[1]).fetch(new Request(`https://room/ws/${rw[1]}${url.search}`, req));
     }
     const ra = url.pathname.match(/^\/room\/([A-Za-z0-9_-]{8,64})\/arc(?:\/(\d{4}-\d{2}\.\d{1,3}))?$/);
     if (ra && req.method === 'GET') {
